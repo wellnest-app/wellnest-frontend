@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#F5B31A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+  <title>WellNest - ระบบจัดการยาสำหรับผู้สูงอายุ</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="WellNest - แอปพลิเคชันจัดการยาและแจ้งเตือนทานยาสำหรับผู้สูงอายุ ดูแลสุขภาพอย่างใส่ใจ">
+  <meta name="keywords" content="medication reminder, elderly care, health app, pill reminder, ระบบเตือนทานยา, ดูแลผู้สูงอายุ">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="WellNest - ระบบจัดการยาสำหรับผู้สูงอายุ">
+  <meta property="og:description" content="ดูแลสุขภาพผู้สูงอายุด้วยระบบแจ้งเตือนทานยาอัจฉริยะ">
+  <meta property="og:image" content="/wellnest-frontend/assets/images/og-image.png">
+  <meta property="og:type" content="website">
+  
+  <!-- PWA -->
+  <link rel="manifest" href="/wellnest-frontend/manifest.json">
+  <link rel="apple-touch-icon" href="/wellnest-frontend/assets/icons/icon-192.png">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/wellnest-frontend/assets/icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/wellnest-frontend/assets/icons/favicon-16.png">
+  
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --color-primary: #F5B31A;
+      --color-secondary: #3B82F6;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Noto Sans Thai', sans-serif;
+      background: linear-gradient(135deg, #FFFBEB 0%, #FFF 50%, #EFF6FF 100%);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    
+    .splash-container {
+      text-align: center;
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .logo {
+      width: 150px;
+      height: auto;
+      margin-bottom: 1.5rem;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+    
+    .app-name {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1F2937;
+      margin-bottom: 0.5rem;
+    }
+    
+    .tagline {
+      font-size: 1rem;
+      color: #6B7280;
+      margin-bottom: 2rem;
+    }
+    
+    .loading-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 2rem;
+    }
+    
+    .loading-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      animation: bounce 1.4s infinite ease-in-out;
+    }
+    
+    .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0; }
+    
+    @keyframes bounce {
+      0%, 80%, 100% {
+        transform: scale(0);
+        opacity: 0.5;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    .version {
+      position: fixed;
+      bottom: 1rem;
+      color: #9CA3AF;
+      font-size: 0.75rem;
+    }
+    
+    /* Fallback when JavaScript is disabled */
+    .no-js-message {
+      display: none;
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #FEF3C7;
+      border-radius: 12px;
+      color: #92400E;
+    }
+    
+    noscript .no-js-message {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="splash-container">
+    <img src="/wellnest-frontend/assets/images/logo.png" alt="WellNest" class="logo" onerror="this.style.display='none'">
+    <h1 class="app-name">WellNest</h1>
+    <p class="tagline" id="tagline">กำลังโหลด...</p>
+    
+    <div class="loading-dots" id="loading-dots">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+  
+  <p class="version">v1.0.0</p>
+  
+  <noscript>
+    <div class="no-js-message">
+      <p>กรุณาเปิดใช้งาน JavaScript เพื่อใช้งาน WellNest</p>
+      <p>Please enable JavaScript to use WellNest</p>
+    </div>
+  </noscript>
+  
+  <script src="/wellnest-frontend/js/config.js"></script>
+  <script>
+    (function() {
+      // Token and auth key names from config
+      const TOKEN_KEY = 'wellnest_token';
+      const USER_KEY = 'wellnest_user';
+      
+      // Check if user is authenticated
+      function isAuthenticated() {
+        const token = localStorage.getItem(TOKEN_KEY);
+        if (!token) return false;
+        
+        // Check if token is expired
+        try {
+          const parts = token.split('.');
+          if (parts.length !== 3) return false;
+          
+          const payload = JSON.parse(atob(parts[1]));
+          const exp = payload.exp;
+          
+          if (!exp) return true; // No expiry, assume valid
+          
+          // Check if expired (with 30 second buffer)
+          return (exp * 1000) > (Date.now() + 30000);
+        } catch (e) {
+          return false;
+        }
+      }
+      
+      // Redirect based on auth status
+      function redirect() {
+        const tagline = document.getElementById('tagline');
+        const loadingDots = document.getElementById('loading-dots');
+        
+        // Show appropriate message based on auth status
+        if (isAuthenticated()) {
+          tagline.textContent = 'กำลังเข้าสู่ระบบ...';
+          
+          // Small delay for visual feedback
+          setTimeout(() => {
+            window.location.replace('/wellnest-frontend/pages/dashboard.html');
+          }, 500);
+        } else {
+          tagline.textContent = 'ยินดีต้อนรับ';
+          
+          // Show login page after splash
+          setTimeout(() => {
+            window.location.replace('/wellnest-frontend/pages/auth/login.html');
+          }, 1000);
+        }
+      }
+      
+      // Wait for DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', redirect);
+      } else {
+        redirect();
+      }
+      
+      // Handle deep links (for Capacitor)
+      window.handleDeepLink = function(url) {
+        console.log('Deep link received:', url);
+        // Parse and handle deep link URL
+        // e.g., wellnest://reminder/123
+      };
+    })();
+  </script>
+</body>
+</html>

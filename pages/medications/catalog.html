@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#F5B31A">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+  <title>ค้นหายา - WellNest</title>
+  
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#FFFBEB',
+              100: '#FEF3C7',
+              200: '#FDE68A',
+              300: '#FCD34D',
+              400: '#FBBF24',
+              500: '#F5B31A',
+              600: '#D97706',
+              700: '#B45309',
+              800: '#92400E',
+              900: '#78350F'
+            },
+            secondary: {
+              50: '#EFF6FF',
+              100: '#DBEAFE',
+              200: '#BFDBFE',
+              300: '#93C5FD',
+              400: '#60A5FA',
+              500: '#3B82F6',
+              600: '#2563EB',
+              700: '#1D4ED8',
+              800: '#1E40AF',
+              900: '#1E3A8A'
+            }
+          },
+          fontFamily: {
+            sans: ['Noto Sans Thai', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/wellnest-frontend/css/tokens.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/components.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/utilities.css">
+  
+  <style>
+    :root {
+      --header-height: 56px;
+      --bottom-nav-height: 64px;
+    }
+    
+    /* ===== Page Container ===== */
+    .page-container {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+      padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 80px);
+      background: var(--color-background, #FFFBEB);
+    }
+    
+    /* ===== Header ===== */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height);
+      background: white;
+      border-bottom: 1px solid #f0f0f0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+    
+    .header-left {
+      width: 48px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .header-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-gray-600);
+    }
+    
+    .header-btn:hover {
+      background: var(--color-gray-100);
+    }
+    
+    .header-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+    
+    .header-center {
+      flex: 1;
+      text-align: center;
+    }
+    
+    .header-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-gray-800);
+      margin: 0;
+    }
+    
+    .header-right {
+      width: 48px;
+    }
+    
+    /* ===== Search Section ===== */
+    .search-section {
+      background: white;
+      padding: 1rem;
+      border-bottom: 1px solid #f0f0f0;
+      position: sticky;
+      top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+      z-index: 50;
+    }
+    
+    .search-input-wrapper {
+      position: relative;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.75rem;
+      border-radius: 12px;
+      border: 2px solid var(--color-gray-200);
+      font-size: 1rem;
+      background: var(--color-gray-50);
+      transition: all 0.2s;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: var(--color-primary-500);
+      background: white;
+    }
+    
+    .search-input::placeholder {
+      color: var(--color-gray-400);
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 0.875rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      color: var(--color-gray-400);
+    }
+    
+    .search-clear {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--color-gray-300);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .search-clear.visible {
+      display: flex;
+    }
+    
+    .search-clear svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    /* ===== Filter Pills ===== */
+    .filter-pills {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      margin-top: 0.75rem;
+      padding-bottom: 0.25rem;
+    }
+    
+    .filter-pills::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .filter-pill {
+      flex-shrink: 0;
+      padding: 0.375rem 0.875rem;
+      border-radius: 1rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      border: 1.5px solid var(--color-gray-300);
+      background: white;
+      color: var(--color-gray-600);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .filter-pill:hover {
+      border-color: var(--color-primary-500);
+    }
+    
+    .filter-pill.active {
+      background: var(--color-primary-500);
+      border-color: var(--color-primary-500);
+      color: white;
+    }
+    
+    /* ===== Results Section ===== */
+    .results-section {
+      padding: 1rem;
+    }
+    
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .results-count {
+      font-size: 0.875rem;
+      color: var(--color-gray-500);
+    }
+    
+    .add-new-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-primary-600);
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .add-new-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    /* ===== Medication Card ===== */
+    .catalog-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+      display: flex;
+      gap: 0.75rem;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .catalog-card:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .catalog-card:active {
+      transform: scale(0.98);
+    }
+    
+    .catalog-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--color-primary-100);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .catalog-icon svg {
+      width: 24px;
+      height: 24px;
+      color: var(--color-primary-600);
+    }
+    
+    .catalog-icon.tablet { background: #FEF3C7; }
+    .catalog-icon.tablet svg { color: #D97706; }
+    .catalog-icon.capsule { background: #DBEAFE; }
+    .catalog-icon.capsule svg { color: #2563EB; }
+    .catalog-icon.syrup { background: #FCE7F3; }
+    .catalog-icon.syrup svg { color: #BE185D; }
+    .catalog-icon.cream { background: #E0E7FF; }
+    .catalog-icon.cream svg { color: #4338CA; }
+    .catalog-icon.injection { background: #FEE2E2; }
+    .catalog-icon.injection svg { color: #DC2626; }
+    .catalog-icon.inhaler { background: #D1FAE5; }
+    .catalog-icon.inhaler svg { color: #059669; }
+    .catalog-icon.drop { background: #E0F2FE; }
+    .catalog-icon.drop svg { color: #0284C7; }
+    
+    .catalog-content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .catalog-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-gray-800);
+      margin-bottom: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .catalog-info {
+      font-size: 0.8125rem;
+      color: var(--color-gray-600);
+      margin-bottom: 0.375rem;
+    }
+    
+    .catalog-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.375rem;
+    }
+    
+    .catalog-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      padding: 0.125rem 0.5rem;
+      border-radius: 1rem;
+      background: var(--color-gray-100);
+      color: var(--color-gray-600);
+    }
+    
+    .catalog-badge.form {
+      background: var(--color-primary-100);
+      color: var(--color-primary-700);
+    }
+    
+    .catalog-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      margin: auto 0;
+    }
+    
+    .catalog-action svg {
+      width: 20px;
+      height: 20px;
+      color: var(--color-gray-400);
+    }
+    
+    .catalog-more {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin: auto 0;
+      margin-right: -0.5rem;
+    }
+    
+    .catalog-more:hover {
+      background: var(--color-gray-100);
+    }
+    
+    .catalog-more svg {
+      width: 18px;
+      height: 18px;
+      color: var(--color-gray-400);
+    }
+    
+    /* ===== Empty State ===== */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+    
+    .empty-state svg {
+      width: 80px;
+      height: 80px;
+      color: var(--color-gray-300);
+      margin-bottom: 1rem;
+    }
+    
+    .empty-state h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-gray-700);
+      margin-bottom: 0.5rem;
+    }
+    
+    .empty-state p {
+      font-size: 0.875rem;
+      color: var(--color-gray-500);
+      margin-bottom: 1.5rem;
+    }
+    
+    /* ===== Loading ===== */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    .skeleton-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      gap: 0.75rem;
+    }
+    
+    .skeleton-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+    }
+    
+    .skeleton-content {
+      flex: 1;
+    }
+    
+    .skeleton-title {
+      height: 16px;
+      width: 60%;
+      margin-bottom: 0.5rem;
+    }
+    
+    .skeleton-text {
+      height: 12px;
+      width: 40%;
+      margin-bottom: 0.5rem;
+    }
+    
+    .skeleton-badge {
+      height: 20px;
+      width: 60px;
+    }
+    
+    /* ===== Add New Modal ===== */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-gray-700);
+      margin-bottom: 0.375rem;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      border: 2px solid var(--color-gray-200);
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--color-primary-500);
+    }
+    
+    .form-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      border: 2px solid var(--color-gray-200);
+      font-size: 1rem;
+      background: white;
+      cursor: pointer;
+    }
+    
+    .form-select:focus {
+      outline: none;
+      border-color: var(--color-primary-500);
+    }
+    
+    /* ===== FAB Button ===== */
+    .fab {
+      position: fixed;
+      bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 16px);
+      right: 16px;
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: var(--color-primary-500);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 16px rgba(245, 179, 26, 0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      z-index: 100;
+    }
+    
+    .fab:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(245, 179, 26, 0.5);
+    }
+    
+    .fab:active {
+      transform: scale(0.95);
+    }
+    
+    .fab svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    /* ===== Btn ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: var(--color-primary-500);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: var(--color-primary-600);
+    }
+    
+    .btn-outline {
+      background: white;
+      color: var(--color-gray-700);
+      border: 2px solid var(--color-gray-300);
+    }
+    
+    .btn-outline:hover {
+      border-color: var(--color-gray-400);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="header-btn" onclick="history.back()" aria-label="กลับ">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+    </div>
+    <div class="header-center">
+      <h1 class="header-title" data-i18n="medications.catalog">ค้นหายา</h1>
+    </div>
+    <div class="header-right"></div>
+  </header>
+  
+  <!-- Page Content -->
+  <div class="page-container">
+    
+    <!-- Search Section -->
+    <div class="search-section">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input type="text" 
+               class="search-input" 
+               id="searchInput"
+               placeholder="ค้นหาชื่อยา..."
+               autocomplete="off">
+        <button class="search-clear" id="searchClear">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Filter Pills -->
+      <div class="filter-pills" id="filterPills">
+        <button class="filter-pill active" data-filter="">ทั้งหมด</button>
+        <button class="filter-pill" data-filter="tablet">เม็ด</button>
+        <button class="filter-pill" data-filter="capsule">แคปซูล</button>
+        <button class="filter-pill" data-filter="syrup">น้ำเชื่อม</button>
+        <button class="filter-pill" data-filter="cream">ครีม</button>
+        <button class="filter-pill" data-filter="injection">ฉีด</button>
+        <button class="filter-pill" data-filter="inhaler">พ่น</button>
+        <button class="filter-pill" data-filter="drop">หยด</button>
+      </div>
+    </div>
+    
+    <!-- Results Section -->
+    <div class="results-section">
+      <div class="results-header">
+        <span class="results-count" id="resultsCount">กำลังค้นหา...</span>
+        <button class="add-new-btn" onclick="showAddMedicationModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          เพิ่มยาใหม่
+        </button>
+      </div>
+      
+      <!-- Results List -->
+      <div id="resultsList">
+        <!-- Skeleton Loading -->
+        <div id="loadingSkeleton">
+          <div class="skeleton-card">
+            <div class="skeleton skeleton-icon"></div>
+            <div class="skeleton-content">
+              <div class="skeleton skeleton-title"></div>
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-badge"></div>
+            </div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton skeleton-icon"></div>
+            <div class="skeleton-content">
+              <div class="skeleton skeleton-title"></div>
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-badge"></div>
+            </div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton skeleton-icon"></div>
+            <div class="skeleton-content">
+              <div class="skeleton skeleton-title"></div>
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-badge"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Catalog Items -->
+        <div id="catalogItems" style="display: none;"></div>
+        
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+          </svg>
+          <h3 data-i18n="medications.messages.searchEmpty">ไม่พบยาที่ค้นหา</h3>
+          <p>ลองค้นหาด้วยคำค้นอื่น หรือเพิ่มยาใหม่</p>
+          <button class="btn btn-primary" onclick="showAddMedicationModal()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            เพิ่มยาใหม่
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- FAB Button -->
+  <button class="fab" onclick="showAddMedicationModal()" aria-label="เพิ่มยาใหม่">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <line x1="12" y1="5" x2="12" y2="19"/>
+      <line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+  
+  <!-- Component Placeholders -->
+  <div id="bottom-nav-placeholder"></div>
+  <div id="toast-placeholder"></div>
+  <div id="modal-placeholder"></div>
+  
+  <!-- Core Scripts -->
+  <script src="/wellnest-frontend/js/config.js"></script>
+  <script src="/wellnest-frontend/js/i18n/th.js"></script>
+  <script src="/wellnest-frontend/js/i18n/en.js"></script>
+  <script src="/wellnest-frontend/js/i18n.js"></script>
+  <script src="/wellnest-frontend/js/utils.js"></script>
+  <script src="/wellnest-frontend/js/api.js"></script>
+  <script src="/wellnest-frontend/js/auth.js"></script>
+  <script src="/wellnest-frontend/js/storage.js"></script>
+  <script src="/wellnest-frontend/js/components.js"></script>
+  <script src="/wellnest-frontend/js/modal.js"></script>
+  
+  <script>
+  document.addEventListener('DOMContentLoaded', async function() {
+    // Require authentication
+    if (typeof Auth !== 'undefined') {
+      Auth.requireAuth();
+    }
+    
+    // Load components
+    await Components.init({
+      bottomNav: { active: 'medications' },
+      toast: true,
+      modal: true
+    });
+    
+    // State
+    let medications = [];
+    let currentFilter = '';
+    let searchQuery = '';
+    let searchTimeout = null;
+    
+    // Elements
+    const searchInput = document.getElementById('searchInput');
+    const searchClear = document.getElementById('searchClear');
+    const filterPills = document.querySelectorAll('.filter-pill');
+    const loadingSkeleton = document.getElementById('loadingSkeleton');
+    const catalogItems = document.getElementById('catalogItems');
+    const emptyState = document.getElementById('emptyState');
+    const resultsCount = document.getElementById('resultsCount');
+    
+    // Initialize
+    loadCatalog();
+    initSearch();
+    initFilters();
+    
+    // Load Catalog
+    async function loadCatalog() {
+      try {
+        loadingSkeleton.style.display = 'block';
+        catalogItems.style.display = 'none';
+        emptyState.style.display = 'none';
+        
+        let endpoint = '/medications';
+        const params = {};
+        
+        if (searchQuery) {
+          params.search = searchQuery;
+        }
+        if (currentFilter) {
+          params.dosage_form = currentFilter;
+        }
+        
+        const queryString = Object.keys(params).length > 0 
+          ? '?' + new URLSearchParams(params).toString() 
+          : '';
+        
+        const response = await Api.get(endpoint + queryString);
+        medications = Array.isArray(response) ? response : [];
+        
+        loadingSkeleton.style.display = 'none';
+        
+        if (medications.length === 0) {
+          emptyState.style.display = 'block';
+          resultsCount.textContent = 'ไม่พบรายการยา';
+        } else {
+          catalogItems.style.display = 'block';
+          resultsCount.textContent = `พบ ${medications.length} รายการ`;
+          renderCatalog();
+        }
+        
+      } catch (error) {
+        console.error('Failed to load catalog:', error);
+        loadingSkeleton.style.display = 'none';
+        emptyState.style.display = 'block';
+        resultsCount.textContent = 'เกิดข้อผิดพลาด';
+      }
+    }
+    
+    // Render Catalog
+    function renderCatalog() {
+      catalogItems.innerHTML = medications.map(med => createCatalogCard(med)).join('');
+    }
+    
+    function createCatalogCard(med) {
+      const formLabels = {
+        tablet: 'เม็ด',
+        capsule: 'แคปซูล',
+        syrup: 'น้ำเชื่อม',
+        injection: 'ฉีด',
+        cream: 'ครีม',
+        inhaler: 'พ่น',
+        drop: 'หยด'
+      };
+      
+      const formLabel = formLabels[med.dosage_form] || med.dosage_form || '';
+      
+      return `
+        <div class="catalog-card" onclick="selectMedication(${med.medication_id})">
+          <div class="catalog-icon ${med.dosage_form || 'tablet'}">
+            ${getDosageFormIcon(med.dosage_form)}
+          </div>
+          <div class="catalog-content">
+            <div class="catalog-name">${med.medication_name}</div>
+            <div class="catalog-info">${med.strength || ''} ${med.manufacturer ? '• ' + med.manufacturer : ''}</div>
+            <div class="catalog-badges">
+              ${formLabel ? `<span class="catalog-badge form">${formLabel}</span>` : ''}
+              ${med.description ? `<span class="catalog-badge">${truncate(med.description, 20)}</span>` : ''}
+            </div>
+          </div>
+          <button class="catalog-more" onclick="event.stopPropagation(); showMedicationOptions(${med.medication_id}, '${med.medication_name.replace(/'/g, "\\'")}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="1"/>
+              <circle cx="12" cy="5" r="1"/>
+              <circle cx="12" cy="19" r="1"/>
+            </svg>
+          </button>
+          <div class="catalog-action">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </div>
+        </div>
+      `;
+    }
+    
+    function getDosageFormIcon(form) {
+      const icons = {
+        tablet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4"/><line x1="3" y1="12" x2="21" y2="12"/></svg>',
+        capsule: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.5 20.5L3.5 13.5a4.95 4.95 0 1 1 7-7l7 7a4.95 4.95 0 0 1-7 7z"/><path d="M8.5 8.5l7 7"/></svg>',
+        syrup: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2h8l2 4H6l2-4z"/><path d="M6 6v14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V6"/><path d="M10 10v6"/><path d="M14 10v6"/></svg>',
+        cream: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6l1 4H8l1-4z"/><rect x="7" y="7" width="10" height="14" rx="2"/></svg>',
+        inhaler: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 12h4v9H6z"/><path d="M10 3h4v9h-4z"/><path d="M14 8h4v4h-4z"/></svg>',
+        injection: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2l4 4-4 4"/><path d="M2 18l4 4 4-4"/><path d="M22 6L6 22"/><path d="M11 1l3 3"/><path d="M20 10l3 3"/></svg>',
+        drop: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>'
+      };
+      return icons[form] || icons.tablet;
+    }
+    
+    function truncate(str, len) {
+      if (!str) return '';
+      return str.length > len ? str.substring(0, len) + '...' : str;
+    }
+    
+    // Search
+    function initSearch() {
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.trim();
+        
+        // Show/hide clear button
+        searchClear.classList.toggle('visible', searchQuery.length > 0);
+        
+        // Debounce search
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          loadCatalog();
+        }, 300);
+      });
+      
+      searchClear.addEventListener('click', () => {
+        searchInput.value = '';
+        searchQuery = '';
+        searchClear.classList.remove('visible');
+        loadCatalog();
+      });
+    }
+    
+    // Filters
+    function initFilters() {
+      filterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          filterPills.forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          currentFilter = pill.dataset.filter;
+          loadCatalog();
+        });
+      });
+    }
+    
+    // Select Medication
+    window.selectMedication = function(medicationId) {
+      window.location.href = `/wellnest-frontend/pages/medications/assign.html?med_id=${medicationId}`;
+    };
+    
+    // Add New Medication Modal
+    window.showAddMedicationModal = function() {
+      // Close any existing modal first to prevent stacking
+      Modal.closeAll();
+      
+      const content = `
+        <form id="addMedicationForm">
+          <div class="form-group">
+            <label class="form-label">ชื่อยา *</label>
+            <input type="text" class="form-input" name="medication_name" required placeholder="เช่น พาราเซตามอล">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">รูปแบบยา *</label>
+            <select class="form-select" name="dosage_form" required>
+              <option value="">เลือกรูปแบบ</option>
+              <option value="tablet">เม็ด</option>
+              <option value="capsule">แคปซูล</option>
+              <option value="syrup">น้ำเชื่อม</option>
+              <option value="cream">ครีม/ขี้ผึ้ง</option>
+              <option value="injection">ฉีด</option>
+              <option value="inhaler">พ่น</option>
+              <option value="drop">หยด</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">ความแรง</label>
+            <input type="text" class="form-input" name="strength" placeholder="เช่น 500mg">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">ผู้ผลิต</label>
+            <input type="text" class="form-input" name="manufacturer" placeholder="เช่น GPO">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">คำอธิบาย</label>
+            <input type="text" class="form-input" name="description" placeholder="เช่น ยาแก้ปวด ลดไข้">
+          </div>
+          
+          <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+            <button type="button" class="btn btn-outline" style="flex: 1;" onclick="Modal.close()">ยกเลิก</button>
+            <button type="submit" class="btn btn-primary" style="flex: 1;">เพิ่มยา</button>
+          </div>
+        </form>
+      `;
+      
+      Modal.show({
+        title: 'เพิ่มยาใหม่ใน Catalog',
+        content: content,
+        size: 'md'
+      });
+      
+      // Handle form submission
+      setTimeout(() => {
+        const form = document.getElementById('addMedicationForm');
+        if (form) {
+          form.addEventListener('submit', handleAddMedication);
+        }
+      }, 100);
+    };
+    
+    async function handleAddMedication(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target);
+      const data = {
+        medication_name: formData.get('medication_name'),
+        dosage_form: formData.get('dosage_form'),
+        strength: formData.get('strength') || null,
+        manufacturer: formData.get('manufacturer') || null,
+        description: formData.get('description') || null
+      };
+      
+      try {
+        const response = await Api.post('/medications', data);
+        Modal.close();
+        Toast.success(t('medications.messages.addSuccess'));
+        
+        // Redirect to assign page
+        window.location.href = `/wellnest-frontend/pages/medications/assign.html?med_id=${response.medication_id}`;
+        
+      } catch (error) {
+        console.error('Failed to add medication:', error);
+        Toast.error(error.message || t('errors.generic'));
+      }
+    }
+    
+    // Show medication options menu
+    window.showMedicationOptions = function(medId, medName) {
+      Modal.closeAll();
+      
+      const content = `
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <button class="btn btn-outline" onclick="selectMedication(${medId}); Modal.close();" style="justify-content: flex-start;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            เพิ่มเข้ารายการยาของฉัน
+          </button>
+          <button class="btn btn-outline" onclick="editMedication(${medId})" style="justify-content: flex-start;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            แก้ไขข้อมูลยา
+          </button>
+          <button class="btn btn-outline" onclick="confirmDeleteCatalog(${medId}, '${medName}')" style="justify-content: flex-start; color: var(--color-error);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+            ลบออกจาก Catalog
+          </button>
+        </div>
+      `;
+      
+      Modal.show({
+        title: medName,
+        content: content,
+        size: 'sm'
+      });
+    };
+    
+    // Edit medication in catalog
+    window.editMedication = async function(medId) {
+      Modal.close();
+      
+      try {
+        // Get current medication data
+        const med = medications.find(m => m.medication_id === medId);
+        if (!med) {
+          Toast.error('ไม่พบข้อมูลยา');
+          return;
+        }
+        
+        const content = `
+          <form id="editMedicationForm">
+            <div class="form-group">
+              <label class="form-label">ชื่อยา <span style="color: var(--color-error);">*</span></label>
+              <input type="text" class="form-input" name="medication_name" value="${med.medication_name || ''}" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">รูปแบบยา</label>
+              <select class="form-select" name="dosage_form">
+                <option value="tablet" ${med.dosage_form === 'tablet' ? 'selected' : ''}>เม็ด (Tablet)</option>
+                <option value="capsule" ${med.dosage_form === 'capsule' ? 'selected' : ''}>แคปซูล (Capsule)</option>
+                <option value="syrup" ${med.dosage_form === 'syrup' ? 'selected' : ''}>น้ำเชื่อม (Syrup)</option>
+                <option value="injection" ${med.dosage_form === 'injection' ? 'selected' : ''}>ฉีด (Injection)</option>
+                <option value="cream" ${med.dosage_form === 'cream' ? 'selected' : ''}>ครีม/ขี้ผึ้ง (Cream)</option>
+                <option value="inhaler" ${med.dosage_form === 'inhaler' ? 'selected' : ''}>พ่น (Inhaler)</option>
+                <option value="drop" ${med.dosage_form === 'drop' ? 'selected' : ''}>หยด (Drop)</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">ความแรง</label>
+              <input type="text" class="form-input" name="strength" value="${med.strength || ''}" placeholder="เช่น 500mg, 10ml">
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">ผู้ผลิต</label>
+              <input type="text" class="form-input" name="manufacturer" value="${med.manufacturer || ''}" placeholder="ชื่อบริษัทผู้ผลิต">
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">คำอธิบาย</label>
+              <input type="text" class="form-input" name="description" value="${med.description || ''}" placeholder="เช่น ยาแก้ปวด ลดไข้">
+            </div>
+            
+            <input type="hidden" name="medication_id" value="${medId}">
+            
+            <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+              <button type="button" class="btn btn-outline" style="flex: 1;" onclick="Modal.close()">ยกเลิก</button>
+              <button type="submit" class="btn btn-primary" style="flex: 1;">บันทึก</button>
+            </div>
+          </form>
+        `;
+        
+        Modal.show({
+          title: 'แก้ไขข้อมูลยา',
+          content: content,
+          size: 'md'
+        });
+        
+        // Handle form submission
+        setTimeout(() => {
+          const form = document.getElementById('editMedicationForm');
+          if (form) {
+            form.addEventListener('submit', handleEditMedication);
+          }
+        }, 100);
+        
+      } catch (error) {
+        console.error('Failed to edit medication:', error);
+        Toast.error(t('errors.generic'));
+      }
+    };
+    
+    // Handle edit medication form submission
+    async function handleEditMedication(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target);
+      const medId = formData.get('medication_id');
+      const data = {
+        medication_name: formData.get('medication_name'),
+        dosage_form: formData.get('dosage_form'),
+        strength: formData.get('strength') || null,
+        manufacturer: formData.get('manufacturer') || null,
+        description: formData.get('description') || null
+      };
+      
+      try {
+        await Api.put(`/medications/${medId}`, data);
+        Modal.close();
+        Toast.success('บันทึกการแก้ไขสำเร็จ');
+        
+        // Reload catalog
+        loadCatalog();
+        
+      } catch (error) {
+        console.error('Failed to update medication:', error);
+        Toast.error(error.message || t('errors.generic'));
+      }
+    }
+    
+    // Confirm delete from catalog
+    window.confirmDeleteCatalog = function(medId, medName) {
+      Modal.close();
+      
+      setTimeout(() => {
+        Modal.show({
+          title: 'ลบยาจาก Catalog',
+          content: `
+            <p style="color: var(--color-gray-600); margin-bottom: 1rem;">
+              ต้องการลบ <strong>${medName}</strong> ออกจาก Catalog หรือไม่?
+            </p>
+            <p style="font-size: 0.875rem; color: var(--color-gray-500);">
+              ⚠️ การลบจะมีผลกับผู้ใช้ทุกคนที่ใช้ยานี้
+            </p>
+          `,
+          actions: [
+            {
+              label: 'ยกเลิก',
+              class: 'btn-outline',
+              onclick: "Modal.close()"
+            },
+            {
+              label: 'ลบ',
+              class: 'btn-danger',
+              onclick: `deleteCatalogMedication(${medId})`
+            }
+          ]
+        });
+      }, 100);
+    };
+    
+    // Delete medication from catalog
+    window.deleteCatalogMedication = async function(medId) {
+      try {
+        await Api.delete(`/medications/${medId}`);
+        Modal.close();
+        Toast.success('ลบยาจาก Catalog สำเร็จ');
+        
+        // Reload catalog
+        loadCatalog();
+        
+      } catch (error) {
+        console.error('Failed to delete medication:', error);
+        Toast.error(error.message || t('errors.generic'));
+      }
+    };
+  });
+  </script>
+</body>
+</html>

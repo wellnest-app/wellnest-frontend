@@ -1,0 +1,59 @@
+{
+  "name": "wellnest-app",
+  "version": "1.0.0",
+  "description": "WellNest - Medication reminder and management app for elderly care",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx live-server --port=3000 --no-browser",
+    "serve": "npx live-server --port=3000",
+    "build": "npm run sync:android && npm run sync:ios",
+    "sync": "npx cap sync",
+    "sync:android": "npx cap sync android",
+    "sync:ios": "npx cap sync ios",
+    "open:android": "npx cap open android",
+    "open:ios": "npx cap open ios",
+    "run:android": "npx cap run android",
+    "run:ios": "npx cap run ios",
+    "resources": "npx cordova-res --skip-config --copy"
+  },
+  "keywords": [
+    "medication",
+    "reminder",
+    "elderly",
+    "healthcare",
+    "capacitor",
+    "mobile",
+    "pwa"
+  ],
+  "author": "WellNest Team",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/app": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/haptics": "^6.0.0",
+    "@capacitor/ios": "^6.0.0",
+    "@capacitor/keyboard": "^6.0.0",
+    "@capacitor/local-notifications": "^6.0.0",
+    "@capacitor/push-notifications": "^6.0.0",
+    "@capacitor/splash-screen": "^6.0.0",
+    "@capacitor/status-bar": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0",
+    "cordova-res": "^0.15.4",
+    "live-server": "^1.2.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wellnest/wellnest-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wellnest/wellnest-app/issues"
+  },
+  "homepage": "https://wellnest.app"
+}

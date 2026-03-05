@@ -1,0 +1,16 @@
+<div class="toast-container" id="toastContainer"></div>
+
+<template id="toastTemplate">
+  <div class="toast" data-type="">
+    <div class="toast-icon"></div>
+    <div class="toast-content">
+      <p class="toast-message"></p>
+    </div>
+    <button class="toast-close" onclick="this.parentElement.remove()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</template>

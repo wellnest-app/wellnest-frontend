@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#F5B31A">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+  <title>ประวัติการทานยา - WellNest</title>
+  
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#FFFBEB',
+              100: '#FEF3C7',
+              200: '#FDE68A',
+              300: '#FCD34D',
+              400: '#FBBF24',
+              500: '#F5B31A',
+              600: '#D97706',
+              700: '#B45309',
+              800: '#92400E',
+              900: '#78350F'
+            },
+            secondary: {
+              50: '#EFF6FF',
+              100: '#DBEAFE',
+              200: '#BFDBFE',
+              300: '#93C5FD',
+              400: '#60A5FA',
+              500: '#3B82F6',
+              600: '#2563EB',
+              700: '#1D4ED8',
+              800: '#1E40AF',
+              900: '#1E3A8A'
+            }
+          },
+          fontFamily: {
+            sans: ['Noto Sans Thai', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/wellnest-frontend/css/tokens.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/components.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/utilities.css">
+  
+  <style>
+    :root {
+      --header-height: 56px;
+      --bottom-nav-height: 64px;
+    }
+    
+    /* ===== Page Container ===== */
+    .page-container {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+      padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 20px);
+      background: var(--color-background, #FFFBEB);
+    }
+    
+    /* ===== Header ===== */
+    .page-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+      padding-top: env(safe-area-inset-top, 0px);
+      background: linear-gradient(135deg, #F5B31A 0%, #FBBF24 100%);
+      display: flex;
+      align-items: center;
+      padding-left: 1rem;
+      padding-right: 1rem;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(245, 179, 26, 0.3);
+    }
+    
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: all 0.2s;
+    }
+    
+    .back-btn:active {
+      transform: scale(0.95);
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .header-title {
+      flex: 1;
+      text-align: center;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: white;
+      margin-right: 40px;
+    }
+    
+    /* ===== Date Filter ===== */
+    .date-filter {
+      display: flex;
+      gap: 0.5rem;
+      padding: 1rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    
+    .date-filter::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .filter-chip {
+      padding: 0.5rem 1rem;
+      background: white;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-gray-600);
+      white-space: nowrap;
+      border: 1px solid #e5e5e5;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    
+    .filter-chip:active {
+      transform: scale(0.95);
+    }
+    
+    .filter-chip.active {
+      background: var(--color-primary-500);
+      color: white;
+      border-color: var(--color-primary-500);
+    }
+    
+    /* ===== Stats Section ===== */
+    .stats-section {
+      padding: 0 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-gray-900);
+    }
+    
+    .stat-value.taken { color: #22C55E; }
+    .stat-value.skipped { color: #EF4444; }
+    .stat-value.pending { color: var(--color-primary-500); }
+    
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--color-gray-500);
+      margin-top: 0.25rem;
+    }
+    
+    /* ===== History List ===== */
+    .history-list {
+      padding: 0 1rem;
+    }
+    
+    .date-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .date-header {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--color-gray-500);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .date-header svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .history-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .history-status {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .history-status svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .history-status.taken {
+      background: #D1FAE5;
+      color: #059669;
+    }
+    
+    .history-status.skipped {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+    
+    .history-status.pending {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+    
+    .history-content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .history-med-name {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--color-gray-900);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .history-dosage {
+      font-size: 0.75rem;
+      color: var(--color-gray-500);
+      margin-top: 0.125rem;
+    }
+    
+    .history-notes {
+      font-size: 0.75rem;
+      color: var(--color-gray-400);
+      font-style: italic;
+      margin-top: 0.25rem;
+    }
+    
+    /* ✅ Phase 2.6 Bug #4: Deleted medication styles */
+    .history-card.deleted-med {
+      opacity: 0.8;
+      background: #fafafa;
+    }
+    
+    .deleted-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.625rem;
+      font-weight: 500;
+      padding: 0.125rem 0.375rem;
+      background: #FEE2E2;
+      color: #991B1B;
+      border-radius: 4px;
+      margin-left: 0.375rem;
+      vertical-align: middle;
+    }
+      color: var(--color-gray-400);
+      font-style: italic;
+      margin-top: 0.25rem;
+    }
+    
+    .history-time-container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.25rem;
+    }
+    
+    .meal-badge {
+      padding: 0.125rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.6875rem;
+      font-weight: 500;
+    }
+    
+    .meal-badge.morning {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+    
+    .meal-badge.afternoon {
+      background: #DBEAFE;
+      color: #2563EB;
+    }
+    
+    .meal-badge.evening {
+      background: #F3E8FF;
+      color: #7C3AED;
+    }
+    
+    .meal-badge.night {
+      background: #E0E7FF;
+      color: #4338CA;
+    }
+    
+    /* ✅ Phase 2.5: Scheduled time badge */
+    .scheduled-badge {
+      padding: 0.125rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      background: var(--color-gray-100);
+      color: var(--color-gray-600);
+    }
+    
+    .history-time {
+      font-size: 0.75rem;
+      color: var(--color-gray-400);
+    }
+    
+    /* ===== Empty State ===== */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+    
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      color: var(--color-gray-300);
+      margin: 0 auto 1rem;
+    }
+    
+    .empty-state-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-gray-700);
+      margin-bottom: 0.5rem;
+    }
+    
+    .empty-state-text {
+      font-size: 0.875rem;
+      color: var(--color-gray-500);
+      line-height: 1.5;
+    }
+    
+    /* ===== Load More ===== */
+    .load-more-btn {
+      width: 100%;
+      padding: 0.875rem;
+      background: white;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-gray-600);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 0.5rem;
+    }
+    
+    .load-more-btn:hover {
+      background: var(--color-gray-50);
+    }
+    
+    .load-more-btn:active {
+      transform: scale(0.98);
+    }
+    
+    /* ===== Skeleton Loading ===== */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s infinite;
+      border-radius: 8px;
+    }
+    
+    @keyframes skeleton-loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="page-header">
+    <button class="back-btn" onclick="goBack()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+    </button>
+    <h1 class="header-title">ประวัติการทานยา</h1>
+  </header>
+  
+  <!-- Page Content -->
+  <div class="page-container">
+    
+    <!-- Date Filter -->
+    <div class="date-filter">
+      <button class="filter-chip active" data-filter="today" onclick="setFilter('today')">วันนี้</button>
+      <button class="filter-chip" data-filter="week" onclick="setFilter('week')">7 วัน</button>
+      <button class="filter-chip" data-filter="month" onclick="setFilter('month')">30 วัน</button>
+      <button class="filter-chip" data-filter="all" onclick="setFilter('all')">ทั้งหมด</button>
+    </div>
+    
+    <!-- Stats Section -->
+    <section class="stats-section">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value taken" id="taken-count">0</div>
+          <div class="stat-label">ทานแล้ว</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value skipped" id="skipped-count">0</div>
+          <div class="stat-label">ข้าม</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value pending" id="rate-value">-</div>
+          <div class="stat-label">อัตราสำเร็จ</div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- History List -->
+    <div class="history-list" id="history-list">
+      <!-- Will be rendered by JS -->
+    </div>
+    
+  </div>
+  
+  <!-- Component Placeholders -->
+  <div id="bottom-nav-placeholder"></div>
+  <div id="toast-placeholder"></div>
+  
+  <!-- Core Scripts -->
+  <script src="/wellnest-frontend/js/config.js"></script>
+  <script src="/wellnest-frontend/js/i18n/th.js"></script>
+  <script src="/wellnest-frontend/js/i18n/en.js"></script>
+  <script src="/wellnest-frontend/js/i18n.js"></script>
+  <script src="/wellnest-frontend/js/utils.js"></script>
+  <script src="/wellnest-frontend/js/api.js"></script>
+  <script src="/wellnest-frontend/js/auth.js"></script>
+  <script src="/wellnest-frontend/js/storage.js"></script>
+  <script src="/wellnest-frontend/js/components.js"></script>
+  
+  <script>
+  // State
+  let historyData = [];
+  let medicationsMap = {};
+  let currentFilter = 'today';
+  let offset = 0;
+  const limit = 50;
+  let hasMore = true;
+  
+  document.addEventListener('DOMContentLoaded', async function() {
+    // Require authentication
+    if (typeof Auth !== 'undefined') {
+      Auth.requireAuth();
+    }
+    
+    // Load components
+    await Components.init({
+      bottomNav: { active: 'history' },
+      toast: true
+    });
+    
+    // Load medications for mapping
+    await loadMedications();
+    
+    // Load history
+    loadHistory();
+  });
+  
+  // Load medications for name mapping
+  async function loadMedications() {
+    try {
+      const meds = await Api.get('/medications/mine');
+      medicationsMap = {};
+      meds.forEach(m => {
+        medicationsMap[m.user_med_id] = m;
+      });
+    } catch (error) {
+      console.error('Failed to load medications:', error);
+    }
+  }
+  
+  // Load history
+  async function loadHistory(append = false) {
+    const listEl = document.getElementById('history-list');
+    
+    if (!append) {
+      offset = 0;
+      historyData = [];
+      hasMore = true;
+    }
+    
+    try {
+      // Build query params based on filter
+      let params = `?limit=${limit}&offset=${offset}`;
+      
+      const now = new Date();
+      if (currentFilter === 'today') {
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        params += `&start=${start.toISOString()}`;
+      } else if (currentFilter === 'week') {
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+        params += `&start=${start.toISOString()}`;
+      } else if (currentFilter === 'month') {
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30);
+        params += `&start=${start.toISOString()}`;
+      }
+      
+      const response = await Api.get(`/history${params}`);
+      
+      if (response.length < limit) {
+        hasMore = false;
+      }
+      
+      historyData = append ? [...historyData, ...response] : response;
+      offset += response.length;
+      
+      // Calculate stats
+      updateStats();
+      
+      // Render history
+      renderHistory();
+      
+    } catch (error) {
+      console.error('Failed to load history:', error);
+      
+      if (!append) {
+        listEl.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div class="empty-state-title">เกิดข้อผิดพลาด</div>
+            <div class="empty-state-text">ไม่สามารถโหลดประวัติได้<br>กรุณาลองใหม่อีกครั้ง</div>
+          </div>
+        `;
+      }
+    }
+  }
+  
+  // Update stats
+  function updateStats() {
+    const taken = historyData.filter(h => h.status === 'taken').length;
+    const skipped = historyData.filter(h => h.status === 'skipped').length;
+    const total = taken + skipped;
+    const rate = total > 0 ? Math.round((taken / total) * 100) : 0;
+    
+    document.getElementById('taken-count').textContent = taken;
+    document.getElementById('skipped-count').textContent = skipped;
+    document.getElementById('rate-value').textContent = total > 0 ? `${rate}%` : '-';
+  }
+  
+  // Render history
+  function renderHistory() {
+    const listEl = document.getElementById('history-list');
+    
+    // Dosage form labels (Thai)
+    const formLabels = {
+      tablet: 'เม็ด',
+      capsule: 'แคปซูล',
+      syrup: 'น้ำเชื่อม',
+      injection: 'ฉีด',
+      cream: 'ครีม',
+      inhaler: 'พ่น',
+      drop: 'หยด'
+    };
+    
+    if (historyData.length === 0) {
+      listEl.innerHTML = `
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 8v4l3 3"/>
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+          <div class="empty-state-title">ยังไม่มีประวัติ</div>
+          <div class="empty-state-text">ประวัติการทานยาจะปรากฏที่นี่<br>เมื่อคุณกดทานหรือข้ามยา</div>
+        </div>
+      `;
+      return;
+    }
+    
+    // Group by date
+    const grouped = {};
+    historyData.forEach(item => {
+      const date = new Date(item.taken_at);
+      const dateKey = formatDateKey(date);
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = {
+          label: formatDateLabel(date),
+          items: []
+        };
+      }
+      grouped[dateKey].items.push(item);
+    });
+    
+    // Render groups
+    let html = '';
+    Object.keys(grouped).forEach(dateKey => {
+      const group = grouped[dateKey];
+      
+      html += `
+        <div class="date-group">
+          <div class="date-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="18" x="3" y="4" rx="2"/>
+              <path d="M16 2v4"/>
+              <path d="M8 2v4"/>
+              <path d="M3 10h18"/>
+            </svg>
+            ${group.label}
+          </div>
+      `;
+      
+      group.items.forEach(item => {
+        const med = medicationsMap[item.user_med_id] || {};
+        const status = item.status || 'taken';
+        const statusIcon = getStatusIcon(status);
+        const takenDate = new Date(item.taken_at);
+        const time = formatTime(takenDate);
+        
+        // ✅ Phase 2.5: Use scheduled_time if available, otherwise calculate from taken_at
+        const scheduledTime = item.scheduled_time;
+        const mealPeriod = scheduledTime 
+          ? getMealPeriodFromScheduledTime(scheduledTime)
+          : getMealPeriod(takenDate);
+        
+        // ✅ Phase 2.6 Bug #4 Fix: Use medication_name from snapshot if medication deleted
+        // Priority: current medication data > snapshot from history > fallback
+        const medName = med.medication_name || item.medication_name || 'ยาไม่ระบุ';
+        const isDeleted = !med.medication_name && item.medication_name;
+        
+        // Build dosage info with translated form
+        let dosageInfo = med.prescribed_dosage || '';
+        if (!dosageInfo && med.dosage_per_take) {
+          const formLabel = formLabels[med.dosage_form] || med.dosage_form || '';
+          dosageInfo = `${med.dosage_per_take} ${formLabel} วันละ ${med.frequency_per_day || 1} ครั้ง`;
+        }
+        // ✅ Phase 2.6: Show strength from snapshot if no dosage info
+        if (!dosageInfo && item.strength) {
+          dosageInfo = item.strength;
+        }
+        
+        // Only show notes if valid (not empty, not just "string" or other invalid values)
+        const validNotes = item.notes && 
+                          typeof item.notes === 'string' && 
+                          item.notes.trim() !== '' && 
+                          item.notes.toLowerCase() !== 'string' &&
+                          !item.notes.includes('via API') &&  // ✅ Phase 2.5: Hide auto-generated notes
+                          item.notes.length > 1;
+        
+        // ✅ Phase 2.6 Bug #4: Show "deleted" badge if medication was deleted
+        const deletedBadge = isDeleted ? '<span class="deleted-badge">ลบแล้ว</span>' : '';
+        
+        html += `
+          <div class="history-card ${isDeleted ? 'deleted-med' : ''}">
+            <div class="history-status ${status}">
+              ${statusIcon}
+            </div>
+            <div class="history-content">
+              <div class="history-med-name">${medName} ${deletedBadge}</div>
+              <div class="history-dosage">${dosageInfo}</div>
+              ${validNotes ? `<div class="history-notes">${item.notes}</div>` : ''}
+            </div>
+            <div class="history-time-container">
+              <span class="meal-badge ${mealPeriod.class}">${mealPeriod.label}</span>
+              ${scheduledTime ? `<span class="scheduled-badge">${scheduledTime}</span>` : ''}
+              <span class="history-time">${time}</span>
+            </div>
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+    });
+    
+    // Add load more button if needed
+    if (hasMore) {
+      html += `
+        <button class="load-more-btn" onclick="loadMore()">
+          โหลดเพิ่มเติม
+        </button>
+      `;
+    }
+    
+    listEl.innerHTML = html;
+  }
+  
+  // Get status icon
+  function getStatusIcon(status) {
+    if (status === 'taken') {
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>`;
+    } else if (status === 'skipped') {
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>`;
+    } else {
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 6v6l4 2"/>
+      </svg>`;
+    }
+  }
+  
+  // Format date key
+  function formatDateKey(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+  
+  // Format date label (Thai)
+  function formatDateLabel(date) {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (formatDateKey(date) === formatDateKey(today)) {
+      return 'วันนี้';
+    } else if (formatDateKey(date) === formatDateKey(yesterday)) {
+      return 'เมื่อวาน';
+    }
+    
+    const thaiDays = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+    const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    
+    const dayName = thaiDays[date.getDay()];
+    const day = date.getDate();
+    const month = thaiMonths[date.getMonth()];
+    const year = date.getFullYear() + 543;
+    
+    return `วัน${dayName}ที่ ${day} ${month} ${year}`;
+  }
+  
+  // Format time
+  function formatTime(date) {
+    const hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    return `${displayHours}:${minutes} ${period}`;
+  }
+  
+  // Get meal period from time
+  function getMealPeriod(date) {
+    const hours = date.getHours();
+    
+    if (hours >= 6 && hours < 12) {
+      return { label: 'เช้า', class: 'morning' };
+    } else if (hours >= 12 && hours < 17) {
+      return { label: 'กลางวัน', class: 'afternoon' };
+    } else if (hours >= 17 && hours < 21) {
+      return { label: 'เย็น', class: 'evening' };
+    } else {
+      return { label: 'ก่อนนอน', class: 'night' };
+    }
+  }
+  
+  // ✅ Phase 2.5: Get meal period from scheduled_time string
+  function getMealPeriodFromScheduledTime(timeStr) {
+    if (!timeStr) return getMealPeriod(new Date());
+    
+    const hour = parseInt(timeStr.split(':')[0]);
+    
+    if (hour >= 6 && hour < 12) {
+      return { label: 'เช้า', class: 'morning' };
+    } else if (hour >= 12 && hour < 17) {
+      return { label: 'กลางวัน', class: 'afternoon' };
+    } else if (hour >= 17 && hour < 21) {
+      return { label: 'เย็น', class: 'evening' };
+    } else {
+      return { label: 'ก่อนนอน', class: 'night' };
+    }
+  }
+  
+  // Set filter
+  window.setFilter = function(filter) {
+    currentFilter = filter;
+    
+    // Update filter chips
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.classList.toggle('active', chip.dataset.filter === filter);
+    });
+    
+    // Reload history
+    loadHistory();
+  };
+  
+  // Load more
+  window.loadMore = function() {
+    loadHistory(true);
+  };
+  
+  // Go back
+  window.goBack = function() {
+    if (document.referrer && document.referrer.includes(window.location.host)) {
+      window.history.back();
+    } else {
+      window.location.href = '/wellnest-frontend/pages/dashboard.html';
+    }
+  };
+  </script>
+</body>
+</html>

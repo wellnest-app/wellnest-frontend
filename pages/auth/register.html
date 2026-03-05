@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#F5B31A">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+  <title>สร้างบัญชี - WellNest</title>
+  
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#FFFBEB',
+              100: '#FEF3C7',
+              200: '#FDE68A',
+              300: '#FCD34D',
+              400: '#FBBF24',
+              500: '#F5B31A',
+              600: '#D97706',
+              700: '#B45309',
+              800: '#92400E',
+              900: '#78350F'
+            },
+            secondary: {
+              50: '#EFF6FF',
+              100: '#DBEAFE',
+              200: '#BFDBFE',
+              300: '#93C5FD',
+              400: '#60A5FA',
+              500: '#3B82F6',
+              600: '#2563EB',
+              700: '#1D4ED8',
+              800: '#1E40AF',
+              900: '#1E3A8A'
+            }
+          },
+          fontFamily: {
+            sans: ['Noto Sans Thai', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/wellnest-frontend/css/tokens.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/components.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/utilities.css">
+  
+  <style>
+    .auth-container {
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: linear-gradient(135deg, var(--color-primary-50) 0%, #FFF 50%, var(--color-secondary-50) 100%);
+    }
+    
+    .auth-card {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      width: 100%;
+      max-width: 420px;
+      margin: 1rem;
+    }
+    
+    .logo-container {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .logo-container img {
+      width: 80px;
+      height: auto;
+    }
+    
+    .input-group {
+      margin-bottom: 1rem;
+    }
+    
+    .input-group label {
+      display: block;
+      font-weight: 500;
+      color: var(--color-gray-700);
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    .input-group .input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid var(--color-gray-200);
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.2s;
+      background: white;
+    }
+    
+    .input-group .input:focus {
+      outline: none;
+      border-color: var(--color-primary-500);
+      box-shadow: 0 0 0 3px rgba(245, 179, 26, 0.15);
+    }
+    
+    .input-group .input.error {
+      border-color: var(--color-error);
+    }
+    
+    .input-group .input-error {
+      color: var(--color-error);
+      font-size: 0.75rem;
+      margin-top: 0.375rem;
+      display: none;
+    }
+    
+    .input-group .input-error.show {
+      display: block;
+    }
+    
+    .input-hint {
+      color: var(--color-gray-500);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-gray-400);
+      padding: 4px;
+    }
+    
+    .password-toggle:hover {
+      color: var(--color-gray-600);
+    }
+    
+    .btn-register {
+      width: 100%;
+      padding: 0.875rem;
+      background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+    }
+    
+    .btn-register:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(245, 179, 26, 0.4);
+    }
+    
+    .btn-register:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    
+    .btn-register:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .btn-register .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 1.25rem 0;
+      color: var(--color-gray-400);
+      font-size: 0.875rem;
+    }
+    
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--color-gray-200);
+    }
+    
+    .divider span {
+      padding: 0 1rem;
+      background: white;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .login-link {
+      text-align: center;
+      color: var(--color-gray-600);
+      font-size: 0.875rem;
+    }
+    
+    .login-link a {
+      color: var(--color-primary-600);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+    
+    .language-toggle {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .lang-btn {
+      padding: 0.5rem 0.75rem;
+      border: 1.5px solid var(--color-gray-200);
+      border-radius: 8px;
+      background: white;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .lang-btn.active {
+      background: var(--color-primary-500);
+      border-color: var(--color-primary-500);
+      color: white;
+    }
+    
+    .alert {
+      padding: 0.875rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    
+    .alert.show {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .alert-error {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-error);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    
+    .password-strength {
+      margin-top: 0.5rem;
+      display: none;
+    }
+    
+    .password-strength.show {
+      display: block;
+    }
+    
+    .strength-bar {
+      height: 4px;
+      background: var(--color-gray-200);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 0.25rem;
+    }
+    
+    .strength-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: all 0.3s;
+      width: 0;
+    }
+    
+    .strength-fill.weak { width: 33%; background: #EF4444; }
+    .strength-fill.medium { width: 66%; background: #F59E0B; }
+    .strength-fill.strong { width: 100%; background: #22C55E; }
+    
+    .strength-text {
+      font-size: 0.75rem;
+      color: var(--color-gray-500);
+    }
+    
+    .strength-text.weak { color: #EF4444; }
+    .strength-text.medium { color: #F59E0B; }
+    .strength-text.strong { color: #22C55E; }
+    
+    .back-btn {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      padding: 0.5rem;
+      background: white;
+      border: 1.5px solid var(--color-gray-200);
+      border-radius: 10px;
+      cursor: pointer;
+      color: var(--color-gray-600);
+      transition: all 0.2s;
+    }
+    
+    .back-btn:hover {
+      background: var(--color-gray-50);
+      color: var(--color-gray-800);
+    }
+    
+    .name-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container flex items-center justify-center p-4 relative">
+    <!-- Back Button -->
+    <button class="back-btn" onclick="history.back()" aria-label="กลับ">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+    </button>
+    
+    <!-- Language Toggle -->
+    <div class="language-toggle">
+      <button class="lang-btn active" data-lang="th" onclick="switchLanguage('th')">🇹🇭 TH</button>
+      <button class="lang-btn" data-lang="en" onclick="switchLanguage('en')">🇺🇸 EN</button>
+    </div>
+    
+    <div class="auth-card">
+      <!-- Logo -->
+      <div class="logo-container">
+        <img src="/wellnest-frontend/assets/images/logo.png" alt="WellNest" onerror="this.src='/assets/images/logo-placeholder.svg'">
+        <h1 class="text-xl font-bold text-gray-800 mt-2" data-i18n="auth.createAccount">สร้างบัญชีใหม่</h1>
+        <p class="text-gray-500 text-sm mt-1" data-i18n="auth.registerSubtitle">เริ่มต้นดูแลสุขภาพของคุณ</p>
+      </div>
+      
+      <!-- Alert Message -->
+      <div class="alert alert-error" id="alert-error">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        <span id="error-message"></span>
+      </div>
+      
+      <!-- Register Form -->
+      <form id="register-form" novalidate>
+        <!-- First Name & Last Name (2 columns) -->
+        <div class="name-row">
+          <div class="input-group">
+            <label for="firstname" data-i18n="auth.firstName">ชื่อ</label>
+            <input 
+              type="text" 
+              id="firstname" 
+              name="first_name"
+              class="input" 
+              data-i18n-placeholder="auth.firstNamePlaceholder"
+              placeholder="ชื่อ"
+              autocomplete="given-name"
+              required
+            >
+            <p class="input-error" id="firstname-error"></p>
+          </div>
+          
+          <div class="input-group">
+            <label for="lastname" data-i18n="auth.lastName">นามสกุล</label>
+            <input 
+              type="text" 
+              id="lastname" 
+              name="last_name"
+              class="input" 
+              data-i18n-placeholder="auth.lastNamePlaceholder"
+              placeholder="นามสกุล"
+              autocomplete="family-name"
+              required
+            >
+            <p class="input-error" id="lastname-error"></p>
+          </div>
+        </div>
+        
+        <!-- Username -->
+        <div class="input-group">
+          <label for="username" data-i18n="auth.username">ชื่อผู้ใช้</label>
+          <input 
+            type="text" 
+            id="username" 
+            name="username"
+            class="input" 
+            data-i18n-placeholder="auth.usernamePlaceholder"
+            placeholder="ชื่อผู้ใช้ (ภาษาอังกฤษและตัวเลข)"
+            autocomplete="username"
+            required
+          >
+          <p class="input-hint" data-i18n="auth.usernameHint">3-50 ตัวอักษร (a-z, 0-9, _)</p>
+          <p class="input-error" id="username-error"></p>
+        </div>
+        
+        <!-- Email (Optional) -->
+        <div class="input-group">
+          <label for="email">
+            <span data-i18n="auth.email">อีเมล</span>
+            <span class="text-gray-400 text-xs ml-1" data-i18n="common.optional">(ไม่บังคับ)</span>
+          </label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email"
+            class="input" 
+            data-i18n-placeholder="auth.emailPlaceholder"
+            placeholder="your@email.com"
+            autocomplete="email"
+          >
+          <p class="input-error" id="email-error"></p>
+        </div>
+        
+        <!-- Password -->
+        <div class="input-group">
+          <label for="password" data-i18n="auth.password">รหัสผ่าน</label>
+          <div class="relative">
+            <input 
+              type="password" 
+              id="password" 
+              name="password"
+              class="input pr-12" 
+              data-i18n-placeholder="auth.passwordPlaceholder"
+              placeholder="อย่างน้อย 8 ตัวอักษร"
+              autocomplete="new-password"
+              required
+            >
+            <button type="button" class="password-toggle" id="toggle-password" aria-label="แสดงรหัสผ่าน">
+              <svg id="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg id="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </button>
+          </div>
+          <!-- Password Strength -->
+          <div class="password-strength" id="password-strength">
+            <div class="strength-bar">
+              <div class="strength-fill" id="strength-fill"></div>
+            </div>
+            <p class="strength-text" id="strength-text"></p>
+          </div>
+          <p class="input-error" id="password-error"></p>
+        </div>
+        
+        <!-- Confirm Password -->
+        <div class="input-group">
+          <label for="confirm-password" data-i18n="auth.confirmPassword">ยืนยันรหัสผ่าน</label>
+          <div class="relative">
+            <input 
+              type="password" 
+              id="confirm-password" 
+              name="confirm_password"
+              class="input pr-12" 
+              data-i18n-placeholder="auth.confirmPasswordPlaceholder"
+              placeholder="กรอกรหัสผ่านอีกครั้ง"
+              autocomplete="new-password"
+              required
+            >
+            <button type="button" class="password-toggle" id="toggle-confirm-password" aria-label="แสดงรหัสผ่าน">
+              <svg id="eye-open-confirm" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg id="eye-closed-confirm" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </button>
+          </div>
+          <p class="input-error" id="confirm-password-error"></p>
+        </div>
+        
+        <!-- Register Button -->
+        <button type="submit" class="btn-register" id="btn-register">
+          <span data-i18n="auth.register">สร้างบัญชี</span>
+        </button>
+      </form>
+      
+      <!-- Divider -->
+      <div class="divider">
+        <span data-i18n="auth.haveAccount">มีบัญชีอยู่แล้ว?</span>
+      </div>
+      
+      <!-- Login Link -->
+      <p class="login-link">
+        <a href="/wellnest-frontend/pages/auth/login.html" data-i18n="auth.loginNow">เข้าสู่ระบบ</a>
+      </p>
+    </div>
+  </div>
+  
+  <!-- Toast Placeholder -->
+  <div id="toast-placeholder"></div>
+  
+  <!-- Core Scripts -->
+  <script src="/wellnest-frontend/js/config.js"></script>
+  <script src="/wellnest-frontend/js/components.js"></script>
+  <script src="/wellnest-frontend/js/i18n/th.js"></script>
+  <script src="/wellnest-frontend/js/i18n/en.js"></script>
+  <script src="/wellnest-frontend/js/i18n.js"></script>
+  <script src="/wellnest-frontend/js/utils.js"></script>
+  <script src="/wellnest-frontend/js/api.js"></script>
+  <script src="/wellnest-frontend/js/auth.js"></script>
+  
+  <script>
+  // Wait for all scripts to load
+  document.addEventListener('DOMContentLoaded', async function() {
+    // Load components (only toast for auth pages)
+    await Components.init({
+      toast: true
+    });
+    
+    // DOM Elements
+    const form = document.getElementById('register-form');
+    const firstnameInput = document.getElementById('firstname');
+    const lastnameInput = document.getElementById('lastname');
+    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm-password');
+    const btnRegister = document.getElementById('btn-register');
+    const alertError = document.getElementById('alert-error');
+    const errorMessage = document.getElementById('error-message');
+    
+    // Password visibility toggles
+    const togglePassword = document.getElementById('toggle-password');
+    const eyeOpen = document.getElementById('eye-open');
+    const eyeClosed = document.getElementById('eye-closed');
+    const toggleConfirmPassword = document.getElementById('toggle-confirm-password');
+    const eyeOpenConfirm = document.getElementById('eye-open-confirm');
+    const eyeClosedConfirm = document.getElementById('eye-closed-confirm');
+    
+    // Password strength elements
+    const passwordStrength = document.getElementById('password-strength');
+    const strengthFill = document.getElementById('strength-fill');
+    const strengthText = document.getElementById('strength-text');
+    
+    // Check if already authenticated
+    if (typeof Auth !== 'undefined' && Auth.isAuthenticated() && !Auth.isTokenExpired()) {
+      window.location.replace('/wellnest-frontend/pages/dashboard.html');
+      return;
+    }
+    
+    // Password visibility toggles
+    togglePassword.addEventListener('click', () => {
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      eyeOpen.style.display = isPassword ? 'none' : 'block';
+      eyeClosed.style.display = isPassword ? 'block' : 'none';
+    });
+    
+    toggleConfirmPassword.addEventListener('click', () => {
+      const isPassword = confirmPasswordInput.type === 'password';
+      confirmPasswordInput.type = isPassword ? 'text' : 'password';
+      eyeOpenConfirm.style.display = isPassword ? 'none' : 'block';
+      eyeClosedConfirm.style.display = isPassword ? 'block' : 'none';
+    });
+    
+    // Initialize language buttons
+    updateLanguageButtons(I18n.getLang());
+    
+    // Clear error on input
+    [firstnameInput, lastnameInput, usernameInput, emailInput, passwordInput, confirmPasswordInput].forEach(input => {
+      input.addEventListener('input', () => {
+        input.classList.remove('error');
+        const errorEl = document.getElementById(`${input.id}-error`);
+        if (errorEl) errorEl.classList.remove('show');
+        hideError();
+      });
+    });
+    
+    // Password strength checker
+    function checkPasswordStrength(password) {
+      let score = 0;
+      
+      if (password.length >= 8) score++;
+      if (password.length >= 12) score++;
+      if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+      if (/\d/.test(password)) score++;
+      if (/[^a-zA-Z0-9]/.test(password)) score++;
+      
+      if (score <= 2) return 'weak';
+      if (score <= 3) return 'medium';
+      return 'strong';
+    }
+    
+    function updatePasswordStrength() {
+      const password = passwordInput.value;
+      
+      if (!password) {
+        passwordStrength.classList.remove('show');
+        strengthFill.className = 'strength-fill';
+        strengthText.className = 'strength-text';
+        strengthText.textContent = '';
+        return;
+      }
+      
+      // Show the strength bar when typing
+      passwordStrength.classList.add('show');
+      
+      const strength = checkPasswordStrength(password);
+      strengthFill.className = `strength-fill ${strength}`;
+      strengthText.className = `strength-text ${strength}`;
+      
+      const strengthLabels = {
+        weak: t('validation.passwordWeak'),
+        medium: t('validation.passwordMedium'),
+        strong: t('validation.passwordStrong')
+      };
+      
+      strengthText.textContent = strengthLabels[strength];
+    }
+    
+    passwordInput.addEventListener('input', updatePasswordStrength);
+    
+    // Show error
+    function showError(message) {
+      errorMessage.textContent = message;
+      alertError.classList.add('show');
+    }
+    
+    function hideError() {
+      alertError.classList.remove('show');
+    }
+    
+    // Show field error
+    function showFieldError(fieldId, message) {
+      const input = document.getElementById(fieldId);
+      const error = document.getElementById(`${fieldId}-error`);
+      if (input) input.classList.add('error');
+      if (error) {
+        error.textContent = message;
+        error.classList.add('show');
+      }
+    }
+    
+    // Set loading state
+    function setLoading(loading) {
+      if (loading) {
+        btnRegister.disabled = true;
+        btnRegister.innerHTML = '<div class="spinner"></div><span>' + t('common.loading') + '</span>';
+      } else {
+        btnRegister.disabled = false;
+        btnRegister.innerHTML = '<span data-i18n="auth.register">' + t('auth.register') + '</span>';
+      }
+    }
+    
+    // Validate form
+    function validateForm() {
+      let isValid = true;
+      hideError();
+      
+      // Validate first name
+      const firstname = firstnameInput.value.trim();
+      if (!firstname) {
+        showFieldError('firstname', t('validation.required'));
+        isValid = false;
+      } else if (firstname.length < 2) {
+        showFieldError('firstname', t('validation.minLength', { min: 2 }));
+        isValid = false;
+      }
+      
+      // Validate last name
+      const lastname = lastnameInput.value.trim();
+      if (!lastname) {
+        showFieldError('lastname', t('validation.required'));
+        isValid = false;
+      } else if (lastname.length < 2) {
+        showFieldError('lastname', t('validation.minLength', { min: 2 }));
+        isValid = false;
+      }
+      
+      // Validate username
+      const username = usernameInput.value.trim();
+      if (!username) {
+        showFieldError('username', t('validation.required'));
+        isValid = false;
+      } else if (!Auth.validateUsername(username).valid) {
+        showFieldError('username', t('validation.invalidUsername'));
+        isValid = false;
+      }
+      
+      // Validate email (optional but must be valid if provided)
+      const email = emailInput.value.trim();
+      if (email && !Auth.validateEmail(email).valid) {
+        showFieldError('email', t('validation.invalidEmail'));
+        isValid = false;
+      }
+      
+      // Validate password
+      const password = passwordInput.value;
+      if (!password) {
+        showFieldError('password', t('validation.required'));
+        isValid = false;
+      } else if (!Auth.validatePassword(password).valid) {
+        showFieldError('password', t('validation.invalidPassword'));
+        isValid = false;
+      }
+      
+      // Validate confirm password
+      const confirmPassword = confirmPasswordInput.value;
+      if (!confirmPassword) {
+        showFieldError('confirm-password', t('validation.required'));
+        isValid = false;
+      } else if (confirmPassword !== password) {
+        showFieldError('confirm-password', t('validation.passwordMismatch'));
+        isValid = false;
+      }
+      
+      return isValid;
+    }
+    
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!validateForm()) return;
+      
+      setLoading(true);
+      
+      try {
+        const userData = {
+          first_name: firstnameInput.value.trim(),
+          last_name: lastnameInput.value.trim(),
+          username: usernameInput.value.trim(),
+          password: passwordInput.value
+        };
+        
+        // Add email if provided
+        const email = emailInput.value.trim();
+        if (email) {
+          userData.email = email;
+        }
+        
+        const result = await Auth.register(userData);
+        
+        // Show success toast
+        Toast.success(t('auth.registerSuccess'));
+        
+        // Redirect to login page
+        setTimeout(() => {
+          window.location.replace('/wellnest-frontend/pages/auth/login.html?registered=1');
+        }, 1000);
+        
+      } catch (error) {
+        console.error('Registration error:', error);
+        
+        // Handle specific errors
+        if (error.status === 409 || (error.message && error.message.includes('already exists'))) {
+          showError(t('auth.usernameExists'));
+        } else if (error.isValidationError && error.isValidationError()) {
+          // Show field-specific errors
+          const details = error.details || {};
+          Object.entries(details).forEach(([field, messages]) => {
+            if (Array.isArray(messages) && messages.length > 0) {
+              showFieldError(field, messages[0]);
+            }
+          });
+        } else if (error.isNetworkError && error.isNetworkError()) {
+          showError(t('errors.network'));
+        } else {
+          showError(error.message || t('auth.registerFailed'));
+        }
+        
+        // Haptic feedback on error
+        if (typeof Utils !== 'undefined' && Utils.haptic) {
+          Utils.haptic('error');
+        }
+        
+      } finally {
+        setLoading(false);
+      }
+    });
+  });
+  
+  // Language switching (global function for onclick)
+  function switchLanguage(lang) {
+    if (typeof I18n !== 'undefined') {
+      I18n.setLang(lang);
+      updateLanguageButtons(lang);
+      // Update password strength text in new language
+      const passwordInput = document.getElementById('password');
+      if (passwordInput && passwordInput.value) {
+        const event = new Event('input');
+        passwordInput.dispatchEvent(event);
+      }
+    }
+  }
+  
+  function updateLanguageButtons(lang) {
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+  }
+  </script>
+</body>
+</html>

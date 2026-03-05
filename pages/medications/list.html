@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#F5B31A">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+  <title>รายการยา - WellNest</title>
+  
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#FFFBEB',
+              100: '#FEF3C7',
+              200: '#FDE68A',
+              300: '#FCD34D',
+              400: '#FBBF24',
+              500: '#F5B31A',
+              600: '#D97706',
+              700: '#B45309',
+              800: '#92400E',
+              900: '#78350F'
+            },
+            secondary: {
+              50: '#EFF6FF',
+              100: '#DBEAFE',
+              200: '#BFDBFE',
+              300: '#93C5FD',
+              400: '#60A5FA',
+              500: '#3B82F6',
+              600: '#2563EB',
+              700: '#1D4ED8',
+              800: '#1E40AF',
+              900: '#1E3A8A'
+            }
+          },
+          fontFamily: {
+            sans: ['Noto Sans Thai', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/wellnest-frontend/css/tokens.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/components.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/utilities.css">
+  
+  <style>
+    :root {
+      --header-height: 56px;
+      --bottom-nav-height: 64px;
+    }
+    
+    /* ===== Page Container ===== */
+    .page-container {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+      padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 80px);
+      background: var(--color-background, #FFFBEB);
+    }
+    
+    /* ===== Horizontal Date Picker ===== */
+    .date-picker-container {
+      background: white;
+      padding: 1rem 0;
+      border-bottom: 1px solid #f0f0f0;
+      position: sticky;
+      top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+      z-index: 50;
+    }
+    
+    .date-picker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1rem 0.75rem;
+    }
+    
+    .date-picker-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-gray-800);
+    }
+    
+    .date-picker-today-btn {
+      font-size: 0.875rem;
+      color: var(--color-primary-600);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      transition: background 0.2s;
+    }
+    
+    .date-picker-today-btn:hover {
+      background: var(--color-primary-50);
+    }
+    
+    .date-picker-scroll {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 0 0.75rem;
+      gap: 0.5rem;
+    }
+    
+    .date-picker-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .date-item {
+      flex-shrink: 0;
+      width: 52px;
+      padding: 0.5rem;
+      text-align: center;
+      border-radius: 12px;
+      cursor: pointer;
+      scroll-snap-align: center;
+      transition: all 0.2s;
+      background: transparent;
+      border: none;
+    }
+    
+    .date-item:hover {
+      background: var(--color-gray-100);
+    }
+    
+    .date-item.active {
+      background: var(--color-primary-500);
+      color: white;
+    }
+    
+    .date-item.today:not(.active) {
+      border: 2px solid var(--color-primary-500);
+    }
+    
+    .date-day {
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      color: var(--color-gray-500);
+      margin-bottom: 0.25rem;
+    }
+    
+    .date-item.active .date-day {
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .date-num {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-gray-800);
+    }
+    
+    .date-item.active .date-num {
+      color: white;
+    }
+    
+    .date-dot {
+      width: 5px;
+      height: 5px;
+      background: var(--color-primary-500);
+      border-radius: 50%;
+      margin: 4px auto 0;
+    }
+    
+    .date-item.active .date-dot {
+      background: white;
+    }
+    
+    /* ===== Filter Tabs ===== */
+    .filter-tabs {
+      display: flex;
+      padding: 0.75rem 1rem;
+      gap: 0.5rem;
+      background: white;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .filter-tab {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-align: center;
+      border-radius: 8px;
+      border: none;
+      background: var(--color-gray-100);
+      color: var(--color-gray-600);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .filter-tab.active {
+      background: var(--color-primary-500);
+      color: white;
+    }
+    
+    .filter-tab:hover:not(.active) {
+      background: var(--color-gray-200);
+    }
+    
+    /* ===== Timeline View ===== */
+    .timeline-section {
+      padding: 1rem;
+    }
+    
+    .time-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .time-group-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      padding-left: 0.25rem;
+    }
+    
+    .time-group-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .time-group-icon.morning {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+    
+    .time-group-icon.afternoon {
+      background: #DBEAFE;
+      color: #2563EB;
+    }
+    
+    .time-group-icon.evening {
+      background: #F3E8FF;
+      color: #7C3AED;
+    }
+    
+    .time-group-icon.night {
+      background: #E0E7FF;
+      color: #4338CA;
+    }
+    
+    .time-group-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .time-group-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-gray-700);
+    }
+    
+    .time-group-count {
+      font-size: 0.75rem;
+      color: var(--color-gray-400);
+      margin-left: auto;
+    }
+    
+    /* ===== Medication Card ===== */
+    .med-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s;
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .med-card:active {
+      transform: scale(0.98);
+    }
+    
+    .med-card.taken {
+      background: #F0FDF4;
+      border: 1px solid #BBF7D0;
+    }
+    
+    .med-card.skipped {
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+    }
+    
+    .med-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--color-primary-100) 0%, var(--color-primary-50) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .med-icon svg {
+      width: 24px;
+      height: 24px;
+      color: var(--color-primary-600);
+    }
+    
+    .med-icon.taken {
+      background: #D1FAE5;
+    }
+    
+    .med-icon.taken svg {
+      color: #059669;
+    }
+    
+    .med-content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .med-name {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--color-gray-900);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .med-dosage {
+      font-size: 0.75rem;
+      color: var(--color-gray-500);
+      margin-top: 0.125rem;
+    }
+    
+    .med-time {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.75rem;
+      color: var(--color-gray-400);
+      margin-top: 0.25rem;
+    }
+    
+    .med-time svg {
+      width: 12px;
+      height: 12px;
+    }
+    
+    /* ===== Status Badge ===== */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.125rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.6875rem;
+      font-weight: 500;
+    }
+    
+    .status-badge svg {
+      width: 12px;
+      height: 12px;
+    }
+    
+    .status-badge.taken {
+      background: #D1FAE5;
+      color: #059669;
+    }
+    
+    .status-badge.skipped {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+    
+    /* ===== Actions ===== */
+    .med-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .action-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .action-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .action-btn.take {
+      background: #D1FAE5;
+      color: #059669;
+    }
+    
+    .action-btn.take:hover:not(:disabled) {
+      background: #A7F3D0;
+    }
+    
+    .action-btn.skip {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+    
+    .action-btn.skip:hover:not(:disabled) {
+      background: #FECACA;
+    }
+    
+    .action-btn.snooze {
+      background: #E0E7FF;
+      color: #4338CA;
+    }
+    
+    .action-btn.snooze:hover:not(:disabled) {
+      background: #C7D2FE;
+    }
+    
+    /* ===== Empty State ===== */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+    
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      color: var(--color-gray-300);
+      margin: 0 auto 1rem;
+    }
+    
+    .empty-state h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-gray-700);
+      margin-bottom: 0.5rem;
+    }
+    
+    .empty-state p {
+      font-size: 0.875rem;
+      color: var(--color-gray-500);
+      margin-bottom: 1.5rem;
+    }
+    
+    /* ===== FAB ===== */
+    .fab {
+      position: fixed;
+      bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 16px);
+      right: 16px;
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%);
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(245, 179, 26, 0.4);
+      cursor: pointer;
+      z-index: 90;
+      transition: all 0.2s;
+    }
+    
+    .fab:active {
+      transform: scale(0.95);
+    }
+    
+    .fab svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    /* ===== Skeleton Loading ===== */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s infinite;
+      border-radius: 8px;
+    }
+    
+    @keyframes skeleton-loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    .skeleton-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      gap: 0.75rem;
+    }
+    
+    .skeleton-icon {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+    }
+    
+    .skeleton-content {
+      flex: 1;
+    }
+    
+    .skeleton-title {
+      height: 18px;
+      width: 60%;
+      margin-bottom: 0.5rem;
+    }
+    
+    .skeleton-text {
+      height: 14px;
+      width: 40%;
+      margin-bottom: 0.5rem;
+    }
+    
+    .skeleton-badge {
+      height: 20px;
+      width: 30%;
+    }
+    
+    /* ===== Snooze Modal ===== */
+    .snooze-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+    }
+    
+    .snooze-btn {
+      padding: 0.75rem;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      background: white;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-gray-700);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .snooze-btn:hover:not(:disabled) {
+      background: var(--color-primary-50);
+      border-color: var(--color-primary-500);
+      color: var(--color-primary-600);
+    }
+    
+    .snooze-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* ===== Header ===== */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height);
+      background: white;
+      border-bottom: 1px solid #f0f0f0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+    
+    .header-left {
+      width: 48px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .header-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-gray-600);
+    }
+    
+    .header-btn:hover {
+      background: var(--color-gray-100);
+    }
+    
+    .header-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+    
+    .header-center {
+      flex: 1;
+      text-align: center;
+    }
+    
+    .header-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-gray-800);
+      margin: 0;
+    }
+    
+    .header-right {
+      width: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="header-btn" onclick="history.back()" aria-label="กลับ">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+    </div>
+    <div class="header-center">
+      <h1 class="header-title" data-i18n="medications.title">รายการยาของฉัน</h1>
+    </div>
+    <div class="header-right">
+      <button class="header-btn" onclick="location.href='/wellnest-frontend/pages/medications/catalog.html'" aria-label="ค้นหา">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+  
+  <!-- Page Content -->
+  <div class="page-container">
+    
+    <!-- Date Picker -->
+    <div class="date-picker-container">
+      <div class="date-picker-header">
+        <span class="date-picker-title" id="currentMonth">ธันวาคม 2568</span>
+        <button class="date-picker-today-btn" onclick="scrollToToday()" data-i18n="time.today">วันนี้</button>
+      </div>
+      <div class="date-picker-scroll" id="datePicker">
+        <!-- Date items will be rendered here -->
+      </div>
+    </div>
+    
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <button class="filter-tab active" data-filter="all" data-i18n="common.viewAll">ทั้งหมด</button>
+      <button class="filter-tab" data-filter="pending">รอทาน</button>
+      <button class="filter-tab" data-filter="taken">ทานแล้ว</button>
+    </div>
+    
+    <!-- Timeline Section -->
+    <div class="timeline-section" id="timelineContainer">
+      <!-- Skeleton Loading -->
+      <div id="loadingSkeleton">
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-icon"></div>
+          <div class="skeleton-content">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-badge"></div>
+          </div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-icon"></div>
+          <div class="skeleton-content">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-badge"></div>
+          </div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-icon"></div>
+          <div class="skeleton-content">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-badge"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Medications Timeline -->
+      <div id="medicationsTimeline" style="display: none;">
+        <!-- Timeline groups will be rendered here -->
+      </div>
+      
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M10.5 20.5L3.5 13.5a4.95 4.95 0 1 1 7-7l7 7a4.95 4.95 0 0 1-7 7z"/>
+          <path d="M8.5 8.5l7 7"/>
+        </svg>
+        <h3 data-i18n="medications.messages.noMedications">ยังไม่มียา</h3>
+        <p>เพิ่มยาเพื่อเริ่มติดตามการทานยาของคุณ</p>
+        <button class="btn btn-primary" onclick="location.href='/wellnest-frontend/pages/medications/catalog.html'">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span data-i18n="medications.addNew">เพิ่มยาใหม่</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- FAB Button -->
+  <button class="fab" onclick="location.href='/wellnest-frontend/pages/medications/catalog.html'" aria-label="เพิ่มยา">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <line x1="12" y1="5" x2="12" y2="19"/>
+      <line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+  
+  <!-- Component Placeholders -->
+  <div id="bottom-nav-placeholder"></div>
+  <div id="toast-placeholder"></div>
+  <div id="modal-placeholder"></div>
+  
+  <!-- Core Scripts -->
+  <script src="/wellnest-frontend/js/config.js"></script>
+  <script src="/wellnest-frontend/js/i18n/th.js"></script>
+  <script src="/wellnest-frontend/js/i18n/en.js"></script>
+  <script src="/wellnest-frontend/js/i18n.js"></script>
+  <script src="/wellnest-frontend/js/utils.js"></script>
+  <script src="/wellnest-frontend/js/api.js"></script>
+  <script src="/wellnest-frontend/js/auth.js"></script>
+  <script src="/wellnest-frontend/js/storage.js"></script>
+  <script src="/wellnest-frontend/js/components.js"></script>
+  <script src="/wellnest-frontend/js/modal.js"></script>
+  
+  <script>
+  document.addEventListener('DOMContentLoaded', async function() {
+    // Require authentication
+    if (typeof Auth !== 'undefined') {
+      Auth.requireAuth();
+    }
+    
+    // Load components
+    await Components.init({
+      bottomNav: { active: 'medications' },
+      toast: true,
+      modal: true
+    });
+    
+    // State
+    let selectedDate = new Date();
+    let medications = [];
+    let reminders = [];
+    let currentFilter = 'all';
+    
+    // ✅ Phase 2.5: Track taken/skipped from API (persistent)
+    let todayHistory = [];  // History records from API
+    
+    // Elements
+    const datePicker = document.getElementById('datePicker');
+    const currentMonth = document.getElementById('currentMonth');
+    const timelineContainer = document.getElementById('medicationsTimeline');
+    const loadingSkeleton = document.getElementById('loadingSkeleton');
+    const emptyState = document.getElementById('emptyState');
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    
+    // Initialize
+    initDatePicker();
+    initFilterTabs();
+    loadMedications();
+    
+    // ✅ Bug #1 Fix: Sync with detail.html when returning to this page
+    document.addEventListener('visibilitychange', async () => {
+      if (document.visibilityState === 'visible' && medications.length > 0) {
+        console.log('[list.html] Page visible - reloading history...');
+        await loadTodayHistory();
+        renderTimeline();
+      }
+    });
+    
+    // Also handle pageshow event for Safari/iOS back navigation
+    window.addEventListener('pageshow', async (event) => {
+      if (event.persisted && medications.length > 0) {
+        console.log('[list.html] Page restored from cache - reloading history...');
+        await loadTodayHistory();
+        renderTimeline();
+      }
+    });
+    
+    // Date Picker Functions
+    function initDatePicker() {
+      const today = new Date();
+      const dates = [];
+      
+      // Generate 30 days (15 before and 14 after today)
+      for (let i = -15; i <= 14; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        dates.push(date);
+      }
+      
+      datePicker.innerHTML = dates.map(date => {
+        const isToday = isSameDay(date, today);
+        const isSelected = isSameDay(date, selectedDate);
+        const dayName = date.toLocaleDateString('th-TH', { weekday: 'short' });
+        const dayNum = date.getDate();
+        
+        return `
+          <button class="date-item ${isSelected ? 'active' : ''} ${isToday ? 'today' : ''}"
+                  data-date="${date.toISOString()}"
+                  onclick="selectDate('${date.toISOString()}')">
+            <div class="date-day">${dayName}</div>
+            <div class="date-num">${dayNum}</div>
+            <div class="date-dot" style="visibility: hidden;"></div>
+          </button>
+        `;
+      }).join('');
+      
+      updateMonthTitle();
+      
+      // Scroll to selected date
+      setTimeout(() => {
+        const activeItem = datePicker.querySelector('.date-item.active');
+        if (activeItem) {
+          activeItem.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      }, 100);
+    }
+    
+    function isSameDay(date1, date2) {
+      return date1.getFullYear() === date2.getFullYear() &&
+             date1.getMonth() === date2.getMonth() &&
+             date1.getDate() === date2.getDate();
+    }
+    
+    function updateMonthTitle() {
+      const months = [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+      ];
+      const buddhistYear = selectedDate.getFullYear() + 543;
+      currentMonth.textContent = `${months[selectedDate.getMonth()]} ${buddhistYear}`;
+    }
+    
+    window.selectDate = function(isoString) {
+      selectedDate = new Date(isoString);
+      
+      // Update active state
+      datePicker.querySelectorAll('.date-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.date === isoString) {
+          item.classList.add('active');
+        }
+      });
+      
+      updateMonthTitle();
+      
+      // ✅ Phase 2.5: Reload history when date changes
+      loadTodayHistory().then(() => {
+        renderTimeline();
+      });
+    };
+    
+    window.scrollToToday = function() {
+      selectedDate = new Date();
+      initDatePicker();
+      loadTodayHistory().then(() => {
+        renderTimeline();
+      });
+    };
+    
+    // Filter Tabs
+    function initFilterTabs() {
+      filterTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          filterTabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          currentFilter = tab.dataset.filter;
+          renderTimeline();
+        });
+      });
+    }
+    
+    // ✅ Phase 2.5: Load today's history from API
+    async function loadTodayHistory() {
+      try {
+        const dayStart = new Date(selectedDate);
+        dayStart.setHours(0, 0, 0, 0);
+        const dayEnd = new Date(selectedDate);
+        dayEnd.setHours(23, 59, 59, 999);
+        
+        const response = await Api.get(
+          `/history?start=${dayStart.toISOString()}&end=${dayEnd.toISOString()}`
+        );
+        
+        todayHistory = Array.isArray(response) ? response : [];
+      } catch (error) {
+        console.error('Failed to load today history:', error);
+        todayHistory = [];
+      }
+    }
+    
+    // Load Medications
+    async function loadMedications() {
+      try {
+        loadingSkeleton.style.display = 'block';
+        timelineContainer.style.display = 'none';
+        emptyState.style.display = 'none';
+        
+        // Fetch medications, reminders, and today's history in parallel
+        const [medsResponse, remindersResponse] = await Promise.all([
+          Api.get('/medications/mine'),
+          Api.get('/reminders').catch(() => [])
+        ]);
+        
+        medications = Array.isArray(medsResponse) ? medsResponse : [];
+        reminders = Array.isArray(remindersResponse) ? remindersResponse : [];
+        
+        // ✅ Phase 2.5: Load today's history
+        await loadTodayHistory();
+        
+        loadingSkeleton.style.display = 'none';
+        
+        if (medications.length === 0) {
+          emptyState.style.display = 'block';
+        } else {
+          timelineContainer.style.display = 'block';
+          renderTimeline();
+        }
+        
+      } catch (error) {
+        console.error('Failed to load medications:', error);
+        loadingSkeleton.style.display = 'none';
+        emptyState.style.display = 'block';
+      }
+    }
+    
+    // ✅ Phase 2.5: Check if medication+time is already taken/skipped
+    function getMedicationStatus(userMedId, scheduledTime) {
+      // ✅ Bug #1 Fix v2: Smarter matching for scheduled_time
+      
+      // First, try exact match (user_med_id + scheduled_time)
+      let entry = todayHistory.find(h => 
+        h.user_med_id === userMedId && 
+        h.scheduled_time === scheduledTime
+      );
+      
+      if (entry) {
+        return entry.status;
+      }
+      
+      // If no exact match, check conditions for fallback
+      const medReminders = reminders.filter(r => r.user_med_id === userMedId && r.is_enabled);
+      const medication = medications.find(m => m.user_med_id === userMedId);
+      const frequency = medication?.frequency_per_day || 1;
+      
+      // Only fallback to null scheduled_time if:
+      // 1. No reminders exist for this medication, AND
+      // 2. Medication is single-dose (frequency = 1)
+      // This prevents multi-dose medications from showing "taken" on all slots
+      if (medReminders.length === 0 && frequency === 1) {
+        entry = todayHistory.find(h => 
+          h.user_med_id === userMedId && 
+          h.scheduled_time === null
+        );
+        return entry ? entry.status : null;
+      }
+      
+      // For multi-dose medications without reminders:
+      // Try to match by time proximity (within 2 hours)
+      if (medReminders.length === 0 && frequency > 1) {
+        const slotHour = parseInt(scheduledTime.split(':')[0]);
+        
+        entry = todayHistory.find(h => {
+          if (h.user_med_id !== userMedId) return false;
+          if (h.scheduled_time === null && h.taken_at) {
+            // Match by taken_at time proximity
+            const takenDate = new Date(h.taken_at);
+            const takenHour = takenDate.getHours();
+            // Consider it a match if taken within 2 hours of the slot
+            return Math.abs(takenHour - slotHour) <= 2;
+          }
+          return false;
+        });
+        return entry ? entry.status : null;
+      }
+      
+      return null;
+    }
+    
+    // ✅ Phase 2.5: Get reminder for this medication + time
+    function getReminderForTime(userMedId, scheduledTime) {
+      return reminders.find(r => 
+        r.user_med_id === userMedId && 
+        r.reminder_time === scheduledTime
+      );
+    }
+    
+    // Render Timeline
+    function renderTimeline() {
+      // Filter active medications
+      let filteredMeds = medications.filter(med => med.is_active);
+      
+      // Create schedule items from medications
+      const scheduleItems = createScheduleFromMedications(filteredMeds);
+      
+      // Apply filter
+      if (currentFilter === 'pending') {
+        scheduleItems.forEach(group => {
+          group.items = group.items.filter(item => !item.taken && !item.skipped);
+        });
+      } else if (currentFilter === 'taken') {
+        scheduleItems.forEach(group => {
+          group.items = group.items.filter(item => item.taken);
+        });
+      }
+      
+      // Remove empty groups
+      const nonEmptyGroups = scheduleItems.filter(group => group.items.length > 0);
+      
+      if (nonEmptyGroups.length === 0) {
+        timelineContainer.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <h3>${currentFilter === 'taken' ? 'ยังไม่มียาที่ทานแล้ว' : 'ไม่มียาที่รอทาน'}</h3>
+            <p>${currentFilter === 'taken' ? 'ทานยาตามกำหนดเพื่อดูประวัติ' : 'ทานยาครบแล้ววันนี้!'}</p>
+          </div>
+        `;
+        return;
+      }
+      
+      timelineContainer.innerHTML = nonEmptyGroups.map(group => `
+        <div class="time-group">
+          <div class="time-group-header">
+            <div class="time-group-icon ${group.period}">
+              ${getTimeGroupIcon(group.period)}
+            </div>
+            <span class="time-group-label">${group.label}</span>
+            <span class="time-group-count">${group.items.length} รายการ</span>
+          </div>
+          ${group.items.map(item => createMedCard(item)).join('')}
+        </div>
+      `).join('');
+    }
+    
+    // Create schedule from medications (with reminder data)
+    function createScheduleFromMedications(meds) {
+      const timeGroups = [
+        { period: 'morning', label: 'เช้า (06:00 - 11:59)', items: [] },
+        { period: 'afternoon', label: 'กลางวัน (12:00 - 16:59)', items: [] },
+        { period: 'evening', label: 'เย็น (17:00 - 20:59)', items: [] },
+        { period: 'night', label: 'ก่อนนอน (21:00 - 05:59)', items: [] }
+      ];
+      
+      // Helper to determine time period
+      function getTimePeriod(timeStr) {
+        const hour = parseInt(timeStr.split(':')[0]);
+        if (hour >= 6 && hour < 12) return 0;  // morning
+        if (hour >= 12 && hour < 17) return 1; // afternoon
+        if (hour >= 17 && hour < 21) return 2; // evening
+        return 3; // night
+      }
+      
+      meds.forEach(med => {
+        const medReminders = reminders.filter(r => r.user_med_id === med.user_med_id && r.is_enabled);
+        const dosage = med.prescribed_dosage || `${med.dosage_per_take || 1} ${med.dosage_unit || 'เม็ด'}`;
+        
+        if (medReminders.length > 0) {
+          // ✅ Phase 2.5: Use actual reminders to create schedule items
+          medReminders.forEach(reminder => {
+            const scheduledTime = reminder.reminder_time;
+            const status = getMedicationStatus(med.user_med_id, scheduledTime);
+            const periodIndex = getTimePeriod(scheduledTime);
+            
+            timeGroups[periodIndex].items.push({
+              id: med.user_med_id,
+              reminderId: reminder.reminder_id,
+              name: med.medication_name,
+              dosage: dosage,
+              dosageForm: med.dosage_form || 'tablet',
+              time: scheduledTime,
+              taken: status === 'taken',
+              skipped: status === 'skipped'
+            });
+          });
+        } else {
+          // No reminders - create default schedule based on frequency
+          const frequency = med.frequency_per_day || 1;
+          const defaultTimes = ['08:00', '12:00', '18:00', '21:00'];
+          
+          for (let i = 0; i < Math.min(frequency, 4); i++) {
+            const scheduledTime = defaultTimes[i];
+            const status = getMedicationStatus(med.user_med_id, scheduledTime);
+            
+            timeGroups[i].items.push({
+              id: med.user_med_id,
+              reminderId: null,
+              name: med.medication_name,
+              dosage: dosage,
+              dosageForm: med.dosage_form || 'tablet',
+              time: scheduledTime,
+              taken: status === 'taken',
+              skipped: status === 'skipped'
+            });
+          }
+        }
+      });
+      
+      return timeGroups;
+    }
+    
+    function getTimeGroupIcon(period) {
+      const icons = {
+        morning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/></svg>',
+        afternoon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2"/><path d="M12 21v2"/><path d="M4.22 4.22l1.42 1.42"/><path d="M18.36 18.36l1.42 1.42"/><path d="M1 12h2"/><path d="M21 12h2"/><path d="M4.22 19.78l1.42-1.42"/><path d="M18.36 5.64l1.42-1.42"/></svg>',
+        evening: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>',
+        night: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'
+      };
+      return icons[period] || icons.morning;
+    }
+    
+    function getDosageFormIcon(form) {
+      const icons = {
+        tablet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4"/><line x1="3" y1="12" x2="21" y2="12"/></svg>',
+        capsule: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.5 20.5L3.5 13.5a4.95 4.95 0 1 1 7-7l7 7a4.95 4.95 0 0 1-7 7z"/><path d="M8.5 8.5l7 7"/></svg>',
+        syrup: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2h8l2 4H6l2-4z"/><path d="M6 6v14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V6"/><path d="M10 10v6"/><path d="M14 10v6"/></svg>',
+        cream: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6l1 4H8l1-4z"/><rect x="7" y="7" width="10" height="14" rx="2"/></svg>',
+        inhaler: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 12h4v9H6z"/><path d="M10 3h4v9h-4z"/><path d="M14 8h4v4h-4z"/></svg>',
+        injection: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2l4 4-4 4"/><path d="M2 18l4 4 4-4"/><path d="M22 6L6 22"/><path d="M11 1l3 3"/><path d="M20 10l3 3"/></svg>',
+        drop: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>'
+      };
+      return icons[form] || icons.tablet;
+    }
+    
+    function createMedCard(item) {
+      const statusClass = item.taken ? 'taken' : (item.skipped ? 'skipped' : '');
+      const iconClass = item.taken ? 'taken' : '';
+      
+      let statusBadge = '';
+      if (item.taken) {
+        statusBadge = `
+          <span class="status-badge taken">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            ทานแล้ว
+          </span>
+        `;
+      } else if (item.skipped) {
+        statusBadge = `
+          <span class="status-badge skipped">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+            ข้าม
+          </span>
+        `;
+      }
+      
+      // ✅ Phase 2.5: Only show actions if not taken/skipped
+      const actions = item.taken || item.skipped ? '' : `
+        <div class="med-actions">
+          <button class="action-btn take" onclick="takeMedication(event, ${item.id}, '${item.time}', ${item.reminderId || 'null'})" title="ทานแล้ว">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </button>
+          <button class="action-btn skip" onclick="skipMedication(event, ${item.id}, '${item.time}', ${item.reminderId || 'null'})" title="ข้าม">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+          <button class="action-btn snooze" onclick="showSnoozeDialog(event, ${item.id}, ${item.reminderId || 'null'})" title="เลื่อน">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </button>
+        </div>
+      `;
+      
+      return `
+        <div class="med-card ${statusClass}" onclick="viewMedicationDetail(${item.id})">
+          <div class="med-icon ${iconClass}">
+            ${getDosageFormIcon(item.dosageForm)}
+          </div>
+          <div class="med-content">
+            <div class="med-name">${item.name}</div>
+            <div class="med-dosage">${item.dosage}</div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="med-time">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                ${item.time}
+              </span>
+              ${statusBadge}
+            </div>
+          </div>
+          ${actions}
+        </div>
+      `;
+    }
+    
+    // ✅ Phase 2.5: Updated Take action with reminder_id and scheduled_time
+    window.takeMedication = async function(e, userMedId, scheduledTime, reminderId) {
+      e.stopPropagation();
+      
+      // Disable button immediately to prevent rapid clicks
+      const btn = e.target.closest('.action-btn');
+      if (btn) {
+        if (btn.disabled) return; // Already processing
+        btn.disabled = true;
+      }
+      
+      try {
+        // ✅ Phase 2.5: Include reminder_id and scheduled_time
+        const response = await Api.post('/medication/take', {
+          user_med_id: userMedId,
+          action: 'taken',
+          reminder_id: reminderId,
+          scheduled_time: scheduledTime,
+          taken_at: new Date().toISOString()
+        });
+        
+        // Check if it was a duplicate
+        if (response.is_duplicate) {
+          Toast.info('บันทึกไว้แล้วก่อนหน้านี้');
+        } else {
+          Toast.success(t('medications.messages.takeSuccess'));
+        }
+        
+        // ✅ Phase 2.5: Add to local history and re-render
+        todayHistory.push(response);
+        renderTimeline();
+        
+        // Haptic feedback
+        if (typeof Utils !== 'undefined' && Utils.haptic) {
+          Utils.haptic('success');
+        }
+        
+      } catch (error) {
+        console.error('Failed to record medication:', error);
+        Toast.error(t('errors.generic'));
+        // Re-enable button on error
+        if (btn) btn.disabled = false;
+      }
+    };
+    
+    // ✅ Phase 2.5: Updated Skip action with reminder_id and scheduled_time
+    window.skipMedication = async function(e, userMedId, scheduledTime, reminderId) {
+      e.stopPropagation();
+      
+      // Disable button immediately to prevent rapid clicks
+      const btn = e.target.closest('.action-btn');
+      if (btn) {
+        if (btn.disabled) return; // Already processing
+        btn.disabled = true;
+      }
+      
+      try {
+        // ✅ Phase 2.5: Include reminder_id and scheduled_time
+        const response = await Api.post('/medication/take', {
+          user_med_id: userMedId,
+          action: 'skipped',
+          reminder_id: reminderId,
+          scheduled_time: scheduledTime,
+          taken_at: new Date().toISOString()
+        });
+        
+        // Check if it was a duplicate
+        if (response.is_duplicate) {
+          Toast.info('บันทึกไว้แล้วก่อนหน้านี้');
+        } else {
+          Toast.info(t('medications.actions.skip') + ' - บันทึกแล้ว');
+        }
+        
+        // ✅ Phase 2.5: Add to local history and re-render
+        todayHistory.push(response);
+        renderTimeline();
+        
+        // Haptic feedback
+        if (typeof Utils !== 'undefined' && Utils.haptic) {
+          Utils.haptic('light');
+        }
+        
+      } catch (error) {
+        console.error('Failed to skip medication:', error);
+        Toast.error(t('errors.generic'));
+        // Re-enable button on error
+        if (btn) btn.disabled = false;
+      }
+    };
+    
+    window.showSnoozeDialog = function(e, userMedId, reminderId) {
+      e.stopPropagation();
+      
+      // Close any existing modal first to prevent stacking
+      Modal.closeAll();
+      
+      // Find reminder for this medication
+      let reminder = null;
+      if (reminderId) {
+        reminder = reminders.find(r => r.reminder_id === reminderId);
+      } else {
+        reminder = reminders.find(r => r.user_med_id === userMedId);
+      }
+      
+      if (!reminder) {
+        // No reminder found - show info message
+        const content = `
+          <p style="color: var(--color-gray-600); margin-bottom: 1rem;">
+            ยานี้ยังไม่มีการเตือน กรุณาสร้างการเตือนก่อน
+          </p>
+          <button class="snooze-btn" style="width: 100%;" onclick="Modal.close(); window.location.href='/wellnest-frontend/pages/reminders/add.html?user_med_id=${userMedId}'">
+            + สร้างการเตือน
+          </button>
+        `;
+        
+        Modal.show({
+          title: 'ไม่พบการเตือน',
+          content: content,
+          size: 'sm'
+        });
+        return;
+      }
+      
+      const snoozeCount = reminder.snooze_count || 0;
+      const maxSnooze = reminder.max_snooze_per_day || 3;
+      const remaining = maxSnooze - snoozeCount;
+      
+      const content = `
+        <p style="color: var(--color-gray-600); margin-bottom: 0.5rem;">เลือกเวลาที่ต้องการเลื่อน</p>
+        <p style="font-size: 0.75rem; color: var(--color-gray-500); margin-bottom: 1rem;">
+          เหลือการเลื่อน <strong>${remaining}</strong> ครั้งวันนี้
+        </p>
+        <div class="snooze-options">
+          <button class="snooze-btn" onclick="snoozeReminder(${reminder.reminder_id}, 5)" ${remaining <= 0 ? 'disabled' : ''}>5 นาที</button>
+          <button class="snooze-btn" onclick="snoozeReminder(${reminder.reminder_id}, 10)" ${remaining <= 0 ? 'disabled' : ''}>10 นาที</button>
+          <button class="snooze-btn" onclick="snoozeReminder(${reminder.reminder_id}, 15)" ${remaining <= 0 ? 'disabled' : ''}>15 นาที</button>
+          <button class="snooze-btn" onclick="snoozeReminder(${reminder.reminder_id}, 30)" ${remaining <= 0 ? 'disabled' : ''}>30 นาที</button>
+          <button class="snooze-btn" onclick="snoozeReminder(${reminder.reminder_id}, 60)" ${remaining <= 0 ? 'disabled' : ''}>1 ชั่วโมง</button>
+        </div>
+        ${remaining <= 0 ? '<p style="color: var(--color-error); font-size: 0.75rem; margin-top: 0.5rem;">เลื่อนครบ 3 ครั้งแล้ววันนี้</p>' : ''}
+      `;
+      
+      Modal.show({
+        title: 'เลื่อนการเตือน',
+        content: content,
+        size: 'sm'
+      });
+    };
+    
+    window.snoozeReminder = async function(reminderId, minutes) {
+      try {
+        const response = await Api.post(`/reminders/${reminderId}/snooze`, { minutes });
+        
+        Modal.close();
+        Toast.success(t('reminders.snooze.snoozed', { minutes }));
+        
+        // Update local reminder data
+        const reminder = reminders.find(r => r.reminder_id === reminderId);
+        if (reminder) {
+          reminder.snooze_count = response.snooze_count || (reminder.snooze_count || 0) + 1;
+          reminder.snoozed_until = response.snoozed_until;
+        }
+        
+        if (typeof Utils !== 'undefined' && Utils.haptic) {
+          Utils.haptic('light');
+        }
+        
+      } catch (error) {
+        console.error('Failed to snooze:', error);
+        Modal.close();
+        Toast.error(error.message || t('errors.generic'));
+      }
+    };
+    
+    window.viewMedicationDetail = function(userMedId) {
+      window.location.href = `/wellnest-frontend/pages/medications/detail.html?id=${userMedId}`;
+    };
+  });
+  </script>
+</body>
+</html>

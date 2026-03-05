@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#F5B31A">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+  <title>รายละเอียดยา - WellNest</title>
+  
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#FFFBEB',
+              100: '#FEF3C7',
+              200: '#FDE68A',
+              300: '#FCD34D',
+              400: '#FBBF24',
+              500: '#F5B31A',
+              600: '#D97706',
+              700: '#B45309',
+              800: '#92400E',
+              900: '#78350F'
+            },
+            secondary: {
+              50: '#EFF6FF',
+              100: '#DBEAFE',
+              200: '#BFDBFE',
+              300: '#93C5FD',
+              400: '#60A5FA',
+              500: '#3B82F6',
+              600: '#2563EB',
+              700: '#1D4ED8',
+              800: '#1E40AF',
+              900: '#1E3A8A'
+            }
+          },
+          fontFamily: {
+            sans: ['Noto Sans Thai', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/wellnest-frontend/css/tokens.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/components.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/utilities.css">
+  
+  <style>
+    :root {
+      --header-height: 56px;
+      --bottom-nav-height: 64px;
+    }
+    
+    /* ===== Page Container ===== */
+    .page-container {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+      padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 80px);
+      background: var(--color-background, #FFFBEB);
+    }
+    
+    /* ===== Header ===== */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height);
+      background: white;
+      border-bottom: 1px solid #f0f0f0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+    
+    .header-left {
+      width: 48px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .header-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-gray-600);
+    }
+    
+    .header-btn:hover {
+      background: var(--color-gray-100);
+    }
+    
+    .header-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+    
+    .header-center {
+      flex: 1;
+      text-align: center;
+    }
+    
+    .header-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-gray-800);
+      margin: 0;
+    }
+    
+    .header-right {
+      width: 48px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    /* ===== Hero Card ===== */
+    .hero-card {
+      background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%);
+      margin: 1rem;
+      border-radius: 20px;
+      padding: 1.5rem;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -30%;
+      width: 200px;
+      height: 200px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+    }
+    
+    .hero-card::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -20%;
+      width: 150px;
+      height: 150px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .hero-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    
+    .hero-icon svg {
+      width: 32px;
+      height: 32px;
+    }
+    
+    .hero-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    
+    .hero-strength {
+      font-size: 1rem;
+      opacity: 0.9;
+      margin-bottom: 0.75rem;
+    }
+    
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.625rem;
+      border-radius: 1rem;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .hero-badge svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    .hero-badge.active {
+      background: #22C55E;
+    }
+    
+    .hero-badge.inactive {
+      background: #EF4444;
+    }
+    
+    /* ===== Info Cards ===== */
+    .info-card {
+      background: white;
+      margin: 0 1rem 1rem;
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+    
+    .info-card-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-gray-800);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .info-card-title svg {
+      width: 18px;
+      height: 18px;
+      color: var(--color-primary-500);
+    }
+    
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--color-gray-100);
+    }
+    
+    .info-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    
+    .info-row:first-child {
+      padding-top: 0;
+    }
+    
+    .info-label {
+      font-size: 0.875rem;
+      color: var(--color-gray-500);
+    }
+    
+    .info-value {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-gray-800);
+      text-align: right;
+    }
+    
+    .info-value.highlight {
+      color: var(--color-primary-600);
+    }
+    
+    /* ===== Progress Card ===== */
+    .progress-card {
+      background: white;
+      margin: 0 1rem 1rem;
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+    
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    
+    .progress-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-gray-800);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .progress-title svg {
+      width: 18px;
+      height: 18px;
+      color: var(--color-primary-500);
+    }
+    
+    .progress-percentage {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-primary-600);
+    }
+    
+    .progress-bar-container {
+      height: 8px;
+      background: var(--color-gray-200);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-primary-400) 0%, var(--color-primary-500) 100%);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    
+    .progress-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--color-gray-500);
+    }
+    
+    /* ===== Reminder Card ===== */
+    .reminder-card {
+      background: white;
+      margin: 0 1rem 1rem;
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+    
+    .reminder-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    
+    .reminder-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-gray-800);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .reminder-title svg {
+      width: 18px;
+      height: 18px;
+      color: var(--color-primary-500);
+    }
+    
+    .reminder-add-btn {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--color-primary-600);
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    .reminder-add-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .reminder-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .reminder-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 10px;
+      background: var(--color-gray-100);
+      font-size: 0.875rem;
+      color: var(--color-gray-700);
+    }
+    
+    .reminder-chip svg {
+      width: 16px;
+      height: 16px;
+      color: var(--color-gray-500);
+    }
+    
+    .reminder-chip.active {
+      background: var(--color-primary-100);
+      color: var(--color-primary-700);
+    }
+    
+    .reminder-chip.active svg {
+      color: var(--color-primary-500);
+    }
+    
+    .no-reminders {
+      text-align: center;
+      padding: 1rem;
+      color: var(--color-gray-500);
+      font-size: 0.875rem;
+    }
+    
+    /* ===== Notes Card ===== */
+    .notes-card {
+      background: white;
+      margin: 0 1rem 1rem;
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+    
+    .notes-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-gray-800);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .notes-title svg {
+      width: 18px;
+      height: 18px;
+      color: var(--color-primary-500);
+    }
+    
+    .notes-content {
+      font-size: 0.875rem;
+      color: var(--color-gray-600);
+      line-height: 1.6;
+    }
+    
+    /* ===== Quick Actions ===== */
+    .quick-actions {
+      display: flex;
+      gap: 0.75rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 16px;
+      margin: 1rem;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+    
+    .quick-action-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem 0.75rem;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .quick-action-btn svg {
+      width: 28px;
+      height: 28px;
+    }
+    
+    .quick-action-btn.take {
+      background: #DCFCE7;
+      color: #16A34A;
+    }
+    
+    .quick-action-btn.take:hover {
+      background: #BBF7D0;
+    }
+    
+    .quick-action-btn.skip {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+    
+    .quick-action-btn.skip:hover {
+      background: #FECACA;
+    }
+    
+    .quick-action-btn.snooze {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+    
+    .quick-action-btn.snooze:hover {
+      background: #FDE68A;
+    }
+    
+    .quick-action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* ===== Snooze Options ===== */
+    .snooze-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+    
+    .snooze-btn {
+      padding: 0.75rem;
+      background: var(--color-gray-100);
+      border: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .snooze-btn:hover {
+      background: var(--color-primary-100);
+    }
+    
+    .snooze-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* ===== Action Buttons ===== */
+    .action-section {
+      position: fixed;
+      bottom: var(--bottom-nav-height, 64px);
+      left: 0;
+      right: 0;
+      padding: 1rem;
+      padding-bottom: 1rem;
+      background: white;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      gap: 0.75rem;
+      z-index: 90;
+    }
+    
+    .btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1rem;
+      border-radius: 12px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    
+    .btn svg {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .btn-primary {
+      background: var(--color-primary-500);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: var(--color-primary-600);
+    }
+    
+    .btn-outline {
+      background: white;
+      color: var(--color-gray-700);
+      border: 2px solid var(--color-gray-300);
+    }
+    
+    .btn-outline:hover {
+      border-color: var(--color-gray-400);
+    }
+    
+    .btn-danger {
+      background: white;
+      color: var(--color-error);
+      border: 2px solid var(--color-error);
+    }
+    
+    .btn-danger:hover {
+      background: var(--color-error);
+      color: white;
+    }
+    
+    /* ===== Loading ===== */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--color-primary-100);
+      border-top-color: var(--color-primary-500);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      color: var(--color-gray-500);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="header-btn" onclick="history.back()" aria-label="กลับ">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+    </div>
+    <div class="header-center">
+      <h1 class="header-title" data-i18n="medications.actions.details">รายละเอียดยา</h1>
+    </div>
+    <div class="header-right">
+      <button class="header-btn" onclick="showMoreOptions()" aria-label="เพิ่มเติม">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="1"/>
+          <circle cx="12" cy="5" r="1"/>
+          <circle cx="12" cy="19" r="1"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+  
+  <!-- Page Content -->
+  <div class="page-container">
+    
+    <!-- Loading State -->
+    <div class="loading-state" id="loadingState">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">กำลังโหลด...</div>
+    </div>
+    
+    <!-- Content (hidden initially) -->
+    <div id="pageContent" style="display: none;">
+      
+      <!-- Hero Card -->
+      <div class="hero-card">
+        <div class="hero-content">
+          <div class="hero-icon" id="heroIcon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.5 20.5L3.5 13.5a4.95 4.95 0 1 1 7-7l7 7a4.95 4.95 0 0 1-7 7z"/>
+              <path d="M8.5 8.5l7 7"/>
+            </svg>
+          </div>
+          <div class="hero-name" id="medName">-</div>
+          <div class="hero-strength" id="medStrength">-</div>
+          <div class="hero-badges">
+            <span class="hero-badge" id="statusBadge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+              </svg>
+              <span id="statusText">กำลังใช้</span>
+            </span>
+            <span class="hero-badge" id="formBadge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.5 20.5L3.5 13.5a4.95 4.95 0 1 1 7-7l7 7a4.95 4.95 0 0 1-7 7z"/>
+              </svg>
+              <span id="formText">-</span>
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick Actions -->
+      <div class="quick-actions" id="quickActions">
+        <button class="quick-action-btn take" onclick="takeMedication()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          ทานแล้ว
+        </button>
+        <button class="quick-action-btn skip" onclick="skipMedication()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          ข้าม
+        </button>
+        <button class="quick-action-btn snooze" onclick="showSnoozeDialog()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          เลื่อน
+        </button>
+      </div>
+      
+      <!-- Dosage Info -->
+      <div class="info-card">
+        <div class="info-card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+          ข้อมูลการใช้ยา
+        </div>
+        <div class="info-row">
+          <span class="info-label">คำสั่งแพทย์</span>
+          <span class="info-value" id="prescribedDosage">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">จำนวนต่อครั้ง</span>
+          <span class="info-value" id="dosagePerTake">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">ความถี่</span>
+          <span class="info-value" id="frequency">-</span>
+        </div>
+      </div>
+      
+      <!-- Duration Info -->
+      <div class="info-card">
+        <div class="info-card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          ระยะเวลาการใช้
+        </div>
+        <div class="info-row">
+          <span class="info-label">วันที่เริ่มต้น</span>
+          <span class="info-value highlight" id="startDate">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">วันที่สิ้นสุด</span>
+          <span class="info-value highlight" id="endDate">-</span>
+        </div>
+        <div class="info-row" id="quantityRow" style="display: none;">
+          <span class="info-label">จำนวนยาที่ได้รับ</span>
+          <span class="info-value" id="quantity">-</span>
+        </div>
+      </div>
+      
+      <!-- Progress Card -->
+      <div class="progress-card" id="progressCard">
+        <div class="progress-header">
+          <div class="progress-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="20" x2="12" y2="10"/>
+              <line x1="18" y1="20" x2="18" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="16"/>
+            </svg>
+            ความคืบหน้า
+          </div>
+          <span class="progress-percentage" id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+        </div>
+        <div class="progress-stats">
+          <span id="progressDays">เหลืออีก - วัน</span>
+          <span id="progressEndDate">สิ้นสุด -</span>
+        </div>
+      </div>
+      
+      <!-- Reminders Card -->
+      <div class="reminder-card">
+        <div class="reminder-header">
+          <div class="reminder-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            เวลาเตือน
+          </div>
+          <button class="reminder-add-btn" onclick="addReminder()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            เพิ่ม
+          </button>
+        </div>
+        <div class="reminder-list" id="reminderList">
+          <div class="no-reminders" id="noReminders">
+            ยังไม่มีการตั้งเตือน<br>
+            <small>กดปุ่ม "เพิ่ม" เพื่อตั้งเวลาเตือน</small>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Notes Card -->
+      <div class="notes-card" id="notesCard" style="display: none;">
+        <div class="notes-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          หมายเหตุ
+        </div>
+        <div class="notes-content" id="notesContent">-</div>
+      </div>
+      
+    </div>
+  </div>
+  
+  <!-- Action Buttons -->
+  <div class="action-section" id="actionSection" style="display: none;">
+    <button class="btn btn-outline" disabled title="ระบบยังไม่รองรับการแก้ไขข้อมูลยา" style="opacity: 0.5; cursor: not-allowed;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+      แก้ไข
+    </button>
+    <button class="btn btn-danger" onclick="confirmRemove()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+      </svg>
+      นำออก
+    </button>
+  </div>
+  
+  <!-- Component Placeholders -->
+  <div id="bottom-nav-placeholder"></div>
+  <div id="toast-placeholder"></div>
+  <div id="modal-placeholder"></div>
+  
+  <!-- Core Scripts -->
+  <script src="/wellnest-frontend/js/config.js"></script>
+  <script src="/wellnest-frontend/js/i18n/th.js"></script>
+  <script src="/wellnest-frontend/js/i18n/en.js"></script>
+  <script src="/wellnest-frontend/js/i18n.js"></script>
+  <script src="/wellnest-frontend/js/utils.js"></script>
+  <script src="/wellnest-frontend/js/api.js"></script>
+  <script src="/wellnest-frontend/js/auth.js"></script>
+  <script src="/wellnest-frontend/js/storage.js"></script>
+  <script src="/wellnest-frontend/js/components.js"></script>
+  <script src="/wellnest-frontend/js/modal.js"></script>
+  
+  <script>
+  document.addEventListener('DOMContentLoaded', async function() {
+    // Require authentication
+    if (typeof Auth !== 'undefined') {
+      Auth.requireAuth();
+    }
+    
+    // Load components
+    await Components.init({
+      bottomNav: { active: 'medications' },
+      toast: true,
+      modal: true
+    });
+    
+    // Get medication ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const userMedId = urlParams.get('id');
+    
+    if (!userMedId) {
+      Toast.error('ไม่พบข้อมูลยา');
+      setTimeout(() => {
+        window.location.href = '/wellnest-frontend/pages/medications/list.html';
+      }, 1500);
+      return;
+    }
+    
+    // State
+    let medication = null;
+    let reminders = [];
+    let todayHistory = [];  // ✅ เพิ่ม: เก็บประวัติวันนี้
+    
+    // Elements
+    const loadingState = document.getElementById('loadingState');
+    const pageContent = document.getElementById('pageContent');
+    const actionSection = document.getElementById('actionSection');
+    
+    // Load Data
+    loadMedicationDetail(userMedId);
+    
+    async function loadMedicationDetail(id) {
+      try {
+        // Load medication
+        medication = await Api.get(`/medications/mine/${id}`);
+        
+        // Load reminders for this medication
+        try {
+          const allReminders = await Api.get('/reminders');
+          reminders = allReminders.filter(r => r.user_med_id === parseInt(id));
+        } catch (e) {
+          reminders = [];
+        }
+        
+        // ✅ โหลดประวัติวันนี้สำหรับยานี้
+        try {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const allHistory = await Api.get(`/history?user_med_id=${id}&start=${today.toISOString()}`);
+          todayHistory = allHistory || [];
+        } catch (e) {
+          todayHistory = [];
+        }
+        
+        renderDetail();
+        renderQuickActions();  // ✅ เพิ่ม: render Quick Actions ตามสถานะ
+        
+        loadingState.style.display = 'none';
+        pageContent.style.display = 'block';
+        actionSection.style.display = 'flex';
+        
+      } catch (error) {
+        console.error('Failed to load medication:', error);
+        Toast.error('ไม่พบข้อมูลยา');
+        setTimeout(() => {
+          window.location.href = '/wellnest-frontend/pages/medications/list.html';
+        }, 1500);
+      }
+    }
+    
+    function renderDetail() {
+      const formLabels = {
+        tablet: 'เม็ด',
+        capsule: 'แคปซูล',
+        syrup: 'น้ำเชื่อม',
+        injection: 'ฉีด',
+        cream: 'ครีม',
+        inhaler: 'พ่น',
+        drop: 'หยด'
+      };
+      
+      // Hero
+      document.getElementById('medName').textContent = medication.medication_name;
+      document.getElementById('medStrength').textContent = medication.strength || '';
+      
+      // Status badge
+      const statusBadge = document.getElementById('statusBadge');
+      const statusText = document.getElementById('statusText');
+      if (medication.is_active) {
+        statusBadge.classList.add('active');
+        statusText.textContent = 'กำลังใช้';
+      } else {
+        statusBadge.classList.add('inactive');
+        statusText.textContent = 'หยุดใช้';
+      }
+      
+      // Form badge
+      const formText = document.getElementById('formText');
+      formText.textContent = formLabels[medication.dosage_form] || medication.dosage_form || '-';
+      
+      // Dosage info
+      document.getElementById('prescribedDosage').textContent = medication.prescribed_dosage || '-';
+      
+      const dosagePerTake = medication.dosage_per_take 
+        ? `${medication.dosage_per_take} ${medication.dosage_unit || ''}`
+        : '-';
+      document.getElementById('dosagePerTake').textContent = dosagePerTake;
+      
+      const frequency = medication.frequency_per_day 
+        ? `วันละ ${medication.frequency_per_day} ครั้ง`
+        : '-';
+      document.getElementById('frequency').textContent = frequency;
+      
+      // Duration info
+      document.getElementById('startDate').textContent = formatDate(medication.start_date);
+      document.getElementById('endDate').textContent = medication.end_date 
+        ? formatDate(medication.end_date) 
+        : 'ใช้ต่อเนื่อง';
+      
+      // Quantity
+      if (medication.quantity) {
+        document.getElementById('quantityRow').style.display = 'flex';
+        document.getElementById('quantity').textContent = 
+          `${medication.quantity} ${medication.quantity_unit || ''}`;
+      }
+      
+      // Progress
+      renderProgress();
+      
+      // Reminders
+      renderReminders();
+      
+      // Notes
+      if (medication.notes) {
+        document.getElementById('notesCard').style.display = 'block';
+        document.getElementById('notesContent').textContent = medication.notes;
+      }
+    }
+    
+    function renderProgress() {
+      if (!medication.start_date || !medication.end_date) {
+        document.getElementById('progressCard').style.display = 'none';
+        return;
+      }
+      
+      const start = new Date(medication.start_date);
+      const end = new Date(medication.end_date);
+      const today = new Date();
+      
+      // ✅ Bug Fix: Add 1 to include end date as a valid medication day
+      // This way, on the last day the progress won't immediately show 100%
+      const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+      const elapsedDays = Math.ceil((today - start) / (1000 * 60 * 60 * 24));
+      const remainingDays = Math.max(0, Math.ceil((end - today) / (1000 * 60 * 60 * 24)));
+      
+      // Cap at 100% only after the end date has passed
+      let percent = Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100));
+      
+      // If today is past end_date, show 100%
+      if (today > end) {
+        percent = 100;
+      }
+      
+      document.getElementById('progressPercent').textContent = `${Math.round(percent)}%`;
+      document.getElementById('progressBar').style.width = `${percent}%`;
+      document.getElementById('progressDays').textContent = `เหลืออีก ${remainingDays} วัน`;
+      document.getElementById('progressEndDate').textContent = `สิ้นสุด ${formatDate(medication.end_date)}`;
+    }
+    
+    function renderReminders() {
+      const container = document.getElementById('reminderList');
+      if (!container) return;
+      
+      // ✅ Bug Fix: noReminders element อาจถูกลบไปจาก DOM หลังจาก innerHTML ถูกเขียนทับ
+      // ดังนั้นต้องสร้างใหม่หรือใช้ HTML template แทน
+      
+      if (reminders.length === 0) {
+        // แสดง "ยังไม่มีการตั้งเตือน" message
+        container.innerHTML = `
+          <div class="no-reminders" id="noReminders">
+            ยังไม่มีการตั้งเตือน<br>
+            <small>กดปุ่ม "เพิ่ม" เพื่อตั้งเวลาเตือน</small>
+          </div>
+        `;
+        return;
+      }
+      
+      // ✅ Bug #3 Fix: Add delete button to each reminder chip
+      container.innerHTML = reminders.map(r => `
+        <div class="reminder-chip-wrapper" style="position: relative; display: inline-block;">
+          <div class="reminder-chip ${r.is_enabled ? 'active' : ''}" onclick="editReminder(${r.reminder_id})" style="cursor: pointer; padding-right: 2rem;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            ${formatTime(r.reminder_time)}
+          </div>
+          <button onclick="event.stopPropagation(); confirmDeleteReminder(${r.reminder_id}, '${r.reminder_time}')" 
+                  class="reminder-delete-btn" 
+                  style="position: absolute; top: 50%; right: 0.25rem; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 50%; border: none; background: rgba(239, 68, 68, 0.1); color: #EF4444; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;"
+                  title="ลบการเตือนนี้">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      `).join('');
+    }
+    
+    // ✅ Bug #3 Fix: Edit reminder (navigate to edit page)
+    window.editReminder = function(reminderId) {
+      window.location.href = `/wellnest-frontend/pages/reminders/edit.html?id=${reminderId}`;
+    };
+    
+    // ✅ Bug #3 Fix: Confirm delete SINGLE reminder
+    window.confirmDeleteReminder = function(reminderId, reminderTime) {
+      const timeLabel = formatTime(reminderTime);
+      Modal.show({
+        title: 'ลบการเตือน',
+        content: `
+          <p style="color: var(--color-gray-600); margin-bottom: 1rem;">
+            ต้องการลบการเตือนเวลา <strong>${timeLabel}</strong> หรือไม่?
+          </p>
+          <p style="font-size: 0.875rem; color: var(--color-gray-500);">
+            ⚠️ จะลบเฉพาะการเตือนมื้อนี้ ยาจะยังคงอยู่ในรายการ
+          </p>
+        `,
+        actions: [
+          {
+            label: 'ยกเลิก',
+            class: 'btn-outline',
+            onclick: "Modal.close()"
+          },
+          {
+            label: 'ลบการเตือน',
+            class: 'btn-danger',
+            onclick: `deleteReminder(${reminderId})`
+          }
+        ]
+      });
+    };
+    
+    // ✅ Bug #3 Fix: Delete single reminder
+    window.deleteReminder = async function(reminderId) {
+      try {
+        await Api.delete(`/reminders/${reminderId}`);
+        Modal.close();
+        Toast.success('ลบการเตือนสำเร็จ');
+        
+        // Remove from local state and re-render
+        reminders = reminders.filter(r => r.reminder_id !== reminderId);
+        renderReminders();
+        renderQuickActions();  // Re-render quick actions as meal slots changed
+        
+        if (typeof Utils !== 'undefined' && Utils.haptic) {
+          Utils.haptic('success');
+        }
+      } catch (error) {
+        console.error('Failed to delete reminder:', error);
+        Modal.close();
+        Toast.error(error.message || 'เกิดข้อผิดพลาด');
+      }
+    };
+    
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      
+      const date = new Date(dateStr);
+      const thaiMonths = [
+        'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+        'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
+      ];
+      
+      return `${date.getDate()} ${thaiMonths[date.getMonth()]} ${date.getFullYear() + 543}`;
+    }
+    
+    function formatTime(timeStr) {
+      if (!timeStr) return '-';
+      
+      const [hours, minutes] = timeStr.split(':');
+      const h = parseInt(hours);
+      const period = h >= 12 ? 'PM' : 'AM';
+      const displayHours = h % 12 || 12;
+      
+      return `${displayHours}:${minutes} ${period}`;
+    }
+    
+    // ✅ Phase 2.5: Helper function to find next pending reminder
+    function getNextPendingReminder() {
+      if (reminders.length === 0) return null;
+      
+      // หา reminders ที่ยังไม่ได้กด (ไม่มีใน todayHistory)
+      const takenTimes = todayHistory.map(h => h.scheduled_time);
+      const pending = reminders.filter(r => !takenTimes.includes(r.reminder_time));
+      
+      if (pending.length === 0) return null;
+      
+      // Return reminder ที่เวลาใกล้ที่สุด
+      return pending.sort((a, b) => a.reminder_time.localeCompare(b.reminder_time))[0];
+    }
+    
+    // ✅ Bug #2 Fix: แสดง Quick Actions แยกตามมื้อ/scheduled_time
+    function renderQuickActions() {
+      const quickActions = document.getElementById('quickActions');
+      
+      // ถ้าไม่มี reminders ให้แสดงปุ่มแบบเดิม
+      if (reminders.length === 0) {
+        const hasAnyAction = todayHistory.length > 0;
+        if (hasAnyAction) {
+          const lastAction = todayHistory[0];
+          const status = lastAction.status || 'taken';
+          const time = new Date(lastAction.taken_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+          
+          quickActions.innerHTML = `
+            <div style="flex: 1; text-align: center; padding: 1rem;">
+              <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; color: ${status === 'taken' ? '#16A34A' : '#DC2626'};">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  ${status === 'taken' 
+                    ? '<polyline points="20 6 9 17 4 12"/>' 
+                    : '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'}
+                </svg>
+                <span style="font-size: 1rem; font-weight: 600;">${status === 'taken' ? 'ทานยาแล้ว!' : 'ข้ามยามื้อนี้'}</span>
+              </div>
+              <p style="color: var(--color-gray-500); font-size: 0.875rem; margin-top: 0.5rem;">บันทึกเมื่อ ${time}</p>
+            </div>
+          `;
+        } else {
+          quickActions.innerHTML = `
+            <button class="quick-action-btn take" onclick="takeMedication()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              ทานแล้ว
+            </button>
+            <button class="quick-action-btn skip" onclick="skipMedication()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              ข้าม
+            </button>
+            <button class="quick-action-btn snooze" onclick="showSnoozeDialog()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              เลื่อน
+            </button>
+          `;
+        }
+        return;
+      }
+      
+      // ✅ Bug #2: มี reminders - แสดงสถานะแยกตามมื้อ
+      const mealSlots = reminders.map(r => {
+        const historyEntry = todayHistory.find(h => h.scheduled_time === r.reminder_time);
+        return {
+          reminder_id: r.reminder_id,
+          time: r.reminder_time,
+          status: historyEntry?.status || null, // null = pending
+          taken_at: historyEntry?.taken_at || null
+        };
+      }).sort((a, b) => a.time.localeCompare(b.time));
+      
+      // สร้าง HTML สำหรับแต่ละมื้อ
+      let html = '<div style="width: 100%; display: flex; flex-direction: column; gap: 0.75rem;">';
+      
+      mealSlots.forEach((slot, index) => {
+        const timeLabel = formatTime(slot.time);
+        const mealName = getMealName(slot.time);
+        
+        if (slot.status === 'taken') {
+          // ✅ ทานแล้ว - แสดง checkmark สีเขียว
+          const takenTime = new Date(slot.taken_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+          html += `
+            <div style="display: flex; align-items: center; padding: 0.75rem; background: #F0FDF4; border-radius: 12px; border: 1px solid #BBF7D0;">
+              <div style="flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; background: #DCFCE7; display: flex; align-items: center; justify-content: center;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div style="flex: 1; margin-left: 0.75rem;">
+                <div style="font-weight: 600; color: #166534; font-size: 0.9375rem;">${mealName} (${timeLabel})</div>
+                <div style="font-size: 0.75rem; color: #4ADE80;">ทานแล้ว เมื่อ ${takenTime}</div>
+              </div>
+            </div>
+          `;
+        } else if (slot.status === 'skipped') {
+          // ❌ ข้ามแล้ว - แสดง X สีแดง
+          const skippedTime = new Date(slot.taken_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+          html += `
+            <div style="display: flex; align-items: center; padding: 0.75rem; background: #FEF2F2; border-radius: 12px; border: 1px solid #FECACA;">
+              <div style="flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; background: #FEE2E2; display: flex; align-items: center; justify-content: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </div>
+              <div style="flex: 1; margin-left: 0.75rem;">
+                <div style="font-weight: 600; color: #991B1B; font-size: 0.9375rem;">${mealName} (${timeLabel})</div>
+                <div style="font-size: 0.75rem; color: #F87171;">ข้าม เมื่อ ${skippedTime}</div>
+              </div>
+            </div>
+          `;
+        } else {
+          // ⏳ ยังไม่ได้กด - แสดงปุ่ม Take/Skip
+          html += `
+            <div style="display: flex; align-items: center; padding: 0.75rem; background: white; border-radius: 12px; border: 1px solid #E5E7EB; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <div style="flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; background: #FEF3C7; display: flex; align-items: center; justify-content: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <div style="flex: 1; margin-left: 0.75rem;">
+                <div style="font-weight: 600; color: var(--color-gray-800); font-size: 0.9375rem;">${mealName} (${timeLabel})</div>
+                <div style="font-size: 0.75rem; color: var(--color-gray-500);">รอทานยา</div>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button onclick="takeMedicationForSlot(${slot.reminder_id}, '${slot.time}')" 
+                        class="slot-action-btn take" 
+                        style="width: 36px; height: 36px; border-radius: 8px; border: none; background: #DCFCE7; color: #16A34A; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button onclick="skipMedicationForSlot(${slot.reminder_id}, '${slot.time}')" 
+                        class="slot-action-btn skip" 
+                        style="width: 36px; height: 36px; border-radius: 8px; border: none; background: #FEE2E2; color: #DC2626; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
+          `;
+        }
+      });
+      
+      html += '</div>';
+      
+      // สรุปสถานะ
+      const completed = mealSlots.filter(s => s.status).length;
+      const total = mealSlots.length;
+      if (total > 1) {
+        html += `<div style="text-align: center; margin-top: 0.5rem; font-size: 0.75rem; color: var(--color-gray-500);">วันนี้ ${completed}/${total} มื้อ</div>`;
+      }
+      
+      quickActions.innerHTML = html;
+    }
+    
+    // Helper: แปลงเวลาเป็นชื่อมื้อ
+    function getMealName(timeStr) {
+      const hour = parseInt(timeStr.split(':')[0]);
+      if (hour >= 5 && hour < 11) return 'มื้อเช้า';
+      if (hour >= 11 && hour < 15) return 'มื้อกลางวัน';
+      if (hour >= 15 && hour < 19) return 'มื้อเย็น';
+      return 'ก่อนนอน';
+    }
+    
+    // ✅ Bug #2: Take medication for specific slot
+    window.takeMedicationForSlot = async function(reminderId, scheduledTime) {
+      const btn = event.target.closest('.slot-action-btn');
+      if (btn) btn.disabled = true;
+      
+      try {
+        const response = await Api.post('/medication/take', {
+          user_med_id: userMedId,
+          action: 'taken',
+          reminder_id: reminderId,
+          scheduled_time: scheduledTime,
+          taken_at: new Date().toISOString()
+        });
+        
+        if (response.is_duplicate) {
+          Toast.info('บันทึกไว้แล้วก่อนหน้านี้');
+        } else {
+          Toast.success(t('medications.messages.takeSuccess'));
+        }
+        
+        todayHistory.unshift(response);
+        renderQuickActions();
+        
+        if (typeof Utils !== 'undefined' && Utils.haptic) {
+          Utils.haptic('success');
+        }
+      } catch (error) {
+        console.error('Failed to record medication:', error);
+        Toast.error(t('errors.generic'));
+        if (btn) btn.disabled = false;
+      }
+    };
+    
+    // ✅ Bug #2: Skip medication for specific slot
+    window.skipMedicationForSlot = async function(reminderId, scheduledTime) {
+      const btn = event.target.closest('.slot-action-btn');
+      if (btn) btn.disabled = true;
+      
+      try {
+        const response = await Api.post('/medication/take', {
+          user_med_id: userMedId,
+          action: 'skipped',
+          reminder_id: reminderId,
+          scheduled_time: scheduledTime,
+          taken_at: new Date().toISOString()
+        });
+        
+        if (response.is_duplicate) {
+          Toast.info('บันทึกไว้แล้วก่อนหน้านี้');
+        } else {
+          Toast.info(t('medications.actions.skip') + ' - บันทึกแล้ว');
+        }
+        
+        todayHistory.unshift(response);
+        renderQuickActions();
+        
+        if (typeof Utils !== 'undefined' && Utils.haptic) {
+          Utils.haptic('light');
+        }
+      } catch (error) {
+        console.error('Failed to skip medication:', error);
+        Toast.error(t('errors.generic'));
+        if (btn) btn.disabled = false;
+      }
+    };
+    
+    // Actions
+    window.editMedication = function() {
+      const content = `
+        <form id="editUserMedForm" style="max-height: 60vh; overflow-y: auto; padding-right: 0.5rem;">
+          <div class="form-group">
+            <label class="form-label">จำนวนต่อครั้ง</label>
+            <div style="display: flex; gap: 0.75rem;">
+              <input type="number" class="form-input" name="dosage_per_take" 
+                     value="${medication.dosage_per_take || 1}" min="1" style="flex: 1;">
+              <select class="form-select" name="dosage_unit" style="flex: 1.2;">
+                <option value="เม็ด" ${medication.dosage_unit === 'เม็ด' ? 'selected' : ''}>เม็ด</option>
+                <option value="แคปซูล" ${medication.dosage_unit === 'แคปซูล' ? 'selected' : ''}>แคปซูล</option>
+                <option value="ช้อนชา" ${medication.dosage_unit === 'ช้อนชา' ? 'selected' : ''}>ช้อนชา</option>
+                <option value="ช้อนโต๊ะ" ${medication.dosage_unit === 'ช้อนโต๊ะ' ? 'selected' : ''}>ช้อนโต๊ะ</option>
+                <option value="มล." ${medication.dosage_unit === 'มล.' ? 'selected' : ''}>มล.</option>
+                <option value="หยด" ${medication.dosage_unit === 'หยด' ? 'selected' : ''}>หยด</option>
+                <option value="พัฟ" ${medication.dosage_unit === 'พัฟ' ? 'selected' : ''}>พัฟ</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">ความถี่ต่อวัน</label>
+            <select class="form-select" name="frequency_per_day">
+              <option value="1" ${medication.frequency_per_day == 1 ? 'selected' : ''}>วันละ 1 ครั้ง</option>
+              <option value="2" ${medication.frequency_per_day == 2 ? 'selected' : ''}>วันละ 2 ครั้ง</option>
+              <option value="3" ${medication.frequency_per_day == 3 ? 'selected' : ''}>วันละ 3 ครั้ง</option>
+              <option value="4" ${medication.frequency_per_day == 4 ? 'selected' : ''}>วันละ 4 ครั้ง</option>
+            </select>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">วันที่เริ่มต้น</label>
+              <input type="date" class="form-input" name="start_date" 
+                     value="${medication.start_date ? medication.start_date.split('T')[0] : ''}">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">วันที่สิ้นสุด</label>
+              <input type="date" class="form-input" name="end_date" 
+                     value="${medication.end_date ? medication.end_date.split('T')[0] : ''}">
+            </div>
+          </div>
+          
+          <div class="form-group" style="margin-top: 1rem;">
+            <label class="form-label">จำนวนยาที่ได้รับ</label>
+            <div style="display: flex; gap: 0.75rem;">
+              <input type="number" class="form-input" name="quantity" 
+                     value="${medication.quantity || ''}" min="0" style="flex: 1;">
+              <select class="form-select" name="quantity_unit" style="flex: 1.2;">
+                <option value="เม็ด" ${medication.quantity_unit === 'เม็ด' ? 'selected' : ''}>เม็ด</option>
+                <option value="แคปซูล" ${medication.quantity_unit === 'แคปซูล' ? 'selected' : ''}>แคปซูล</option>
+                <option value="ขวด" ${medication.quantity_unit === 'ขวด' ? 'selected' : ''}>ขวด</option>
+                <option value="กล่อง" ${medication.quantity_unit === 'กล่อง' ? 'selected' : ''}>กล่อง</option>
+                <option value="แผง" ${medication.quantity_unit === 'แผง' ? 'selected' : ''}>แผง</option>
+                <option value="ซอง" ${medication.quantity_unit === 'ซอง' ? 'selected' : ''}>ซอง</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">หมายเหตุ/คำแนะนำ</label>
+            <textarea class="form-input" name="notes" rows="2" 
+                      placeholder="เช่น หลังอาหาร, ก่อนนอน">${medication.notes || ''}</textarea>
+          </div>
+        </form>
+        
+        <div style="display: flex; gap: 0.75rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f0f0f0;">
+          <button type="button" class="btn btn-outline" style="flex: 1;" onclick="Modal.close()">ยกเลิก</button>
+          <button type="button" class="btn btn-primary" style="flex: 1;" onclick="document.getElementById('editUserMedForm').requestSubmit()">บันทึก</button>
+        </div>
+      `;
+      
+      Modal.show({
+        title: 'แก้ไขข้อมูลยา',
+        content: content,
+        size: 'md'
+      });
+      
+      // Handle form submission
+      setTimeout(() => {
+        const form = document.getElementById('editUserMedForm');
+        if (form) {
+          form.addEventListener('submit', handleEditUserMed);
+        }
+      }, 100);
+    };
+    
+    async function handleEditUserMed(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target);
+      const data = {
+        dosage_per_take: parseInt(formData.get('dosage_per_take')) || 1,
+        dosage_unit: formData.get('dosage_unit'),
+        frequency_per_day: parseInt(formData.get('frequency_per_day')) || 1,
+        start_date: formData.get('start_date') || null,
+        end_date: formData.get('end_date') || null,
+        quantity: parseInt(formData.get('quantity')) || null,
+        quantity_unit: formData.get('quantity_unit'),
+        notes: formData.get('notes') || null
+      };
+      
+      try {
+        await Api.patch(`/medications/mine/${userMedId}`, data);
+        Modal.close();
+        Toast.success('บันทึกการแก้ไขสำเร็จ');
+        
+        // Reload page to show updated data
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+        
+      } catch (error) {
+        console.error('Failed to update user medication:', error);
+        // Check if it's a 405 Method Not Allowed error
+        if (error.message && error.message.includes('Method Not Allowed')) {
+          Toast.error('ระบบยังไม่รองรับการแก้ไขข้อมูลยา กรุณาติดต่อผู้ดูแลระบบ');
+        } else {
+          Toast.error(error.message || t('errors.generic'));
+        }
+      }
+    }
+    
+    window.confirmRemove = function() {
+      // ✅ Bug #3 Fix: Make it clear this deletes the ENTIRE medication
+      const reminderCount = reminders.length;
+      const reminderWarning = reminderCount > 0 
+        ? `<p style="font-size: 0.875rem; color: var(--color-error); margin-top: 0.5rem;">⚠️ การเตือนทั้งหมด ${reminderCount} มื้อ จะถูกลบด้วย</p>`
+        : '';
+      
+      Modal.show({
+        title: '🗑️ นำยาออกทั้งตัว',
+        content: `
+          <p style="color: var(--color-gray-600); margin-bottom: 1rem;">
+            ต้องการนำ <strong>${medication.medication_name}</strong> ออกจากรายการยาของคุณหรือไม่?
+          </p>
+          <p style="font-size: 0.875rem; color: var(--color-gray-500);">
+            การดำเนินการนี้จะ:
+          </p>
+          <ul style="font-size: 0.875rem; color: var(--color-gray-500); margin: 0.5rem 0 0 1.5rem; list-style: disc;">
+            <li>ลบยาออกจากรายการของคุณ</li>
+            <li>หยุดการแจ้งเตือนทั้งหมดที่เกี่ยวข้อง</li>
+            <li>ประวัติการทานยาจะยังคงอยู่</li>
+          </ul>
+          ${reminderWarning}
+        `,
+        actions: [
+          {
+            label: 'ยกเลิก',
+            class: 'btn-outline',
+            onclick: "Modal.close()"
+          },
+          {
+            label: 'นำยาออกทั้งตัว',
+            class: 'btn-danger',
+            onclick: "removeMedication()"
+          }
+        ]
+      });
+    };
+    
+    window.removeMedication = async function() {
+      try {
+        await Api.delete(`/medications/mine/${userMedId}`);
+        Modal.close();
+        Toast.success(t('medications.messages.removeSuccess'));
+        
+        setTimeout(() => {
+          window.location.href = '/wellnest-frontend/pages/medications/list.html';
+        }, 1000);
+        
+      } catch (error) {
+        console.error('Failed to remove medication:', error);
+        Toast.error(t('errors.generic'));
+      }
+    };
+    
+    window.addReminder = function() {
+      window.location.href = `/wellnest-frontend/pages/reminders/add.html?user_med_id=${userMedId}`;
+    };
+    
+    // Quick Actions
+    window.takeMedication = async function() {
+      // Disable all quick action buttons immediately
+      const quickActions = document.getElementById('quickActions');
+      const allBtns = quickActions.querySelectorAll('.quick-action-btn');
+      allBtns.forEach(btn => btn.disabled = true);
+      
+      // ✅ Phase 2.5: หา reminder ที่ยังไม่ได้กด
+      const nextReminder = getNextPendingReminder();
+      
+      try {
+        const response = await Api.post('/medication/take', {
+          user_med_id: userMedId,
+          taken_at: new Date().toISOString(),
+          action: 'taken',
+          reminder_id: nextReminder?.reminder_id || null,        // ← Phase 2.5
+          scheduled_time: nextReminder?.reminder_time || null    // ← Phase 2.5
+        });
+        
+        // ✅ Phase 2.5: Check for duplicate
+        if (response.is_duplicate) {
+          Toast.info('บันทึกไว้แล้วก่อนหน้านี้');
+        } else {
+          Toast.success(t('medications.messages.takeSuccess'));
+        }
+        
+        // ✅ เพิ่มเข้า todayHistory และ render ใหม่
+        todayHistory.unshift(response);
+        renderQuickActions();
+        
+        // Haptic feedback
+        if (typeof Utils !== 'undefined' && Utils.haptic) {
+          Utils.haptic('success');
+        }
+        
+      } catch (error) {
+        console.error('Failed to record medication:', error);
+        Toast.error(t('errors.generic'));
+        // Re-enable buttons on error
+        allBtns.forEach(btn => btn.disabled = false);
+      }
+    };
+    
+    window.skipMedication = async function() {
+      // Disable all quick action buttons immediately
+      const quickActions = document.getElementById('quickActions');
+      const allBtns = quickActions.querySelectorAll('.quick-action-btn');
+      allBtns.forEach(btn => btn.disabled = true);
+      
+      // ✅ Phase 2.5: หา reminder ที่ยังไม่ได้กด
+      const nextReminder = getNextPendingReminder();
+      
+      try {
+        const response = await Api.post('/medication/take', {
+          user_med_id: userMedId,
+          taken_at: new Date().toISOString(),
+          action: 'skipped',
+          reminder_id: nextReminder?.reminder_id || null,        // ← Phase 2.5
+          scheduled_time: nextReminder?.reminder_time || null    // ← Phase 2.5
+        });
+        
+        // ✅ Phase 2.5: Check for duplicate
+        if (response.is_duplicate) {
+          Toast.info('บันทึกไว้แล้วก่อนหน้านี้');
+        } else {
+          Toast.info(t('medications.actions.skip') + ' - บันทึกแล้ว');
+        }
+        
+        // ✅ เพิ่มเข้า todayHistory และ render ใหม่
+        todayHistory.unshift(response);
+        renderQuickActions();
+        
+        // Haptic feedback
+        if (typeof Utils !== 'undefined' && Utils.haptic) {
+          Utils.haptic('light');
+        }
+        
+      } catch (error) {
+        console.error('Failed to skip medication:', error);
+        Toast.error(t('errors.generic'));
+        // Re-enable buttons on error
+        allBtns.forEach(btn => btn.disabled = false);
+      }
+    };
+    
+    // ✅ ลบ updateQuickActionsAfterAction - ใช้ renderQuickActions แทน
+    
+    window.showSnoozeDialog = function() {
+      Modal.closeAll();
+      
+      // Find reminder for this medication
+      const reminder = reminders.find(r => r.user_med_id === userMedId);
+      
+      if (!reminder) {
+        const content = `
+          <p style="color: var(--color-gray-600); margin-bottom: 1rem;">
+            ยานี้ยังไม่มีการเตือน กรุณาสร้างการเตือนก่อน
+          </p>
+          <button class="btn btn-primary" style="width: 100%;" onclick="Modal.close(); window.location.href='/wellnest-frontend/pages/reminders/add.html?user_med_id=${userMedId}'">
+            + สร้างการเตือน
+          </button>
+        `;
+        
+        Modal.show({
+          title: 'ไม่พบการเตือน',
+          content: content,
+          size: 'sm'
+        });
+        return;
+      }
+      
+      const snoozeCount = reminder.snooze_count || 0;
+      const maxSnooze = reminder.max_snooze_per_day || 3;
+      const remaining = maxSnooze - snoozeCount;
+      
+      const content = `
+        <p style="color: var(--color-gray-600); margin-bottom: 0.5rem;">เลือกเวลาที่ต้องการเลื่อน</p>
+        <p style="font-size: 0.75rem; color: var(--color-gray-500); margin-bottom: 1rem;">
+          เหลือการเลื่อน <strong>${remaining}</strong> ครั้งวันนี้
+        </p>
+        <div class="snooze-options">
+          <button class="snooze-btn" onclick="snoozeReminder(${reminder.reminder_id}, 5)" ${remaining <= 0 ? 'disabled' : ''}>5 นาที</button>
+          <button class="snooze-btn" onclick="snoozeReminder(${reminder.reminder_id}, 10)" ${remaining <= 0 ? 'disabled' : ''}>10 นาที</button>
+          <button class="snooze-btn" onclick="snoozeReminder(${reminder.reminder_id}, 15)" ${remaining <= 0 ? 'disabled' : ''}>15 นาที</button>
+          <button class="snooze-btn" onclick="snoozeReminder(${reminder.reminder_id}, 30)" ${remaining <= 0 ? 'disabled' : ''}>30 นาที</button>
+          <button class="snooze-btn" onclick="snoozeReminder(${reminder.reminder_id}, 60)" ${remaining <= 0 ? 'disabled' : ''}>1 ชั่วโมง</button>
+        </div>
+        ${remaining <= 0 ? '<p style="color: var(--color-error); font-size: 0.75rem; margin-top: 0.5rem;">เลื่อนครบ 3 ครั้งแล้ววันนี้</p>' : ''}
+      `;
+      
+      Modal.show({
+        title: 'เลื่อนการเตือน',
+        content: content,
+        size: 'sm'
+      });
+    };
+    
+    window.snoozeReminder = async function(reminderId, minutes) {
+      try {
+        const response = await Api.post(`/reminders/${reminderId}/snooze`, { minutes });
+        
+        Modal.close();
+        Toast.success(t('reminders.snooze.snoozed', { minutes }));
+        
+        // Update local reminder data
+        const reminder = reminders.find(r => r.reminder_id === reminderId);
+        if (reminder) {
+          reminder.snooze_count = response.snooze_count || (reminder.snooze_count || 0) + 1;
+        }
+        
+        if (typeof Utils !== 'undefined' && Utils.haptic) {
+          Utils.haptic('light');
+        }
+        
+      } catch (error) {
+        console.error('Failed to snooze:', error);
+        Modal.close();
+        Toast.error(error.message || t('errors.generic'));
+      }
+    };
+    
+    window.showMoreOptions = function() {
+      // Close any existing modal first to prevent stacking
+      Modal.closeAll();
+      
+      Modal.show({
+        title: 'ตัวเลือก',
+        content: `
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <button class="btn btn-outline" onclick="Modal.close(); setTimeout(() => addReminder(), 250);" style="justify-content: flex-start;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+              เพิ่มการเตือน
+            </button>
+            <button class="btn btn-outline" disabled title="ระบบยังไม่รองรับการแก้ไขข้อมูลยา" style="justify-content: flex-start; opacity: 0.5; cursor: not-allowed;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              แก้ไขข้อมูล (ยังไม่รองรับ)
+            </button>
+            <button class="btn btn-outline" onclick="Modal.close(); setTimeout(() => confirmRemove(), 250);" style="justify-content: flex-start; color: var(--color-error);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              นำออกจากรายการ
+            </button>
+          </div>
+        `,
+        size: 'sm'
+      });
+    };
+  });
+  </script>
+</body>
+</html>

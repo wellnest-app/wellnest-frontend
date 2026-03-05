@@ -1,0 +1,76 @@
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <img src="/wellnest-frontend/assets/images/logo.png" alt="WellNest" class="sidebar-logo">
+    <h2 class="sidebar-title">WellNest</h2>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="/wellnest-frontend/pages/dashboard.html" class="sidebar-item" data-page="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span data-i18n="nav.home">หน้าหลัก</span>
+    </a>
+    <a href="/wellnest-frontend/pages/medications/list.html" class="sidebar-item" data-page="medications">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10.5 20.5L3.5 13.5a4.95 4.95 0 1 1 7-7l7 7a4.95 4.95 0 0 1-7 7z"/>
+        <path d="M8.5 8.5l7 7"/>
+      </svg>
+      <span data-i18n="nav.medications">ยาของฉัน</span>
+    </a>
+    <a href="/wellnest-frontend/pages/reminders/list.html" class="sidebar-item" data-page="reminders">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <span data-i18n="nav.reminders">การเตือน</span>
+    </a>
+    <a href="/wellnest-frontend/pages/devices/list.html" class="sidebar-item" data-page="devices">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/>
+        <line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <span data-i18n="nav.devices">อุปกรณ์</span>
+    </a>
+    <a href="/wellnest-frontend/pages/settings/index.html" class="sidebar-item" data-page="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      <span data-i18n="nav.settings">ตั้งค่า</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="sidebar-logout" onclick="handleSidebarLogout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      <span data-i18n="auth.logout">ออกจากระบบ</span>
+    </button>
+  </div>
+</aside>
+<script>
+  // Handle sidebar logout with fallback
+  function handleSidebarLogout() {
+    try {
+      if (typeof Auth !== 'undefined' && Auth.logout) {
+        Auth.logout();
+      } else if (typeof auth !== 'undefined' && auth.logout) {
+        auth.logout();
+      } else {
+        // Fallback
+        localStorage.removeItem('wellnest_token');
+        localStorage.removeItem('wellnest_user');
+        window.location.href = '/wellnest-frontend/pages/auth/login.html';
+      }
+    } catch (error) {
+      console.error('[Sidebar Logout] Error:', error);
+      localStorage.removeItem('wellnest_token');
+      localStorage.removeItem('wellnest_user');
+      window.location.href = '/wellnest-frontend/pages/auth/login.html';
+    }
+  }
+</script>

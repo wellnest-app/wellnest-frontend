@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#F5B31A">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+  <title>หน้าหลัก - WellNest</title>
+  
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#FFFBEB',
+              100: '#FEF3C7',
+              200: '#FDE68A',
+              300: '#FCD34D',
+              400: '#FBBF24',
+              500: '#F5B31A',
+              600: '#D97706',
+              700: '#B45309',
+              800: '#92400E',
+              900: '#78350F'
+            },
+            secondary: {
+              50: '#EFF6FF',
+              100: '#DBEAFE',
+              200: '#BFDBFE',
+              300: '#93C5FD',
+              400: '#60A5FA',
+              500: '#3B82F6',
+              600: '#2563EB',
+              700: '#1D4ED8',
+              800: '#1E40AF',
+              900: '#1E3A8A'
+            }
+          },
+          fontFamily: {
+            sans: ['Noto Sans Thai', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/wellnest-frontend/css/tokens.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/components.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/utilities.css">
+  
+  <style>
+    :root {
+      --header-height: 56px;
+      --bottom-nav-height: 64px;
+    }
+    
+    /* ===== Header ===== */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height);
+      background: white;
+      border-bottom: 1px solid #f0f0f0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+    
+    .header-left {
+      width: 48px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .header-left img {
+      height: 32px;
+      width: auto;
+    }
+    
+    .header-center {
+      flex: 1;
+      text-align: center;
+    }
+    
+    .header-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-gray-800);
+      margin: 0;
+    }
+    
+    .header-right {
+      width: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    
+    .header-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-gray-600);
+      position: relative;
+    }
+    
+    .header-btn:hover {
+      background: var(--color-gray-100);
+    }
+    
+    .header-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+    
+    .badge-dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      background: #EF4444;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+    
+    /* ===== Page Container ===== */
+    .page-container {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+      padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 16px);
+      background: var(--color-background, #FFFBEB);
+    }
+    
+    /* ===== Dashboard Header ===== */
+    .dashboard-header {
+      padding: 1.25rem 1rem 3rem;
+      background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%);
+      color: white;
+      border-radius: 0 0 24px 24px;
+    }
+    
+    .greeting {
+      font-size: 1.375rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    
+    .user-name {
+      font-size: 0.9375rem;
+      opacity: 0.9;
+    }
+    
+    /* ===== Quick Stats ===== */
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      margin: -2rem 1rem 0;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+    }
+    
+    .stat-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .stat-icon.primary { background: var(--color-primary-100); color: var(--color-primary-600); }
+    .stat-icon.secondary { background: var(--color-secondary-100); color: var(--color-secondary-600); }
+    .stat-icon.success { background: rgba(34, 197, 94, 0.15); color: #16A34A; }
+    .stat-icon.warning { background: rgba(245, 158, 11, 0.15); color: #D97706; }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-gray-900);
+    }
+    
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--color-gray-500);
+      margin-top: 0.25rem;
+    }
+    
+    /* ===== Section ===== */
+    .section {
+      padding: 1.5rem 1rem;
+    }
+    
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-gray-800);
+    }
+    
+    .section-link {
+      font-size: 0.875rem;
+      color: var(--color-primary-600);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    /* ===== Quick Actions ===== */
+    .quick-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+    }
+    
+    .quick-action {
+      text-align: center;
+      text-decoration: none;
+      color: var(--color-gray-700);
+    }
+    
+    .quick-action-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.2s;
+    }
+    
+    .quick-action:hover .quick-action-icon {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+    
+    .quick-action-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .quick-action-label {
+      font-size: 0.6875rem;
+      font-weight: 500;
+    }
+    
+    /* ===== Reminder Card ===== */
+    .reminder-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+      margin-bottom: 0.75rem;
+    }
+    
+    .reminder-time {
+      text-align: center;
+      min-width: 56px;
+    }
+    
+    .reminder-time .time {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--color-primary-600);
+    }
+    
+    .reminder-time .period {
+      font-size: 0.6875rem;
+      color: var(--color-gray-500);
+      text-transform: uppercase;
+    }
+    
+    .reminder-details {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .reminder-med {
+      font-weight: 600;
+      color: var(--color-gray-800);
+      margin-bottom: 0.125rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .reminder-dosage {
+      font-size: 0.8125rem;
+      color: var(--color-gray-500);
+    }
+    
+    .reminder-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .action-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    
+    .action-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .action-btn.take {
+      background: var(--color-success, #22C55E);
+      color: white;
+    }
+    
+    .action-btn.snooze {
+      background: var(--color-gray-100);
+      color: var(--color-gray-600);
+    }
+    
+    .action-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    /* ===== Empty State ===== */
+    .empty-state {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--color-gray-500);
+    }
+    
+    .empty-state svg {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 0.75rem;
+      opacity: 0.5;
+    }
+    
+    .empty-state h3 {
+      font-weight: 600;
+      font-size: 0.9375rem;
+      color: var(--color-gray-700);
+      margin-bottom: 0.375rem;
+    }
+    
+    .empty-state a {
+      color: var(--color-primary-600);
+      text-decoration: none;
+      font-size: 0.875rem;
+    }
+    
+    /* ===== Bottom Navigation ===== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--bottom-nav-height);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      background: white;
+      border-top: 1px solid #f0f0f0;
+      z-index: 100;
+      display: flex;
+      align-items: stretch;
+      justify-content: space-around;
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      padding: 6px 4px;
+      color: var(--color-gray-400);
+      text-decoration: none;
+      transition: all 0.2s;
+      min-width: 0;
+    }
+    
+    .nav-item.active {
+      color: var(--color-primary-500);
+    }
+    
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .nav-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+    
+    .nav-label {
+      font-size: 0.625rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      text-align: center;
+    }
+    
+    /* ===== Skeleton Loading ===== */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Placeholder -->
+  <div id="header-placeholder"></div>
+  
+  <!-- Page Content -->
+  <div class="page-container">
+    <!-- Dashboard Header with Greeting -->
+    <div class="dashboard-header" id="dashboard-header">
+      <p class="greeting" id="greeting">สวัสดี</p>
+      <p class="user-name" id="user-name">กำลังโหลด...</p>
+    </div>
+    
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+      <div class="stat-card">
+        <div class="stat-icon primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.5 20.5L3.5 13.5a4.95 4.95 0 1 1 7-7l7 7a4.95 4.95 0 0 1-7 7z"/>
+            <path d="M8.5 8.5l7 7"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="stat-meds">0</div>
+        <div class="stat-label" data-i18n="dashboard.todayMeds">ยาวันนี้</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon success">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="stat-compliance">0%</div>
+        <div class="stat-label" data-i18n="dashboard.compliance">อัตราการทานยา</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="stat-reminders">0</div>
+        <div class="stat-label" data-i18n="dashboard.upcomingReminders">การเตือนที่กำลังมา</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon warning">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="4" y="4" width="16" height="16" rx="2"/>
+            <rect x="9" y="9" width="6" height="6"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="stat-devices">0</div>
+        <div class="stat-label" data-i18n="dashboard.devices">อุปกรณ์ของฉัน</div>
+      </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title" data-i18n="dashboard.quickActions">ทางลัด</h2>
+      </div>
+      <div class="quick-actions-grid">
+        <a href="/wellnest-frontend/pages/medications/catalog.html" class="quick-action">
+          <div class="quick-action-icon" style="background: var(--color-primary-100);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-primary-600)" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+          <span class="quick-action-label" data-i18n="dashboard.searchMeds">ค้นหายา</span>
+        </a>
+        <a href="/wellnest-frontend/pages/medications/list.html" class="quick-action">
+          <div class="quick-action-icon" style="background: var(--color-secondary-100);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-secondary-600)" stroke-width="2">
+              <path d="M10.5 20.5L3.5 13.5a4.95 4.95 0 1 1 7-7l7 7a4.95 4.95 0 0 1-7 7z"/>
+              <path d="M8.5 8.5l7 7"/>
+            </svg>
+          </div>
+          <span class="quick-action-label" data-i18n="dashboard.myMeds">ยาของฉัน</span>
+        </a>
+        <a href="/wellnest-frontend/pages/reminders/list.html" class="quick-action">
+          <div class="quick-action-icon" style="background: rgba(34, 197, 94, 0.15);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </div>
+          <span class="quick-action-label" data-i18n="dashboard.reminders">การเตือน</span>
+        </a>
+        <a href="/wellnest-frontend/pages/history/index.html" class="quick-action">
+          <div class="quick-action-icon" style="background: rgba(139, 92, 246, 0.15);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <span class="quick-action-label" data-i18n="history.title">ประวัติ</span>
+        </a>
+      </div>
+    </section>
+    
+    <!-- Upcoming Reminders -->
+    <section class="section" style="padding-top: 0;">
+      <div class="section-header">
+        <h2 class="section-title" data-i18n="dashboard.upcomingReminders">การเตือนที่กำลังมา</h2>
+        <a href="/wellnest-frontend/pages/reminders/list.html" class="section-link">
+          <span data-i18n="common.viewAll">ดูทั้งหมด</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </a>
+      </div>
+      
+      <div id="reminders-list">
+        <!-- Reminders will be loaded here -->
+        <div class="empty-state" id="empty-reminders">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <h3 data-i18n="dashboard.noReminders">ยังไม่มีการเตือน</h3>
+          <a href="/wellnest-frontend/pages/reminders/form.html" data-i18n="dashboard.addReminder">เพิ่มการเตือน</a>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+  <!-- Component Placeholders -->
+  <div id="bottom-nav-placeholder"></div>
+  <div id="toast-placeholder"></div>
+  <div id="modal-placeholder"></div>
+  
+  <!-- Core Scripts -->
+  <script src="/wellnest-frontend/js/config.js"></script>
+  <script src="/wellnest-frontend/js/i18n/th.js"></script>
+  <script src="/wellnest-frontend/js/i18n/en.js"></script>
+  <script src="/wellnest-frontend/js/i18n.js"></script>
+  <script src="/wellnest-frontend/js/utils.js"></script>
+  <script src="/wellnest-frontend/js/api.js"></script>
+  <script src="/wellnest-frontend/js/auth.js"></script>
+  <script src="/wellnest-frontend/js/storage.js"></script>
+  <script src="/wellnest-frontend/js/components.js"></script>
+  
+  <script>
+  document.addEventListener('DOMContentLoaded', async function() {
+    // Require authentication
+    if (typeof Auth !== 'undefined') {
+      Auth.requireAuth();
+    }
+    
+    // Load components first
+    await Components.init({
+      header: {
+        titleKey: 'nav.dashboard',
+        showNotifications: true
+      },
+      bottomNav: {
+        active: 'dashboard'
+      },
+      toast: true,
+      modal: true
+    });
+    
+    // Get DOM elements
+    const greetingEl = document.getElementById('greeting');
+    const userNameEl = document.getElementById('user-name');
+    const statMeds = document.getElementById('stat-meds');
+    const statCompliance = document.getElementById('stat-compliance');
+    const statReminders = document.getElementById('stat-reminders');
+    const statDevices = document.getElementById('stat-devices');
+    const remindersList = document.getElementById('reminders-list');
+    const emptyReminders = document.getElementById('empty-reminders');
+    
+    // Initialize page
+    initDashboard();
+    
+    async function initDashboard() {
+      try {
+        // Update greeting
+        updateGreeting();
+        
+        // Load user info
+        const user = Auth.getUser();
+        if (user) {
+          const displayName = user.first_name 
+            ? `${user.first_name} ${user.last_name || ''}`.trim()
+            : user.username || '';
+          userNameEl.textContent = displayName;
+        }
+        
+        // Load dashboard data (handle errors gracefully)
+        await Promise.allSettled([
+          loadTodayMedications(),
+          loadUpcomingReminders(),
+          loadComplianceStats(),
+          loadDeviceCount()
+        ]);
+        
+      } catch (error) {
+        console.error('Failed to load dashboard:', error);
+      }
+    }
+    
+    // Update greeting based on time of day
+    function updateGreeting() {
+      const hour = new Date().getHours();
+      let greetingKey = 'dashboard.greeting.';
+      
+      if (hour >= 5 && hour < 12) {
+        greetingKey += 'morning';
+      } else if (hour >= 12 && hour < 17) {
+        greetingKey += 'afternoon';
+      } else if (hour >= 17 && hour < 21) {
+        greetingKey += 'evening';
+      } else {
+        greetingKey += 'night';
+      }
+      
+      greetingEl.textContent = t(greetingKey);
+    }
+    
+    // Load today's medications count
+    async function loadTodayMedications() {
+      try {
+        // Use /medications/mine instead of /users/me/assigned-medications
+        const response = await Api.get('/medications/mine');
+        const activeMeds = Array.isArray(response) ? response.filter(m => m.is_active) : [];
+        statMeds.textContent = activeMeds.length;
+      } catch (error) {
+        console.log('No medications yet:', error.message);
+        statMeds.textContent = '0';
+      }
+    }
+    
+    // Load upcoming reminders
+    async function loadUpcomingReminders() {
+      try {
+        const response = await Api.get('/reminders');
+        const reminders = Array.isArray(response) ? response : [];
+        
+        // Filter enabled reminders
+        const enabledReminders = reminders.filter(r => r.is_enabled);
+        statReminders.textContent = enabledReminders.length;
+        
+        if (enabledReminders.length > 0) {
+          emptyReminders.style.display = 'none';
+          renderReminders(enabledReminders.slice(0, 3));
+        } else {
+          emptyReminders.style.display = 'block';
+        }
+      } catch (error) {
+        console.log('No reminders yet:', error.message);
+        statReminders.textContent = '0';
+        emptyReminders.style.display = 'block';
+      }
+    }
+    
+    // Load compliance stats
+    async function loadComplianceStats() {
+      try {
+        const response = await Api.get('/notifications/stats');
+        const rate = response.compliance_rate || response.rate || 0;
+        statCompliance.textContent = `${Math.round(rate)}%`;
+      } catch (error) {
+        console.log('No compliance stats yet:', error.message);
+        statCompliance.textContent = '0%';
+      }
+    }
+    
+    // Load device count
+    async function loadDeviceCount() {
+      try {
+        const response = await Api.get('/devices');
+        const devices = Array.isArray(response) ? response : [];
+        statDevices.textContent = devices.length;
+      } catch (error) {
+        console.log('No devices yet:', error.message);
+        statDevices.textContent = '0';
+      }
+    }
+    
+    // Render reminder cards
+    function renderReminders(reminders) {
+      // Remove skeleton loaders if any
+      const skeletons = remindersList.querySelectorAll('.skeleton-card');
+      skeletons.forEach(s => s.remove());
+      
+      reminders.forEach(reminder => {
+        const card = createReminderCard(reminder);
+        remindersList.insertBefore(card, emptyReminders);
+      });
+    }
+    
+    // Create reminder card element
+    function createReminderCard(reminder) {
+      const card = document.createElement('div');
+      card.className = 'reminder-card';
+      card.dataset.id = reminder.reminder_id;
+      
+      // Parse time - handle different formats
+      const timeStr = reminder.reminder_time || '00:00';
+      let hours = 0, minutes = 0;
+      
+      if (timeStr.includes(':')) {
+        const parts = timeStr.split(':');
+        hours = parseInt(parts[0], 10) || 0;
+        minutes = parseInt(parts[1], 10) || 0;
+      }
+      
+      // Format time for display (12-hour format)
+      const period = hours >= 12 ? 'PM' : 'AM';
+      const displayHours = hours % 12 || 12;
+      const displayMinutes = minutes.toString().padStart(2, '0');
+      
+      card.innerHTML = `
+        <div class="reminder-time">
+          <div class="time">${displayHours}:${displayMinutes}</div>
+          <div class="period">${period}</div>
+        </div>
+        <div class="reminder-details">
+          <div class="reminder-med">${reminder.medication_name || 'ยา'}</div>
+          <div class="reminder-dosage">${reminder.dosage || ''}</div>
+        </div>
+        <div class="reminder-actions">
+          <button class="action-btn take" onclick="takeReminder(${reminder.reminder_id})" aria-label="ทานแล้ว">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </button>
+          <button class="action-btn snooze" onclick="snoozeReminder(${reminder.reminder_id})" aria-label="เลื่อน">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </button>
+        </div>
+      `;
+      
+      return card;
+    }
+    
+    // Make functions global for onclick handlers
+    window.takeReminder = async function(reminderId) {
+      try {
+        await Api.post(`/reminders/${reminderId}/take`);
+        Toast.success(t('reminders.taken'));
+        // Refresh reminders
+        loadUpcomingReminders();
+        loadComplianceStats();
+      } catch (error) {
+        console.error('Failed to take reminder:', error);
+        Toast.error(t('errors.generic'));
+      }
+    };
+    
+    window.snoozeReminder = async function(reminderId) {
+      try {
+        await Api.post(`/reminders/${reminderId}/snooze`, { minutes: 10 });
+        Toast.success(t('reminders.snoozed', { minutes: 10 }));
+        // Refresh reminders
+        loadUpcomingReminders();
+      } catch (error) {
+        console.error('Failed to snooze reminder:', error);
+        Toast.error(t('errors.generic'));
+      }
+    };
+    
+    window.toggleNotifications = function() {
+      window.location.href = '/wellnest-frontend/pages/notifications/list.html';
+    };
+  });
+  </script>
+</body>
+</html>
