@@ -1,0 +1,61 @@
+// Firebase Cloud Messaging Service Worker
+// This file must be in the root of your web server
+
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
+
+// Firebase configuration
+firebase.initializeApp({
+    apiKey: "AIzaSyCV4iN3x6h9tJMJPex9WXDU9gL-AF61ES0",
+    authDomain: "wellnest-push-notification.firebaseapp.com",
+    projectId: "wellnest-push-notification",
+    storageBucket: "wellnest-push-notification.firebasestorage.app",
+    messagingSenderId: "286182410972",
+    appId: "1:286182410972:web:9c2820d5deeb8d58e90219"
+});
+
+const messaging = firebase.messaging();
+
+// Handle background messages
+messaging.onBackgroundMessage((payload) => {
+    console.log('[firebase-messaging-sw.js] Received background message:', payload);
+    
+    const notificationTitle = payload.notification?.title || 'WellNest';
+    const notificationOptions = {
+        body: payload.notification?.body || '',
+        icon: '/wellnest-frontend/assets/icons/icon-192x192.png',
+        badge: '/wellnest-frontend/favicon.ico',
+        data: payload.data,
+        tag: 'wellnest-notification',
+        requireInteraction: true
+    };
+    
+    return self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+// Handle notification click
+self.addEventListener('notificationclick', (event) => {
+    console.log('[firebase-messaging-sw.js] Notification clicked:', event);
+    
+    event.notification.close();
+    
+    // Open app
+    // Phase 4.5: Open WellNest app on notification click
+    const appUrl = '/wellnest-frontend/pages/dashboard.html';
+    
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true })
+            .then((clientList) => {
+                // Try to focus existing WellNest window
+                for (const client of clientList) {
+                    if (client.url.includes('wellnest-frontend') && 'focus' in client) {
+                        return client.focus();
+                    }
+                }
+                // Open new window if none found
+                if (clients.openWindow) {
+                    return clients.openWindow(appUrl);
+                }
+            })
+    );
+});
