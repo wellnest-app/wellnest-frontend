@@ -801,6 +801,9 @@
     let selectedMedication = null;
     let selectedDays = [0, 1, 2, 3, 4, 5, 6]; // All days selected by default
     
+    // Phase 4.5: Mapping day number → API name
+    const DAY_NUM_TO_NAME = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    
     // Elements
     const medicationSelect = document.getElementById('medicationSelect');
     const reminderTime = document.getElementById('reminderTime');
@@ -956,8 +959,10 @@
       submitBtn.disabled = true;
       
       try {
-        // Prepare days_of_week (null if all days)
-        const daysOfWeek = selectedDays.length === 7 ? null : selectedDays;
+        // Phase 4.5: Convert day numbers to API string format
+        const daysOfWeek = selectedDays.length === 7 
+          ? null 
+          : selectedDays.map(d => DAY_NUM_TO_NAME[d]);
         
         const payload = {
           user_med_id: selectedMedication.user_med_id,
