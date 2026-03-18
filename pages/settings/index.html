@@ -63,6 +63,10 @@
   <link rel="stylesheet" href="/wellnest-frontend/css/components.css">
   <link rel="stylesheet" href="/wellnest-frontend/css/utilities.css">
   
+  <!-- Firebase SDK สำหรับ Push Notification -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+  
   <style>
     :root {
       --header-height: 56px;
@@ -590,9 +594,9 @@
         </div>
         <div class="settings-item-content">
           <div class="settings-item-title" data-i18n="settings.notifications">การแจ้งเตือน</div>
-          <div class="settings-item-subtitle" data-i18n="settings.notificationsDesc">เปิด/ปิดการแจ้งเตือน</div>
+          <div class="settings-item-subtitle" id="notif-status-text" data-i18n="settings.notificationsDesc">เปิด/ปิดการแจ้งเตือน</div>
         </div>
-        <div class="toggle-switch active" onclick="toggleNotifications(this)"></div>
+        <div class="toggle-switch" id="notif-toggle" onclick="toggleNotifications(this)"></div>
       </div>
     </div>
     
@@ -673,6 +677,9 @@
     
     // Update language checkmarks
     updateLanguageCheck();
+    
+    // Sync notification toggle กับสถานะจริง
+    syncNotificationToggle();
   });
   
   // Load user profile
@@ -713,17 +720,177 @@
     }
   };
   
-  // Toggle notifications
-  window.toggleNotifications = function(element) {
-    element.classList.toggle('active');
-    const isEnabled = element.classList.contains('active');
+  // ============================================================
+  // Push Notification — FCM Integration (Settings Page)
+  // ============================================================
+  
+  // Firebase Configuration (public keys)
+  const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyCV4iN3x6h9tJMJPex9WXDU9gL-AF61ES0",
+    authDomain: "wellnest-push-notification.firebaseapp.com",
+    projectId: "wellnest-push-notification",
+    storageBucket: "wellnest-push-notification.firebasestorage.app",
+    messagingSenderId: "286182410972",
+    appId: "1:286182410972:web:9c2820d5deeb8d58e90219"
+  };
+  const VAPID_KEY = 'BHzt6wLsiYy_VqlISe-PGttDC4_6pVb1L2iz21h0CNYo48hr--JrSu-3Us2UsFeh5CFDj1V1XKcCFgYUdD4w-bY';
+  const SW_PATH = '/wellnest-frontend/firebase-messaging-sw.js';
+  const SW_SCOPE = '/wellnest-frontend/';
+  const PUSH_REGISTERED_KEY = 'wellnest_push_registered';
+  const PUSH_TOKEN_KEY = 'wellnest_push_token';
+  
+  /**
+   * Sync toggle กับสถานะจริงของ notification permission + registration
+   */
+  function syncNotificationToggle() {
+    const toggle = document.getElementById('notif-toggle');
+    const statusText = document.getElementById('notif-status-text');
+    if (!toggle) return;
     
-    // Save preference
-    localStorage.setItem('wellnest_notifications', isEnabled ? '1' : '0');
+    // ตรวจ browser support
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+      toggle.style.opacity = '0.5';
+      toggle.style.pointerEvents = 'none';
+      if (statusText) statusText.textContent = 'เบราว์เซอร์ไม่รองรับ';
+      return;
+    }
     
-    // Show feedback
-    if (typeof Toast !== 'undefined') {
-      Toast.success(isEnabled ? t('settings.notificationsEnabled') : t('settings.notificationsDisabled'));
+    const permission = Notification.permission;
+    const isRegistered = localStorage.getItem(PUSH_REGISTERED_KEY) === 'true';
+    
+    if (permission === 'granted' && isRegistered) {
+      toggle.classList.add('active');
+      if (statusText) statusText.textContent = 'เปิดอยู่ — รับการแจ้งเตือนผ่าน browser';
+    } else if (permission === 'denied') {
+      toggle.classList.remove('active');
+      toggle.style.opacity = '0.5';
+      toggle.style.pointerEvents = 'none';
+      if (statusText) statusText.textContent = 'ถูกบล็อก — เปิดได้ในตั้งค่าเบราว์เซอร์';
+    } else {
+      toggle.classList.remove('active');
+      if (statusText) statusText.textContent = 'ปิดอยู่ — ไม่รับการแจ้งเตือน';
+    }
+  }
+  
+  /**
+   * Toggle notifications — เชื่อม FCM register/unregister จริง
+   */
+  window.toggleNotifications = async function(element) {
+    const statusText = document.getElementById('notif-status-text');
+    const willEnable = !element.classList.contains('active');
+    
+    if (willEnable) {
+      // === เปิด: ขอ permission + register FCM ===
+      try {
+        // ตรวจ browser support
+        if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+          if (typeof Toast !== 'undefined') Toast.error('เบราว์เซอร์ไม่รองรับการแจ้งเตือน');
+          return;
+        }
+        
+        // ตรวจว่าถูก denied หรือไม่
+        if (Notification.permission === 'denied') {
+          if (typeof Toast !== 'undefined') Toast.info('กรุณาเปิดการแจ้งเตือนในตั้งค่าเบราว์เซอร์');
+          return;
+        }
+        
+        if (statusText) statusText.textContent = 'กำลังเปิด...';
+        
+        // ตรวจ Firebase SDK
+        if (typeof firebase === 'undefined' || !firebase.messaging) {
+          if (typeof Toast !== 'undefined') Toast.error('Firebase SDK ไม่พร้อม');
+          return;
+        }
+        
+        // Init Firebase
+        if (!firebase.apps.length) {
+          firebase.initializeApp(FIREBASE_CONFIG);
+        }
+        const messaging = firebase.messaging();
+        
+        // Register SW
+        const swRegistration = await navigator.serviceWorker.register(SW_PATH, { scope: SW_SCOPE });
+        await navigator.serviceWorker.ready;
+        
+        // ขอ Permission
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          if (statusText) statusText.textContent = 'ไม่ได้รับอนุญาต';
+          if (typeof Toast !== 'undefined') Toast.info('ไม่ได้รับอนุญาตการแจ้งเตือน');
+          syncNotificationToggle();
+          return;
+        }
+        
+        // Get FCM Token
+        const fcmToken = await messaging.getToken({
+          vapidKey: VAPID_KEY,
+          serviceWorkerRegistration: swRegistration
+        });
+        
+        if (!fcmToken) {
+          if (statusText) statusText.textContent = 'ขอ token ไม่สำเร็จ';
+          if (typeof Toast !== 'undefined') Toast.error('ขอ token ไม่สำเร็จ');
+          return;
+        }
+        
+        // Register กับ Backend
+        await Api.post('/push/register', {
+          fcm_token: fcmToken,
+          device_type: 'web',
+          device_name: navigator.userAgent.substring(0, 50)
+        });
+        
+        // บันทึก flag
+        localStorage.setItem(PUSH_REGISTERED_KEY, 'true');
+        localStorage.setItem(PUSH_TOKEN_KEY, fcmToken);
+        
+        // อัพเดท UI
+        element.classList.add('active');
+        if (statusText) statusText.textContent = 'เปิดอยู่ — รับการแจ้งเตือนผ่าน browser';
+        if (typeof Toast !== 'undefined') Toast.success('เปิดการแจ้งเตือนสำเร็จ');
+        
+        console.log('[Settings] Push notification enabled');
+        
+      } catch (error) {
+        console.error('[Settings] Enable push failed:', error);
+        if (statusText) statusText.textContent = 'เปิดไม่สำเร็จ';
+        if (typeof Toast !== 'undefined') Toast.error('เปิดการแจ้งเตือนไม่สำเร็จ');
+        syncNotificationToggle();
+      }
+      
+    } else {
+      // === ปิด: Unregister FCM token ===
+      try {
+        if (statusText) statusText.textContent = 'กำลังปิด...';
+        
+        const savedToken = localStorage.getItem(PUSH_TOKEN_KEY);
+        
+        if (savedToken) {
+          // เรียก API unregister
+          try {
+            await Api.post('/push/unregister', { fcm_token: savedToken });
+            console.log('[Settings] Token unregistered from backend');
+          } catch (apiErr) {
+            console.warn('[Settings] Unregister API error (ไม่ร้ายแรง):', apiErr.message);
+          }
+        }
+        
+        // ลบ flag ใน localStorage
+        localStorage.removeItem(PUSH_REGISTERED_KEY);
+        localStorage.removeItem(PUSH_TOKEN_KEY);
+        
+        // อัพเดท UI
+        element.classList.remove('active');
+        if (statusText) statusText.textContent = 'ปิดอยู่ — ไม่รับการแจ้งเตือน';
+        if (typeof Toast !== 'undefined') Toast.success('ปิดการแจ้งเตือนแล้ว');
+        
+        console.log('[Settings] Push notification disabled');
+        
+      } catch (error) {
+        console.error('[Settings] Disable push failed:', error);
+        if (typeof Toast !== 'undefined') Toast.error('ปิดการแจ้งเตือนไม่สำเร็จ');
+        syncNotificationToggle();
+      }
     }
   };
   
@@ -754,9 +921,20 @@
   };
   
   // Perform actual logout
-  function performLogout() {
+  async function performLogout() {
     console.log('[Logout] Performing logout...');
     try {
+      // Step C: Unregister FCM token ก่อน clear localStorage
+      const savedToken = localStorage.getItem(PUSH_TOKEN_KEY);
+      if (savedToken) {
+        try {
+          await Api.post('/push/unregister', { fcm_token: savedToken });
+          console.log('[Logout] FCM token unregistered');
+        } catch (pushErr) {
+          console.warn('[Logout] FCM unregister failed (ไม่ร้ายแรง):', pushErr.message);
+        }
+      }
+      
       // Clear all auth data
       localStorage.removeItem('wellnest_token');
       localStorage.removeItem('wellnest_user');
