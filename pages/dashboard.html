@@ -921,22 +921,10 @@
         }
         
         // --- 9. Foreground Message Handler ---
+        // หมายเหตุ: ไม่สร้าง new Notification() ที่นี่ เพราะ Service Worker
+        // จัดการแสดง desktop notification อยู่แล้ว → ป้องกัน notification ซ้ำ 2 อัน
         messaging.onMessage((payload) => {
           console.log('[Push] Foreground message:', payload);
-          
-          // แสดง browser notification
-          if (Notification.permission === 'granted') {
-            const notifTitle = payload.notification?.title || 'WellNest';
-            const notifBody = payload.notification?.body || '';
-            
-            new Notification(notifTitle, {
-              body: notifBody,
-              icon: '/wellnest-frontend/assets/icons/icon-192x192.png',
-              badge: '/wellnest-frontend/assets/icons/icon-72x72.png',
-              data: payload.data,
-              tag: 'wellnest-' + (payload.data?.reminder_id || Date.now())
-            });
-          }
           
           // ถ้าเป็น notification แบบ reminder → refresh dashboard data
           const dataType = payload.data?.type || '';
@@ -946,7 +934,7 @@
             loadComplianceStats();
           }
           
-          // แสดง in-app toast ด้วย
+          // แสดง in-app toast แทน desktop notification
           if (typeof Toast !== 'undefined') {
             const toastMsg = payload.notification?.title || 'มีการแจ้งเตือนใหม่';
             Toast.info(toastMsg);
