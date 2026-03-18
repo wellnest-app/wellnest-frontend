@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WellNest - Push Notification Test v4</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            font-size: 24px;
+            margin: 0 0 20px 0;
+        }
+        h2 {
+            color: #333;
+            font-size: 18px;
+            margin: 0 0 15px 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .status.pending { background: #fef3c7; color: #92400e; }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover { background: #1d4ed8; }
+        button:disabled { background: #9ca3af; cursor: not-allowed; }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .token-display {
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 10px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 11px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        .log {
+            background: #1f2937;
+            color: #10b981;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .log .error { color: #f87171; }
+        .log .info { color: #60a5fa; }
+        .log .warn { color: #fbbf24; }
+        
+        .browser-info {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔔 WellNest Push Test v4</h1>
+        <p>ทดสอบการรับ Push Notification ผ่าน Firebase Cloud Messaging</p>
+        <div id="firebase-status">
+            <span class="status pending">กำลังโหลด Firebase...</span>
+        </div>
+        <div id="sw-status" style="margin-top: 10px;">
+            <span class="status pending">กำลังตรวจสอบ Service Worker...</span>
+        </div>
+        <div class="browser-info" id="browser-info"></div>
+    </div>
+
+    <!-- Step 1: Login -->
+    <div class="card">
+        <h2>Step 1: เข้าสู่ระบบ</h2>
+        <div id="login-status">
+            <span class="status pending">ยังไม่ได้เข้าสู่ระบบ</span>
+        </div>
+        
+        <label>Username</label>
+        <input type="text" id="username" value="warunyu" placeholder="username">
+        
+        <label>Password</label>
+        <input type="password" id="password" placeholder="password">
+        
+        <label>API URL</label>
+        <input type="text" id="api-url" value="https://api.wellnest-care.com">
+        
+        <button onclick="login()" id="btn-login">เข้าสู่ระบบ</button>
+    </div>
+
+    <!-- Step 2: Get Permission -->
+    <div class="card">
+        <h2>Step 2: ขอ Permission</h2>
+        <div id="permission-status">
+            <span class="status pending">รอดำเนินการ</span>
+        </div>
+        <button onclick="requestPermission()" id="btn-permission" disabled>ขอ Permission</button>
+    </div>
+
+    <!-- Step 3: Get FCM Token -->
+    <div class="card">
+        <h2>Step 3: รับ FCM Token</h2>
+        <div id="token-status">
+            <span class="status pending">รอดำเนินการ</span>
+        </div>
+        <div id="token-display" class="token-display" style="display:none;"></div>
+        <button onclick="getFcmToken()" id="btn-token" disabled>รับ Token</button>
+    </div>
+
+    <!-- Step 4: Register Token -->
+    <div class="card">
+        <h2>Step 4: ลงทะเบียน Token</h2>
+        <div id="register-status">
+            <span class="status pending">รอดำเนินการ</span>
+        </div>
+        <button onclick="registerToken()" id="btn-register" disabled>ลงทะเบียน Token</button>
+    </div>
+
+    <!-- Step 5: Test Push -->
+    <div class="card">
+        <h2>Step 5: ทดสอบส่ง Push</h2>
+        <div id="push-status">
+            <span class="status pending">รอดำเนินการ</span>
+        </div>
+        
+        <label>หัวข้อ</label>
+        <input type="text" id="push-title" value="🔔 เวลาทานยา">
+        
+        <label>เนื้อหา</label>
+        <input type="text" id="push-body" value="อย่าลืมทานยา Paracetamol 500mg">
+        
+        <button onclick="sendTestPush()" id="btn-push" disabled>ส่ง Test Push</button>
+    </div>
+
+    <!-- Utility -->
+    <div class="card">
+        <h2>🛠️ Utility</h2>
+        <button onclick="clearServiceWorkers()" style="background: #dc2626;">ล้าง Service Workers ทั้งหมด</button>
+        <button onclick="location.reload()" style="background: #059669; margin-top: 10px;">รีเฟรชหน้า</button>
+    </div>
+
+    <!-- Log -->
+    <div class="card">
+        <h2>📋 Log</h2>
+        <div id="log" class="log">รอเริ่มทดสอบ...</div>
+    </div>
+
+    <!-- Firebase SDK (compat version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+    
+    <script>
+        // ============================================================
+        // Configuration
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCV4iN3x6h9tJMJPex9WXDU9gL-AF61ES0",
+            authDomain: "wellnest-push-notification.firebaseapp.com",
+            projectId: "wellnest-push-notification",
+            storageBucket: "wellnest-push-notification.firebasestorage.app",
+            messagingSenderId: "286182410972",
+            appId: "1:286182410972:web:9c2820d5deeb8d58e90219",
+            measurementId: "G-7NEHLVM615"
+        };
+
+        // VAPID Key from Firebase Console
+        const VAPID_KEY = 'BHzt6wLsiYy_VqlISe-PGttDC4_6pVb1L2iz21h0CNYo48hr--JrSu-3Us2UsFeh5CFDj1V1XKcCFgYUdD4w-bY';
+
+        // ============================================================
+        // State
+        // ============================================================
+        let authToken = null;
+        let fcmToken = null;
+        let apiUrl = '';
+        let messaging = null;
+        let serviceWorkerRegistration = null;
+        let isGettingToken = false; // Prevent double click
+
+        // ============================================================
+        // Browser Detection
+        // ============================================================
+        function detectBrowser() {
+            const ua = navigator.userAgent;
+            let browser = 'Unknown';
+            
+            if (ua.includes('Safari') && !ua.includes('Chrome')) {
+                browser = 'Safari';
+            } else if (ua.includes('Chrome')) {
+                browser = 'Chrome';
+            } else if (ua.includes('Firefox')) {
+                browser = 'Firefox';
+            } else if (ua.includes('Edge')) {
+                browser = 'Edge';
+            }
+            
+            document.getElementById('browser-info').textContent = 
+                `Browser: ${browser} | Service Worker: ${'serviceWorker' in navigator ? 'Supported' : 'Not Supported'}`;
+            
+            return browser;
+        }
+
+        // ============================================================
+        // Utility Functions
+        // ============================================================
+        function log(msg, type = '') {
+            const logEl = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            const typeClass = type ? ` class="${type}"` : '';
+            logEl.innerHTML += `<div${typeClass}>[${time}] ${msg}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${time}] ${msg}`);
+        }
+
+        function setStatus(id, status, text) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.innerHTML = `<span class="status ${status}">${text}</span>`;
+            }
+        }
+
+        // ============================================================
+        // Clear Service Workers
+        // ============================================================
+        async function clearServiceWorkers() {
+            try {
+                log('🧹 กำลังล้าง Service Workers...', 'info');
+                
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (const registration of registrations) {
+                    await registration.unregister();
+                    log(`Unregistered: ${registration.scope}`, 'info');
+                }
+                
+                log('✅ ล้าง Service Workers เสร็จแล้ว กรุณารีเฟรชหน้า', 'info');
+                setStatus('sw-status', 'pending', '⚠️ Service Workers ถูกล้างแล้ว - กรุณารีเฟรช');
+            } catch (err) {
+                log(`❌ Error clearing SW: ${err.message}`, 'error');
+            }
+        }
+
+        // ============================================================
+        // Register Service Worker
+        // ============================================================
+        async function registerServiceWorker() {
+            if (!('serviceWorker' in navigator)) {
+                setStatus('sw-status', 'error', '❌ Browser ไม่รองรับ Service Worker');
+                log('❌ Service Worker not supported', 'error');
+                return null;
+            }
+
+            try {
+                log('📦 กำลัง register Service Worker...', 'info');
+                
+                // Register the service worker
+                // Phase 4.5: GitHub Pages path
+                const swPath = '/wellnest-frontend/firebase-messaging-sw.js';
+                const swScope = '/wellnest-frontend/';
+                
+                const registration = await navigator.serviceWorker.register(swPath, {
+                    scope: swScope
+                });
+                
+                log(`✅ Service Worker registered (scope: ${registration.scope})`, 'info');
+                
+                // Wait for service worker to be ready
+                await navigator.serviceWorker.ready;
+                log('✅ Service Worker is ready', 'info');
+                
+                setStatus('sw-status', 'success', '✅ Service Worker พร้อมใช้งาน');
+                return registration;
+                
+            } catch (err) {
+                setStatus('sw-status', 'error', `❌ SW Error: ${err.message}`);
+                log(`❌ Service Worker registration failed: ${err.message}`, 'error');
+                return null;
+            }
+        }
+
+        // ============================================================
+        // Initialize Firebase (Fixed - no useServiceWorker)
+        // ============================================================
+        async function initFirebase() {
+            try {
+                // First, register service worker
+                serviceWorkerRegistration = await registerServiceWorker();
+                
+                if (!serviceWorkerRegistration) {
+                    setStatus('firebase-status', 'error', '❌ ไม่สามารถ register Service Worker');
+                    return false;
+                }
+
+                // Initialize Firebase
+                firebase.initializeApp(firebaseConfig);
+                messaging = firebase.messaging();
+                
+                // NOTE: Do NOT call messaging.useServiceWorker() - it's deprecated in v10
+                // Instead, pass serviceWorkerRegistration in getToken() options
+
+                // Listen for foreground messages
+                messaging.onMessage((payload) => {
+                    log('📬 Foreground message received!', 'info');
+                    log(`Title: ${payload.notification?.title}`, 'info');
+                    log(`Body: ${payload.notification?.body}`, 'info');
+                    
+                    // Show browser notification manually for foreground
+                    if (Notification.permission === 'granted') {
+                        new Notification(payload.notification?.title || 'WellNest', {
+                            body: payload.notification?.body || '',
+                            icon: '/favicon.ico',
+                            data: payload.data
+                        });
+                    }
+                });
+
+                setStatus('firebase-status', 'success', '✅ Firebase พร้อมใช้งาน');
+                log('✅ Firebase initialized successfully', 'info');
+                return true;
+                
+            } catch (err) {
+                setStatus('firebase-status', 'error', `❌ Firebase Error: ${err.message}`);
+                log(`❌ Firebase init error: ${err.message}`, 'error');
+                return false;
+            }
+        }
+
+        // ============================================================
+        // Step 1: Login
+        // ============================================================
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            apiUrl = document.getElementById('api-url').value;
+
+            if (!username || !password) {
+                log('กรุณากรอก username และ password', 'error');
+                return;
+            }
+
+            try {
+                log(`🔐 กำลังเข้าสู่ระบบ... (${apiUrl})`);
+                
+                const response = await fetch(`${apiUrl}/api/v1/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || `Login failed: ${response.status}`);
+                }
+
+                const data = await response.json();
+                authToken = data.access_token;
+                
+                setStatus('login-status', 'success', `✅ เข้าสู่ระบบสำเร็จ (${username})`);
+                log('✅ เข้าสู่ระบบสำเร็จ', 'info');
+                
+                // Enable next step
+                document.getElementById('btn-permission').disabled = false;
+                
+            } catch (err) {
+                setStatus('login-status', 'error', `❌ ${err.message}`);
+                log(`❌ Login error: ${err.message}`, 'error');
+            }
+        }
+
+        // ============================================================
+        // Step 2: Request Permission
+        // ============================================================
+        async function requestPermission() {
+            try {
+                log('🔔 กำลังขอ permission...');
+                
+                const currentPermission = Notification.permission;
+                log(`Current permission: ${currentPermission}`, 'info');
+                
+                if (currentPermission === 'granted') {
+                    setStatus('permission-status', 'success', '✅ ได้รับ permission แล้ว');
+                    log('✅ Permission already granted', 'info');
+                    document.getElementById('btn-token').disabled = false;
+                    return;
+                }
+                
+                if (currentPermission === 'denied') {
+                    setStatus('permission-status', 'error', '❌ Permission ถูกบล็อก');
+                    log('❌ Permission denied - reset in browser settings', 'error');
+                    return;
+                }
+                
+                const permission = await Notification.requestPermission();
+                
+                if (permission === 'granted') {
+                    setStatus('permission-status', 'success', '✅ ได้รับ permission แล้ว');
+                    log('✅ Permission granted', 'info');
+                    document.getElementById('btn-token').disabled = false;
+                } else {
+                    setStatus('permission-status', 'error', `❌ Permission ${permission}`);
+                    log(`❌ Permission: ${permission}`, 'error');
+                }
+            } catch (err) {
+                setStatus('permission-status', 'error', `❌ ${err.message}`);
+                log(`❌ Permission error: ${err.message}`, 'error');
+            }
+        }
+
+        // ============================================================
+        // Step 3: Get FCM Token (Fixed - with double-click prevention)
+        // ============================================================
+        async function getFcmToken() {
+            // Prevent double click
+            if (isGettingToken) {
+                log('⏳ กำลังดำเนินการอยู่...', 'warn');
+                return;
+            }
+            
+            if (!messaging) {
+                log('❌ Firebase ยังไม่พร้อม', 'error');
+                return;
+            }
+
+            if (!serviceWorkerRegistration) {
+                log('❌ Service Worker ยังไม่พร้อม', 'error');
+                setStatus('token-status', 'error', '❌ Service Worker ไม่พร้อม');
+                return;
+            }
+
+            isGettingToken = true;
+            document.getElementById('btn-token').disabled = true;
+
+            try {
+                log('🔑 กำลังขอ FCM token...', 'info');
+                log(`Using VAPID Key: ${VAPID_KEY.substring(0, 30)}...`, 'info');
+                
+                // Get token with service worker registration (correct way for v10)
+                const token = await messaging.getToken({ 
+                    vapidKey: VAPID_KEY,
+                    serviceWorkerRegistration: serviceWorkerRegistration
+                });
+                
+                if (token) {
+                    fcmToken = token;
+                    setStatus('token-status', 'success', '✅ ได้รับ token แล้ว');
+                    document.getElementById('token-display').style.display = 'block';
+                    document.getElementById('token-display').textContent = token;
+                    document.getElementById('btn-register').disabled = false;
+                    log('✅ FCM Token received', 'info');
+                    log(`Token: ${token.substring(0, 50)}...`);
+                } else {
+                    setStatus('token-status', 'error', '❌ ไม่ได้รับ token');
+                    log('❌ No token received', 'error');
+                    document.getElementById('btn-token').disabled = false;
+                }
+            } catch (err) {
+                setStatus('token-status', 'error', `❌ ${err.message}`);
+                log(`❌ Token error: ${err.message}`, 'error');
+                document.getElementById('btn-token').disabled = false;
+            } finally {
+                isGettingToken = false;
+            }
+        }
+
+        // ============================================================
+        // Step 4: Register Token with Backend
+        // ============================================================
+        async function registerToken() {
+            if (!fcmToken || !authToken) {
+                log('❌ ต้อง login และ ได้รับ token ก่อน', 'error');
+                return;
+            }
+
+            try {
+                log('📝 กำลังลงทะเบียน token...');
+                
+                const response = await fetch(`${apiUrl}/api/v1/push/register`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        fcm_token: fcmToken,
+                        device_type: 'web',
+                        device_name: navigator.userAgent.substring(0, 50)
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || `HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                setStatus('register-status', 'success', `✅ ลงทะเบียนสำเร็จ (token_id: ${data.token_id})`);
+                log(`✅ Token registered: ${data.message}`, 'info');
+                document.getElementById('btn-push').disabled = false;
+                
+            } catch (err) {
+                setStatus('register-status', 'error', `❌ ${err.message}`);
+                log(`❌ Register error: ${err.message}`, 'error');
+            }
+        }
+
+        // ============================================================
+        // Step 5: Send Test Push
+        // ============================================================
+        async function sendTestPush() {
+            if (!authToken) {
+                log('❌ ต้อง login ก่อน', 'error');
+                return;
+            }
+
+            const title = document.getElementById('push-title').value;
+            const body = document.getElementById('push-body').value;
+
+            try {
+                log('📤 กำลังส่ง test push...');
+                
+                const response = await fetch(`${apiUrl}/api/v1/push/test`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ title, body })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || `HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    setStatus('push-status', 'success', `✅ ส่งสำเร็จ (${data.sent_count} devices)`);
+                    log(`✅ Push sent: ${data.message}`, 'info');
+                } else {
+                    setStatus('push-status', 'error', `⚠️ ${data.message}`);
+                    log(`⚠️ Push warning: ${data.message}`, 'warn');
+                }
+                
+            } catch (err) {
+                setStatus('push-status', 'error', `❌ ${err.message}`);
+                log(`❌ Push error: ${err.message}`, 'error');
+            }
+        }
+
+        // ============================================================
+        // Initialize on page load
+        // ============================================================
+        window.addEventListener('load', async () => {
+            log('🚀 Page loaded, initializing...');
+            detectBrowser();
+            await initFirebase();
+        });
+    </script>
+</body>
+</html>
