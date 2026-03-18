@@ -17,20 +17,14 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 // Handle background messages
+// หมายเหตุ: เมื่อ FCM message มี "notification" payload, browser จะแสดง
+// desktop notification อัตโนมัติ → ไม่ต้องเรียก showNotification() ซ้ำ
+// (ถ้าเรียกซ้ำจะได้ notification 2 อันบน desktop)
 messaging.onBackgroundMessage((payload) => {
     console.log('[firebase-messaging-sw.js] Received background message:', payload);
     
-    const notificationTitle = payload.notification?.title || 'WellNest';
-    const notificationOptions = {
-        body: payload.notification?.body || '',
-        icon: '/wellnest-frontend/assets/icons/icon-192x192.png',
-        badge: '/wellnest-frontend/favicon.ico',
-        data: payload.data,
-        tag: 'wellnest-notification',
-        requireInteraction: true
-    };
-    
-    return self.registration.showNotification(notificationTitle, notificationOptions);
+    // ไม่ต้อง showNotification() — browser จัดการแสดงให้อัตโนมัติแล้ว
+    // เก็บ log ไว้สำหรับ debug เท่านั้น
 });
 
 // Handle notification click
