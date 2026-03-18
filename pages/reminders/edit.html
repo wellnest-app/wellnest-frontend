@@ -861,6 +861,10 @@
     let medication = null;
     let selectedDays = [];
     
+    // Phase 4.5: Mapping between day numbers (Frontend) and API names (Backend)
+    const DAY_NUM_TO_NAME = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    const DAY_NAME_TO_NUM = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+    
     // Elements
     const loadingState = document.getElementById('loadingState');
     const pageContent = document.getElementById('pageContent');
@@ -911,8 +915,16 @@
       reminderTime.value = reminder.reminder_time;
       updateQuickTimeButtons(reminder.reminder_time);
       
-      // Days
-      selectedDays = reminder.days_of_week || [0, 1, 2, 3, 4, 5, 6];
+      // Days — Phase 4.5: Convert API string names to Frontend numbers
+      if (reminder.days_of_week && Array.isArray(reminder.days_of_week) && reminder.days_of_week.length > 0) {
+        // API returns ["mon","tue","wed"] → convert to [1,2,3]
+        selectedDays = reminder.days_of_week
+          .map(d => typeof d === 'string' ? DAY_NAME_TO_NUM[d.toLowerCase()] : d)
+          .filter(d => d !== undefined);
+      } else {
+        // No days_of_week = daily (all days)
+        selectedDays = [0, 1, 2, 3, 4, 5, 6];
+      }
       updateDayButtons();
       
       // Enabled
@@ -988,7 +1000,10 @@
       document.getElementById('saveBtn').disabled = true;
       
       try {
-        const daysOfWeek = selectedDays.length === 7 ? null : selectedDays;
+        // Phase 4.5: Convert day numbers to API string format
+        const daysOfWeek = selectedDays.length === 7 
+          ? null 
+          : selectedDays.map(d => DAY_NUM_TO_NAME[d]);
         
         const payload = {
           reminder_time: reminderTime.value,
