@@ -936,7 +936,7 @@
           
           // แสดง in-app toast แทน desktop notification
           if (typeof Toast !== 'undefined') {
-            const toastMsg = payload.notification?.title || 'มีการแจ้งเตือนใหม่';
+            const toastMsg = payload.data?.title || payload.notification?.title || 'มีการแจ้งเตือนใหม่';
             Toast.info(toastMsg);
           }
         });
