@@ -1,5 +1,6 @@
 // Firebase Cloud Messaging Service Worker
 // This file must be in the root of your web server
+// Bug #2 Fix: ใส่ showNotification() กลับ + ใช้ tag ป้องกัน duplicate notification
 
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
@@ -17,14 +18,25 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 // Handle background messages
-// หมายเหตุ: เมื่อ FCM message มี "notification" payload, browser จะแสดง
-// desktop notification อัตโนมัติ → ไม่ต้องเรียก showNotification() ซ้ำ
-// (ถ้าเรียกซ้ำจะได้ notification 2 อันบน desktop)
+// Bug #2 Fix: ใส่ showNotification() กลับเพื่อแก้ปัญหา mojibake ภาษาไทย
+// เมื่อปล่อยให้ browser แสดง notification อัตโนมัติจาก FCM notification payload
+// → encoding ภาษาไทยเพี้ยน (เ°Cà.§à.³...)
+// ใช้ tag เดียวกันเพื่อป้องกัน duplicate — browser จะ replace ไม่ใช่เพิ่ม
 messaging.onBackgroundMessage((payload) => {
     console.log('[firebase-messaging-sw.js] Received background message:', payload);
     
-    // ไม่ต้อง showNotification() — browser จัดการแสดงให้อัตโนมัติแล้ว
-    // เก็บ log ไว้สำหรับ debug เท่านั้น
+    const title = payload.notification?.title || 'WellNest';
+    const options = {
+        body: payload.notification?.body || '',
+        icon: '/wellnest-frontend/assets/icons/icon-192x192.png',
+        tag: 'wellnest-' + (payload.data?.reminder_id || Date.now()),
+        renotify: true,
+        requireInteraction: true,
+        data: payload.data
+    };
+    
+    // ใช้ tag เดียวกันกับที่ browser auto-display → จะ replace แทนที่จะเพิ่มซ้ำ
+    return self.registration.showNotification(title, options);
 });
 
 // Handle notification click
@@ -33,8 +45,7 @@ self.addEventListener('notificationclick', (event) => {
     
     event.notification.close();
     
-    // Open app
-    // Phase 4.5: Open WellNest app on notification click
+    // Open app — Phase 4.5: Open WellNest app on notification click
     const appUrl = '/wellnest-frontend/pages/dashboard.html';
     
     event.waitUntil(
