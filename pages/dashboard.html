@@ -63,6 +63,10 @@
   <link rel="stylesheet" href="/wellnest-frontend/css/components.css">
   <link rel="stylesheet" href="/wellnest-frontend/css/utilities.css">
   
+  <!-- Firebase SDK สำหรับ Push Notification (Step C) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+  
   <style>
     :root {
       --header-height: 56px;
@@ -486,6 +490,11 @@
     <div class="dashboard-header" id="dashboard-header">
       <p class="greeting" id="greeting">สวัสดี</p>
       <p class="user-name" id="user-name">กำลังโหลด...</p>
+      <!-- Push Notification Status (Step C) -->
+      <div id="push-status-bar" style="display:none; margin-top:0.625rem; padding:0.375rem 0.75rem; border-radius:8px; font-size:0.75rem; align-items:center; gap:0.375rem; background:rgba(255,255,255,0.2); color:white; cursor:pointer;" onclick="handlePushStatusClick()">
+        <span id="push-status-icon"></span>
+        <span id="push-status-text"></span>
+      </div>
     </div>
     
     <!-- Quick Stats -->
@@ -677,6 +686,9 @@
           loadDeviceCount()
         ]);
         
+        // Step C: เริ่ม FCM Push Notification registration (ไม่ block dashboard)
+        initPushNotifications();
+        
       } catch (error) {
         console.error('Failed to load dashboard:', error);
       }
@@ -759,6 +771,221 @@
         statDevices.textContent = '0';
       }
     }
+    
+    // ============================================================
+    // Step C: FCM Push Notification Integration
+    // ============================================================
+    
+    // Firebase Configuration (public keys - ปลอดภัยที่จะอยู่ใน client code)
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyCV4iN3x6h9tJMJPex9WXDU9gL-AF61ES0",
+      authDomain: "wellnest-push-notification.firebaseapp.com",
+      projectId: "wellnest-push-notification",
+      storageBucket: "wellnest-push-notification.firebasestorage.app",
+      messagingSenderId: "286182410972",
+      appId: "1:286182410972:web:9c2820d5deeb8d58e90219",
+      measurementId: "G-7NEHLVM615"
+    };
+    const VAPID_KEY = 'BHzt6wLsiYy_VqlISe-PGttDC4_6pVb1L2iz21h0CNYo48hr--JrSu-3Us2UsFeh5CFDj1V1XKcCFgYUdD4w-bY';
+    const SW_PATH = '/wellnest-frontend/firebase-messaging-sw.js';
+    const SW_SCOPE = '/wellnest-frontend/';
+    const PUSH_REGISTERED_KEY = 'wellnest_push_registered';
+    const PUSH_TOKEN_KEY = 'wellnest_push_token';
+    
+    /**
+     * เริ่มต้น Push Notification — ทำงาน async ไม่ block dashboard
+     * Flow: ตรวจ support → register SW → ขอ permission → getToken → register API
+     */
+    async function initPushNotifications() {
+      const statusBar = document.getElementById('push-status-bar');
+      const statusIcon = document.getElementById('push-status-icon');
+      const statusText = document.getElementById('push-status-text');
+      
+      // Helper: แสดงสถานะ push
+      function showPushStatus(icon, text, show) {
+        if (!statusBar) return;
+        statusIcon.textContent = icon;
+        statusText.textContent = text;
+        statusBar.style.display = show ? 'inline-flex' : 'none';
+      }
+      
+      try {
+        // --- 1. ตรวจสอบ browser support ---
+        if (!('serviceWorker' in navigator)) {
+          console.log('[Push] Service Worker ไม่รองรับ');
+          showPushStatus('⚠️', 'เบราว์เซอร์ไม่รองรับการแจ้งเตือน', true);
+          return;
+        }
+        if (!('Notification' in window)) {
+          console.log('[Push] Notification API ไม่รองรับ');
+          showPushStatus('⚠️', 'เบราว์เซอร์ไม่รองรับการแจ้งเตือน', true);
+          return;
+        }
+        
+        // --- 2. ตรวจสอบว่า user ปฏิเสธ permission แล้วหรือยัง ---
+        if (Notification.permission === 'denied') {
+          console.log('[Push] User ปฏิเสธ notification permission แล้ว');
+          showPushStatus('🔕', 'การแจ้งเตือนถูกปิด (เปิดได้ในตั้งค่าเบราว์เซอร์)', true);
+          return;
+        }
+        
+        // --- 3. ตรวจสอบ Firebase SDK พร้อมหรือยัง ---
+        if (typeof firebase === 'undefined' || !firebase.messaging) {
+          console.warn('[Push] Firebase SDK ยังไม่พร้อม');
+          return;
+        }
+        
+        // --- 4. Initialize Firebase ---
+        if (!firebase.apps.length) {
+          firebase.initializeApp(FIREBASE_CONFIG);
+        }
+        const messaging = firebase.messaging();
+        
+        // --- 5. Register Service Worker ---
+        console.log('[Push] กำลัง register Service Worker...');
+        let swRegistration;
+        try {
+          swRegistration = await navigator.serviceWorker.register(SW_PATH, { scope: SW_SCOPE });
+          await navigator.serviceWorker.ready;
+          console.log('[Push] Service Worker พร้อมแล้ว');
+        } catch (swError) {
+          console.error('[Push] Register SW ล้มเหลว:', swError);
+          showPushStatus('⚠️', 'ตั้งค่าการแจ้งเตือนไม่สำเร็จ', true);
+          return;
+        }
+        
+        // --- 6. ขอ Permission (ถ้ายังไม่เคยขอ) ---
+        let permission = Notification.permission;
+        if (permission === 'default') {
+          console.log('[Push] กำลังขอ notification permission...');
+          permission = await Notification.requestPermission();
+          console.log('[Push] Permission result:', permission);
+        }
+        
+        if (permission !== 'granted') {
+          console.log('[Push] Permission ไม่ได้รับอนุญาต:', permission);
+          showPushStatus('🔕', 'การแจ้งเตือนถูกปิด', true);
+          return;
+        }
+        
+        // --- 7. Get FCM Token ---
+        console.log('[Push] กำลังขอ FCM token...');
+        let fcmToken;
+        try {
+          fcmToken = await messaging.getToken({
+            vapidKey: VAPID_KEY,
+            serviceWorkerRegistration: swRegistration
+          });
+        } catch (tokenError) {
+          console.error('[Push] getToken ล้มเหลว:', tokenError);
+          showPushStatus('⚠️', 'ขอ token ไม่สำเร็จ', true);
+          return;
+        }
+        
+        if (!fcmToken) {
+          console.warn('[Push] ไม่ได้รับ FCM token');
+          showPushStatus('⚠️', 'ขอ token ไม่สำเร็จ', true);
+          return;
+        }
+        
+        console.log('[Push] ได้ FCM token แล้ว:', fcmToken.substring(0, 20) + '...');
+        
+        // --- 8. ตรวจว่า token เปลี่ยนหรือยัง (เทียบกับ localStorage) ---
+        const savedToken = localStorage.getItem(PUSH_TOKEN_KEY);
+        const isAlreadyRegistered = localStorage.getItem(PUSH_REGISTERED_KEY) === 'true';
+        
+        if (isAlreadyRegistered && savedToken === fcmToken) {
+          // Token เดิม ไม่ต้อง register ซ้ำ
+          console.log('[Push] Token เดิม — ข้ามการ register');
+          showPushStatus('🔔', 'การแจ้งเตือนเปิดอยู่', true);
+        } else {
+          // Token ใหม่หรือยังไม่เคย register → ส่งไป Backend
+          console.log('[Push] กำลัง register token กับ Backend...');
+          try {
+            const result = await Api.post('/push/register', {
+              fcm_token: fcmToken,
+              device_type: 'web',
+              device_name: navigator.userAgent.substring(0, 50)
+            });
+            console.log('[Push] Register สำเร็จ:', result);
+            
+            // บันทึก flag + token ลง localStorage
+            localStorage.setItem(PUSH_REGISTERED_KEY, 'true');
+            localStorage.setItem(PUSH_TOKEN_KEY, fcmToken);
+            
+            showPushStatus('🔔', 'เปิดการแจ้งเตือนสำเร็จ', true);
+          } catch (regError) {
+            console.error('[Push] Register กับ Backend ล้มเหลว:', regError);
+            showPushStatus('⚠️', 'ลงทะเบียนแจ้งเตือนไม่สำเร็จ', true);
+          }
+        }
+        
+        // --- 9. Foreground Message Handler ---
+        messaging.onMessage((payload) => {
+          console.log('[Push] Foreground message:', payload);
+          
+          // แสดง browser notification
+          if (Notification.permission === 'granted') {
+            const notifTitle = payload.notification?.title || 'WellNest';
+            const notifBody = payload.notification?.body || '';
+            
+            new Notification(notifTitle, {
+              body: notifBody,
+              icon: '/wellnest-frontend/assets/icons/icon-192x192.png',
+              badge: '/wellnest-frontend/assets/icons/icon-72x72.png',
+              data: payload.data,
+              tag: 'wellnest-' + (payload.data?.reminder_id || Date.now())
+            });
+          }
+          
+          // ถ้าเป็น notification แบบ reminder → refresh dashboard data
+          const dataType = payload.data?.type || '';
+          if (dataType === 'medication_reminder' || dataType === 'reminder') {
+            console.log('[Push] Reminder notification → refresh dashboard');
+            loadUpcomingReminders();
+            loadComplianceStats();
+          }
+          
+          // แสดง in-app toast ด้วย
+          if (typeof Toast !== 'undefined') {
+            const toastMsg = payload.notification?.title || 'มีการแจ้งเตือนใหม่';
+            Toast.info(toastMsg);
+          }
+        });
+        
+        console.log('[Push] FCM Integration พร้อมใช้งาน');
+        
+      } catch (error) {
+        // catch-all: ไม่ให้ push ทำ dashboard พัง
+        console.error('[Push] initPushNotifications error:', error);
+      }
+    }
+    
+    /**
+     * Handler เมื่อ user กดที่ push status bar
+     * - ถ้า denied → แนะนำวิธีเปิดใน browser settings
+     * - ถ้า granted → แสดงข้อมูลสถานะ
+     */
+    window.handlePushStatusClick = function() {
+      const perm = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
+      
+      if (perm === 'denied') {
+        if (typeof Toast !== 'undefined') {
+          Toast.info('เปิดการแจ้งเตือนได้ที่: ตั้งค่าเบราว์เซอร์ → ไซต์นี้ → การแจ้งเตือน → อนุญาต');
+        }
+      } else if (perm === 'granted') {
+        if (typeof Toast !== 'undefined') {
+          Toast.success('การแจ้งเตือนเปิดอยู่แล้ว');
+        }
+      } else {
+        // re-trigger registration
+        initPushNotifications();
+      }
+    };
+    
+    // ============================================================
+    // End of Step C: FCM Push Notification Integration
+    // ============================================================
     
     // Render reminder cards
     function renderReminders(reminders) {
