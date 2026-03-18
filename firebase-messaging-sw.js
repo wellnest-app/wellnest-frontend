@@ -1,6 +1,9 @@
 // Firebase Cloud Messaging Service Worker
 // This file must be in the root of your web server
-// Bug #2 Fix: ใส่ showNotification() กลับ + ใช้ tag ป้องกัน duplicate notification
+// Bug #2 Fix v2: ใช้ data-only FCM message
+//   - Backend ส่งเฉพาะ data payload (ไม่มี notification payload)
+//   - SW จัดการแสดง notification เองทั้งหมด
+//   - ป้องกัน duplicate + แก้ mojibake ภาษาไทย
 
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
@@ -17,17 +20,18 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Handle background messages
-// Bug #2 Fix: ใส่ showNotification() กลับเพื่อแก้ปัญหา mojibake ภาษาไทย
-// เมื่อปล่อยให้ browser แสดง notification อัตโนมัติจาก FCM notification payload
-// → encoding ภาษาไทยเพี้ยน (เ°Cà.§à.³...)
-// ใช้ tag เดียวกันเพื่อป้องกัน duplicate — browser จะ replace ไม่ใช่เพิ่ม
+// Handle background messages (data-only)
+// Backend ส่ง title/body ใน data field → SW อ่านจาก payload.data
+// ไม่มี notification payload → browser ไม่ auto-display → ไม่มี duplicate
 messaging.onBackgroundMessage((payload) => {
     console.log('[firebase-messaging-sw.js] Received background message:', payload);
     
-    const title = payload.notification?.title || 'WellNest';
+    // อ่านจาก data (data-only message) หรือ notification (fallback กรณีเก่า)
+    const title = payload.data?.title || payload.notification?.title || 'WellNest';
+    const body = payload.data?.body || payload.notification?.body || '';
+    
     const options = {
-        body: payload.notification?.body || '',
+        body: body,
         icon: '/wellnest-frontend/assets/icons/icon-192x192.png',
         tag: 'wellnest-' + (payload.data?.reminder_id || Date.now()),
         renotify: true,
@@ -35,7 +39,6 @@ messaging.onBackgroundMessage((payload) => {
         data: payload.data
     };
     
-    // ใช้ tag เดียวกันกับที่ browser auto-display → จะ replace แทนที่จะเพิ่มซ้ำ
     return self.registration.showNotification(title, options);
 });
 
