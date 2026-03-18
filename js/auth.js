@@ -167,8 +167,26 @@ const auth = {
   /**
    * Logout user
    * @param {boolean} redirect - Whether to redirect to login
+   * 
+   * Bug Fix: Unregister FCM token ก่อน clear auth data
+   * ป้องกัน push notification ค้างหลัง logout
    */
-  logout(redirect = true) {
+  async logout(redirect = true) {
+    // Step 1: Unregister FCM token ก่อน clear (ต้องใช้ JWT auth header)
+    try {
+      const pushToken = localStorage.getItem('wellnest_push_token');
+      const jwtToken = this.getToken();
+      
+      if (pushToken && jwtToken) {
+        await api.post('/push/unregister', { fcm_token: pushToken });
+        console.log('[Auth] FCM token unregistered on logout');
+      }
+    } catch (e) {
+      // ไม่ block logout — ถ้า JWT expired หรือ network error ก็ข้ามไป
+      console.warn('[Auth] FCM unregister on logout failed (ไม่ร้ายแรง):', e.message || e);
+    }
+    
+    // Step 2: Clear auth + push data
     this.clearAuth();
     
     if (redirect) {
@@ -179,10 +197,15 @@ const auth = {
   
   /**
    * Clear all auth data
+   * รวมถึง push notification keys
    */
   clearAuth() {
     this.removeToken();
     this.removeUser();
+    
+    // Clear push notification data (safety net)
+    localStorage.removeItem('wellnest_push_registered');
+    localStorage.removeItem('wellnest_push_token');
     
     // Clear other cached data
     if (window.storage) {
