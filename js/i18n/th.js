@@ -180,6 +180,9 @@ const th = {
     },
     enabled: 'เปิดใช้งาน',
     disabled: 'ปิดใช้งาน',
+    // M3 Fix: shortcut keys สำหรับ dashboard Toast
+    taken: 'บันทึกการทานยาแล้ว',
+    snoozed: 'เลื่อนแล้ว {minutes} นาที',
     add: {
       title: 'เพิ่มการเตือน',
       medication: 'ยา',
