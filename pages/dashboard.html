@@ -997,11 +997,15 @@
     // End of Step C: FCM Push Notification Integration
     // ============================================================
     
-    // Render reminder cards
+    // Render reminder cards — Fix: ลบ cards เก่าก่อน render ใหม่
     function renderReminders(reminders) {
-      // Remove skeleton loaders if any
+      // ลบ skeleton loaders
       const skeletons = remindersList.querySelectorAll('.skeleton-card');
       skeletons.forEach(s => s.remove());
+      
+      // ลบ reminder cards เก่า (ป้องกัน duplicate เมื่อ push notification trigger refresh)
+      const oldCards = remindersList.querySelectorAll('.reminder-card');
+      oldCards.forEach(c => c.remove());
       
       reminders.forEach(reminder => {
         const card = createReminderCard(reminder);
