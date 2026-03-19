@@ -790,7 +790,7 @@
         </div>
       </div>
       
-      <!-- Progress Card -->
+      <!-- Progress Card — M1 Fix: compliance-based -->
       <div class="progress-card" id="progressCard">
         <div class="progress-header">
           <div class="progress-title">
@@ -807,7 +807,7 @@
           <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
         </div>
         <div class="progress-stats">
-          <span id="progressDays">เหลืออีก - วัน</span>
+          <span id="progressDays">ทาน 0/0 ครั้ง</span>
           <span id="progressEndDate">สิ้นสุด -</span>
         </div>
       </div>
@@ -920,6 +920,7 @@
     let medication = null;
     let reminders = [];
     let todayHistory = [];  // ✅ เพิ่ม: เก็บประวัติวันนี้
+    let fullHistory = [];   // M1 Fix: เก็บประวัติทั้งหมดสำหรับคำนวณ progress
     
     // Elements
     const loadingState = document.getElementById('loadingState');
@@ -950,6 +951,14 @@
           todayHistory = allHistory || [];
         } catch (e) {
           todayHistory = [];
+        }
+        
+        // M1 Fix: โหลดประวัติทั้งหมดสำหรับคำนวณ compliance progress
+        try {
+          const histData = await Api.get(`/history?user_med_id=${id}`);
+          fullHistory = histData || [];
+        } catch (e) {
+          fullHistory = [];
         }
         
         renderDetail();
@@ -1047,24 +1056,35 @@
       const end = new Date(medication.end_date);
       const today = new Date();
       
-      // ✅ Bug Fix: Add 1 to include end date as a valid medication day
-      // This way, on the last day the progress won't immediately show 100%
+      // M1 Fix: Compliance-based progress — จำนวนครั้งที่ทานจริง / ครั้งที่ควรทาน
+      
+      // จำนวนครั้งที่ทานจริง (status = 'taken')
+      const takenCount = fullHistory.filter(h => h.status === 'taken').length;
+      
+      // จำนวนครั้งต่อวัน — ใช้ frequency_per_day หรือ reminders.length เป็น fallback
+      const dosesPerDay = medication.frequency_per_day || reminders.length || 1;
+      
+      // จำนวนวันทั้งหมด (start → end)
       const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-      const elapsedDays = Math.ceil((today - start) / (1000 * 60 * 60 * 24));
+      
+      // จำนวนครั้งที่ควรทานทั้งหมด
+      const expectedTotal = totalDays * dosesPerDay;
+      
+      // คำนวณ % จากจำนวนทานจริง / ครั้งที่ควรทานทั้งหมด
+      let percent = expectedTotal > 0
+        ? Math.min(100, Math.max(0, (takenCount / expectedTotal) * 100))
+        : 0;
+      
+      // เหลืออีกกี่วัน
       const remainingDays = Math.max(0, Math.ceil((end - today) / (1000 * 60 * 60 * 24)));
       
-      // Cap at 100% only after the end date has passed
-      let percent = Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100));
-      
-      // If today is past end_date, show 100%
-      if (today > end) {
-        percent = 100;
-      }
-      
+      // Render
       document.getElementById('progressPercent').textContent = `${Math.round(percent)}%`;
       document.getElementById('progressBar').style.width = `${percent}%`;
-      document.getElementById('progressDays').textContent = `เหลืออีก ${remainingDays} วัน`;
-      document.getElementById('progressEndDate').textContent = `สิ้นสุด ${formatDate(medication.end_date)}`;
+      document.getElementById('progressDays').textContent = `ทาน ${takenCount}/${expectedTotal} ครั้ง`;
+      document.getElementById('progressEndDate').textContent = remainingDays > 0
+        ? `เหลืออีก ${remainingDays} วัน`
+        : `สิ้นสุด ${formatDate(medication.end_date)}`;
     }
     
     function renderReminders() {
