@@ -344,6 +344,21 @@ const th = {
       vibration: 'การสั่น',
       quiet: 'โหมดเงียบ'
     },
+    // M2 Fix: notification status subtitle texts
+    notifStatus: {
+      unsupported: 'เบราว์เซอร์ไม่รองรับ',
+      enabled: 'เปิดอยู่ — รับการแจ้งเตือนผ่าน browser',
+      blocked: 'ถูกบล็อก — เปิดได้ในตั้งค่าเบราว์เซอร์',
+      disabled: 'ปิดอยู่ — ไม่รับการแจ้งเตือน',
+      enabling: 'กำลังเปิด...',
+      disabling: 'กำลังปิด...',
+      denied: 'ไม่ได้รับอนุญาต',
+      tokenFailed: 'ขอ token ไม่สำเร็จ',
+      enableFailed: 'เปิดไม่สำเร็จ',
+      openBrowserSettings: 'กรุณาเปิดการแจ้งเตือนในตั้งค่าเบราว์เซอร์',
+      enableError: 'เปิดการแจ้งเตือนไม่สำเร็จ',
+      disableError: 'ปิดการแจ้งเตือนไม่สำเร็จ'
+    },
     messages: {
       updateSuccess: 'บันทึกการตั้งค่าแล้ว',
       languageChanged: 'เปลี่ยนภาษาแล้ว',
