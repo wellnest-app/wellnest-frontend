@@ -180,6 +180,9 @@ const en = {
     },
     enabled: 'Enabled',
     disabled: 'Disabled',
+    // M3 Fix: shortcut keys for dashboard Toast
+    taken: 'Medication taken',
+    snoozed: 'Snoozed for {minutes} minutes',
     add: {
       title: 'Add Reminder',
       medication: 'Medication',
