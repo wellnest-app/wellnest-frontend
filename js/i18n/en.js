@@ -344,6 +344,21 @@ const en = {
       vibration: 'Vibration',
       quiet: 'Quiet Mode'
     },
+    // M2 Fix: notification status subtitle texts
+    notifStatus: {
+      unsupported: 'Browser not supported',
+      enabled: 'On — receiving notifications via browser',
+      blocked: 'Blocked — enable in browser settings',
+      disabled: 'Off — not receiving notifications',
+      enabling: 'Enabling...',
+      disabling: 'Disabling...',
+      denied: 'Permission denied',
+      tokenFailed: 'Failed to get token',
+      enableFailed: 'Failed to enable',
+      openBrowserSettings: 'Please enable notifications in browser settings',
+      enableError: 'Failed to enable notifications',
+      disableError: 'Failed to disable notifications'
+    },
     messages: {
       updateSuccess: 'Settings saved',
       languageChanged: 'Language changed',
