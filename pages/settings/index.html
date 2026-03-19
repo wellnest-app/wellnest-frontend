@@ -128,6 +128,12 @@
       background: var(--color-gray-100);
     }
     
+    /* M4 Fix: header-btn svg ขนาดเท่ากับหน้าอื่น */
+    .header-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+    
     /* ===== Page Container ===== */
     .page-container {
       min-height: 100vh;
@@ -751,7 +757,7 @@
     if (!('Notification' in window) || !('serviceWorker' in navigator)) {
       toggle.style.opacity = '0.5';
       toggle.style.pointerEvents = 'none';
-      if (statusText) statusText.textContent = 'เบราว์เซอร์ไม่รองรับ';
+      if (statusText) statusText.textContent = t('settings.notifStatus.unsupported');
       return;
     }
     
@@ -760,15 +766,15 @@
     
     if (permission === 'granted' && isRegistered) {
       toggle.classList.add('active');
-      if (statusText) statusText.textContent = 'เปิดอยู่ — รับการแจ้งเตือนผ่าน browser';
+      if (statusText) statusText.textContent = t('settings.notifStatus.enabled');
     } else if (permission === 'denied') {
       toggle.classList.remove('active');
       toggle.style.opacity = '0.5';
       toggle.style.pointerEvents = 'none';
-      if (statusText) statusText.textContent = 'ถูกบล็อก — เปิดได้ในตั้งค่าเบราว์เซอร์';
+      if (statusText) statusText.textContent = t('settings.notifStatus.blocked');
     } else {
       toggle.classList.remove('active');
-      if (statusText) statusText.textContent = 'ปิดอยู่ — ไม่รับการแจ้งเตือน';
+      if (statusText) statusText.textContent = t('settings.notifStatus.disabled');
     }
   }
   
@@ -784,21 +790,21 @@
       try {
         // ตรวจ browser support
         if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-          if (typeof Toast !== 'undefined') Toast.error('เบราว์เซอร์ไม่รองรับการแจ้งเตือน');
+          if (typeof Toast !== 'undefined') Toast.error(t('settings.notifStatus.unsupported'));
           return;
         }
         
         // ตรวจว่าถูก denied หรือไม่
         if (Notification.permission === 'denied') {
-          if (typeof Toast !== 'undefined') Toast.info('กรุณาเปิดการแจ้งเตือนในตั้งค่าเบราว์เซอร์');
+          if (typeof Toast !== 'undefined') Toast.info(t('settings.notifStatus.openBrowserSettings'));
           return;
         }
         
-        if (statusText) statusText.textContent = 'กำลังเปิด...';
+        if (statusText) statusText.textContent = t('settings.notifStatus.enabling');
         
         // ตรวจ Firebase SDK
         if (typeof firebase === 'undefined' || !firebase.messaging) {
-          if (typeof Toast !== 'undefined') Toast.error('Firebase SDK ไม่พร้อม');
+          if (typeof Toast !== 'undefined') Toast.error('Firebase SDK not ready');
           return;
         }
         
@@ -815,8 +821,8 @@
         // ขอ Permission
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
-          if (statusText) statusText.textContent = 'ไม่ได้รับอนุญาต';
-          if (typeof Toast !== 'undefined') Toast.info('ไม่ได้รับอนุญาตการแจ้งเตือน');
+          if (statusText) statusText.textContent = t('settings.notifStatus.denied');
+          if (typeof Toast !== 'undefined') Toast.info(t('settings.notifStatus.denied'));
           syncNotificationToggle();
           return;
         }
@@ -828,8 +834,8 @@
         });
         
         if (!fcmToken) {
-          if (statusText) statusText.textContent = 'ขอ token ไม่สำเร็จ';
-          if (typeof Toast !== 'undefined') Toast.error('ขอ token ไม่สำเร็จ');
+          if (statusText) statusText.textContent = t('settings.notifStatus.tokenFailed');
+          if (typeof Toast !== 'undefined') Toast.error(t('settings.notifStatus.tokenFailed'));
           return;
         }
         
@@ -846,22 +852,22 @@
         
         // อัพเดท UI
         element.classList.add('active');
-        if (statusText) statusText.textContent = 'เปิดอยู่ — รับการแจ้งเตือนผ่าน browser';
-        if (typeof Toast !== 'undefined') Toast.success('เปิดการแจ้งเตือนสำเร็จ');
+        if (statusText) statusText.textContent = t('settings.notifStatus.enabled');
+        if (typeof Toast !== 'undefined') Toast.success(t('settings.notificationsEnabled'));
         
         console.log('[Settings] Push notification enabled');
         
       } catch (error) {
         console.error('[Settings] Enable push failed:', error);
-        if (statusText) statusText.textContent = 'เปิดไม่สำเร็จ';
-        if (typeof Toast !== 'undefined') Toast.error('เปิดการแจ้งเตือนไม่สำเร็จ');
+        if (statusText) statusText.textContent = t('settings.notifStatus.enableFailed');
+        if (typeof Toast !== 'undefined') Toast.error(t('settings.notifStatus.enableError'));
         syncNotificationToggle();
       }
       
     } else {
       // === ปิด: Unregister FCM token ===
       try {
-        if (statusText) statusText.textContent = 'กำลังปิด...';
+        if (statusText) statusText.textContent = t('settings.notifStatus.disabling');
         
         const savedToken = localStorage.getItem(PUSH_TOKEN_KEY);
         
@@ -871,7 +877,7 @@
             await Api.post('/push/unregister', { fcm_token: savedToken });
             console.log('[Settings] Token unregistered from backend');
           } catch (apiErr) {
-            console.warn('[Settings] Unregister API error (ไม่ร้ายแรง):', apiErr.message);
+            console.warn('[Settings] Unregister API error:', apiErr.message);
           }
         }
         
@@ -881,14 +887,14 @@
         
         // อัพเดท UI
         element.classList.remove('active');
-        if (statusText) statusText.textContent = 'ปิดอยู่ — ไม่รับการแจ้งเตือน';
-        if (typeof Toast !== 'undefined') Toast.success('ปิดการแจ้งเตือนแล้ว');
+        if (statusText) statusText.textContent = t('settings.notifStatus.disabled');
+        if (typeof Toast !== 'undefined') Toast.success(t('settings.notificationsDisabled'));
         
         console.log('[Settings] Push notification disabled');
         
       } catch (error) {
         console.error('[Settings] Disable push failed:', error);
-        if (typeof Toast !== 'undefined') Toast.error('ปิดการแจ้งเตือนไม่สำเร็จ');
+        if (typeof Toast !== 'undefined') Toast.error(t('settings.notifStatus.disableError'));
         syncNotificationToggle();
       }
     }
