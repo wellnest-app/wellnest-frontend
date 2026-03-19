@@ -725,14 +725,36 @@
       }
     }
     
-    // Load upcoming reminders
+    // Load upcoming reminders — Bug Fix: ดึงชื่อยาจาก /medications/mine มา join
     async function loadUpcomingReminders() {
       try {
-        const response = await Api.get('/reminders');
-        const reminders = Array.isArray(response) ? response : [];
+        // ดึง reminders + medications พร้อมกัน
+        const [remindersRes, medsRes] = await Promise.all([
+          Api.get('/reminders'),
+          Api.get('/medications/mine')
+        ]);
+        
+        const reminders = Array.isArray(remindersRes) ? remindersRes : [];
+        const meds = Array.isArray(medsRes) ? medsRes : [];
+        
+        // สร้าง map: user_med_id → medication info
+        const medMap = {};
+        meds.forEach(m => {
+          medMap[m.user_med_id] = {
+            medication_name: m.medication_name || m.med_name || 'ยา',
+            prescribed_dosage: m.prescribed_dosage || ''
+          };
+        });
+        
+        // Enrich reminders ด้วยชื่อยา
+        const enrichedReminders = reminders.map(r => ({
+          ...r,
+          medication_name: medMap[r.user_med_id]?.medication_name || 'ยา',
+          dosage: medMap[r.user_med_id]?.prescribed_dosage || ''
+        }));
         
         // Filter enabled reminders
-        const enabledReminders = reminders.filter(r => r.is_enabled);
+        const enabledReminders = enrichedReminders.filter(r => r.is_enabled);
         statReminders.textContent = enabledReminders.length;
         
         if (enabledReminders.length > 0) {
@@ -987,7 +1009,7 @@
       });
     }
     
-    // Create reminder card element
+    // Create reminder card element — Bug Fix: ส่ง user_med_id + แสดงชื่อยาจริง
     function createReminderCard(reminder) {
       const card = document.createElement('div');
       card.className = 'reminder-card';
@@ -1008,17 +1030,21 @@
       const displayHours = hours % 12 || 12;
       const displayMinutes = minutes.toString().padStart(2, '0');
       
+      // ชื่อยา + dosage (ได้จาก enriched data)
+      const medName = reminder.medication_name || 'ยา';
+      const dosage = reminder.dosage || '';
+      
       card.innerHTML = `
         <div class="reminder-time">
           <div class="time">${displayHours}:${displayMinutes}</div>
           <div class="period">${period}</div>
         </div>
         <div class="reminder-details">
-          <div class="reminder-med">${reminder.medication_name || 'ยา'}</div>
-          <div class="reminder-dosage">${reminder.dosage || ''}</div>
+          <div class="reminder-med">${medName}</div>
+          <div class="reminder-dosage">${dosage}</div>
         </div>
         <div class="reminder-actions">
-          <button class="action-btn take" onclick="takeReminder(${reminder.reminder_id})" aria-label="ทานแล้ว">
+          <button class="action-btn take" onclick="takeReminder(${reminder.reminder_id}, ${reminder.user_med_id})" aria-label="ทานแล้ว">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
@@ -1035,17 +1061,22 @@
       return card;
     }
     
-    // Make functions global for onclick handlers
-    window.takeReminder = async function(reminderId) {
+    // Bug Fix: เปลี่ยนจาก POST /reminders/${id}/take (ไม่มี)
+    //          เป็น POST /medication/take (endpoint ที่ถูกต้อง)
+    window.takeReminder = async function(reminderId, userMedId) {
       try {
-        await Api.post(`/reminders/${reminderId}/take`);
-        Toast.success(t('reminders.taken'));
-        // Refresh reminders
+        await Api.post('/medication/take', {
+          user_med_id: userMedId,
+          reminder_id: reminderId,
+          action: 'taken'
+        });
+        Toast.success(t('reminders.taken') || 'บันทึกการทานยาแล้ว');
+        // Refresh reminders + compliance
         loadUpcomingReminders();
         loadComplianceStats();
       } catch (error) {
         console.error('Failed to take reminder:', error);
-        Toast.error(t('errors.generic'));
+        Toast.error(t('errors.generic') || 'เกิดข้อผิดพลาด');
       }
     };
     
