@@ -1216,12 +1216,14 @@
               <line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
-          <button class="action-btn snooze" onclick="showSnoozeDialog(event, ${item.id}, ${item.reminderId || 'null'})" title="เลื่อน">
+          ${item.reminderId ? `
+          <button class="action-btn snooze" onclick="showSnoozeDialog(event, ${item.id}, ${item.reminderId})" title="เลื่อน">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/>
               <polyline points="12 6 12 12 16 14"/>
             </svg>
           </button>
+          ` : ''}
         </div>
       `;
       
