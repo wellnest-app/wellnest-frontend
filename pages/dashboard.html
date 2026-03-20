@@ -651,6 +651,14 @@
       modal: true
     });
     
+    // L2 Fix: ผูก click handler ให้ปุ่มกระดิ่งใน header → ไปหน้าการเตือน
+    const notifBtn = document.getElementById('headerNotificationBtn');
+    if (notifBtn) {
+      notifBtn.addEventListener('click', function() {
+        window.location.href = '/wellnest-frontend/pages/reminders/list.html';
+      });
+    }
+    
     // Get DOM elements
     const greetingEl = document.getElementById('greeting');
     const userNameEl = document.getElementById('user-name');
@@ -770,14 +778,34 @@
       }
     }
     
-    // Load compliance stats
+    // L8 Fix: คำนวณอัตราการทานยาจาก medication_history + reminders
+    // แทน /notifications/stats ที่มีปัญหา notification_type mismatch
     async function loadComplianceStats() {
       try {
-        const response = await Api.get('/notifications/stats');
-        const rate = response.compliance_rate || response.rate || 0;
-        statCompliance.textContent = `${Math.round(rate)}%`;
+        // คำนวณ start of today (local time → ISO)
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+        
+        // ดึง reminders (จำนวนมื้อที่ต้องทานวันนี้) + history วันนี้ที่ทานแล้ว
+        const [remindersRes, historyRes] = await Promise.all([
+          Api.get('/reminders'),
+          Api.get('/history?status=taken&start=' + encodeURIComponent(todayStart))
+        ]);
+        
+        const enabledReminders = Array.isArray(remindersRes) 
+          ? remindersRes.filter(r => r.is_enabled) 
+          : [];
+        const todayTaken = Array.isArray(historyRes) ? historyRes.length : 0;
+        const totalExpected = enabledReminders.length;
+        
+        if (totalExpected > 0) {
+          const rate = Math.min(Math.round((todayTaken / totalExpected) * 100), 100);
+          statCompliance.textContent = `${rate}%`;
+        } else {
+          statCompliance.textContent = '-';
+        }
       } catch (error) {
-        console.log('No compliance stats yet:', error.message);
+        console.log('Compliance calc error:', error.message);
         statCompliance.textContent = '0%';
       }
     }
