@@ -133,6 +133,63 @@ const utils = {
     return d.toDateString() === tomorrow.toDateString();
   },
   
+  // ===== Medication Status Helpers (EXP fix) =====
+  
+  /**
+   * ตรวจสอบว่ายาหมดอายุหรือยัง (end_date < today)
+   * @param {object} med - medication object ที่มี end_date field
+   * @returns {boolean} true ถ้ายาหมดอายุแล้ว
+   */
+  isExpiredMedication(med) {
+    if (!med || !med.end_date) return false; // ไม่มี end_date = continuous ไม่หมด
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const endDate = new Date(med.end_date + 'T23:59:59'); // end_date เป็นวันสุดท้ายที่ใช้ได้
+    return endDate < today;
+  },
+  
+  /**
+   * Filter เฉพาะยาที่ยัง active + ไม่หมดอายุ
+   * @param {Array} meds - array ของ medication objects
+   * @returns {Array} เฉพาะยาที่ยังใช้ได้
+   */
+  filterActiveMedications(meds) {
+    if (!Array.isArray(meds)) return [];
+    return meds.filter(m => m.is_active && !this.isExpiredMedication(m));
+  },
+  
+  /**
+   * คืนสถานะยา — ใช้สำหรับแสดง badge
+   * @param {object} med - medication object
+   * @returns {string} 'expired' | 'inactive' | 'active'
+   */
+  getMedicationStatus(med) {
+    if (!med) return 'inactive';
+    if (this.isExpiredMedication(med)) return 'expired';
+    if (!med.is_active) return 'inactive';
+    return 'active';
+  },
+  
+  /**
+   * สร้าง medMap จาก medications array — ใช้ร่วมกันหลายหน้า
+   * @param {Array} meds - array ของ medication objects
+   * @returns {object} map: user_med_id → medication info + expired status
+   */
+  buildMedMap(meds) {
+    const map = {};
+    if (!Array.isArray(meds)) return map;
+    meds.forEach(m => {
+      map[m.user_med_id] = {
+        medication_name: m.medication_name || m.med_name || 'ยา',
+        prescribed_dosage: m.prescribed_dosage || '',
+        end_date: m.end_date || null,
+        is_active: m.is_active !== false,
+        is_expired: this.isExpiredMedication(m)
+      };
+    });
+    return map;
+  },
+  
   // ===== String Utilities =====
   
   /**

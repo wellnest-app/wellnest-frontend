@@ -723,8 +723,9 @@
     async function loadTodayMedications() {
       try {
         // Use /medications/mine instead of /users/me/assigned-medications
+        // EXP1 fix: filter ยาที่หมดอายุออกด้วย
         const response = await Api.get('/medications/mine');
-        const activeMeds = Array.isArray(response) ? response.filter(m => m.is_active) : [];
+        const activeMeds = utils.filterActiveMedications(response);
         statMeds.textContent = activeMeds.length;
       } catch (error) {
         console.log('No medications yet:', error.message);
@@ -744,24 +745,19 @@
         const reminders = Array.isArray(remindersRes) ? remindersRes : [];
         const meds = Array.isArray(medsRes) ? medsRes : [];
         
-        // สร้าง map: user_med_id → medication info
-        const medMap = {};
-        meds.forEach(m => {
-          medMap[m.user_med_id] = {
-            medication_name: m.medication_name || m.med_name || 'ยา',
-            prescribed_dosage: m.prescribed_dosage || ''
-          };
-        });
+        // EXP fix: สร้าง medMap พร้อม expired status
+        const medMap = utils.buildMedMap(meds);
         
         // Enrich reminders ด้วยชื่อยา
         const enrichedReminders = reminders.map(r => ({
           ...r,
           medication_name: medMap[r.user_med_id]?.medication_name || 'ยา',
-          dosage: medMap[r.user_med_id]?.prescribed_dosage || ''
+          dosage: medMap[r.user_med_id]?.prescribed_dosage || '',
+          is_med_expired: medMap[r.user_med_id]?.is_expired || false
         }));
         
-        // Filter enabled reminders
-        const enabledReminders = enrichedReminders.filter(r => r.is_enabled);
+        // EXP fix: Filter enabled reminders + ไม่แสดงยาที่หมดอายุ
+        const enabledReminders = enrichedReminders.filter(r => r.is_enabled && !r.is_med_expired);
         statReminders.textContent = enabledReminders.length;
         
         if (enabledReminders.length > 0) {
@@ -785,14 +781,17 @@
         const now = new Date();
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
         
-        // ดึง reminders (จำนวนมื้อที่ต้องทานวันนี้) + history วันนี้ที่ทานแล้ว
-        const [remindersRes, historyRes] = await Promise.all([
+        // EXP4 fix: ดึง medications ด้วยเพื่อเช็ค expired
+        const [remindersRes, historyRes, medsRes] = await Promise.all([
           Api.get('/reminders'),
-          Api.get('/history?status=taken&start=' + encodeURIComponent(todayStart))
+          Api.get('/history?status=taken&start=' + encodeURIComponent(todayStart)),
+          Api.get('/medications/mine')
         ]);
         
+        // EXP4 fix: สร้าง medMap แล้ว filter reminders ของยาที่หมดอายุออก
+        const medMap = utils.buildMedMap(Array.isArray(medsRes) ? medsRes : []);
         const enabledReminders = Array.isArray(remindersRes) 
-          ? remindersRes.filter(r => r.is_enabled) 
+          ? remindersRes.filter(r => r.is_enabled && !medMap[r.user_med_id]?.is_expired) 
           : [];
         const todayTaken = Array.isArray(historyRes) ? historyRes.length : 0;
         const totalExpected = enabledReminders.length;

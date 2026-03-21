@@ -712,9 +712,13 @@
         reminders = Array.isArray(remindersResponse) ? remindersResponse : [];
         medications = Array.isArray(medicationsResponse) ? medicationsResponse : [];
         
+        // EXP fix: เช็คจำนวนหลัง filter ยาหมดอายุออก
+        const medMap = utils.buildMedMap(medications);
+        const visibleReminders = reminders.filter(r => !medMap[r.user_med_id]?.is_expired);
+        
         loadingState.style.display = 'none';
         
-        if (reminders.length === 0) {
+        if (visibleReminders.length === 0) {
           emptyState.style.display = 'block';
           updateSummary(0, 0);
         } else {
@@ -737,10 +741,16 @@
     }
     
     function renderReminders() {
+      // EXP fix: สร้าง medMap เพื่อเช็ค expired
+      const medMap = utils.buildMedMap(medications);
+      
+      // EXP fix: filter reminders ของยาที่หมดอายุออก
+      const activeReminders = reminders.filter(r => !medMap[r.user_med_id]?.is_expired);
+      
       // Group by medication
       const grouped = {};
       
-      reminders.forEach(r => {
+      activeReminders.forEach(r => {
         const med = medications.find(m => m.user_med_id === r.user_med_id);
         const medName = med?.medication_name || 'ยาไม่ระบุ';
         
@@ -754,9 +764,9 @@
         grouped[r.user_med_id].reminders.push(r);
       });
       
-      // Count active reminders
-      const activeCount = reminders.filter(r => r.is_enabled).length;
-      updateSummary(reminders.length, activeCount);
+      // Count active reminders — EXP fix: ใช้ activeReminders
+      const activeCount = activeReminders.filter(r => r.is_enabled).length;
+      updateSummary(activeReminders.length, activeCount);
       
       // Render groups
       let html = '';

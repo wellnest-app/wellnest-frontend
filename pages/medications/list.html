@@ -965,8 +965,14 @@
         if (medications.length === 0) {
           emptyState.style.display = 'block';
         } else {
-          timelineContainer.style.display = 'block';
-          renderTimeline();
+          // EXP1 fix: เช็คยาที่ยังไม่หมดอายุ
+          const activeMeds = medications.filter(m => m.is_active && !utils.isExpiredMedication(m));
+          if (activeMeds.length === 0) {
+            emptyState.style.display = 'block';
+          } else {
+            timelineContainer.style.display = 'block';
+            renderTimeline();
+          }
         }
         
       } catch (error) {
@@ -1039,8 +1045,8 @@
     
     // Render Timeline
     function renderTimeline() {
-      // Filter active medications
-      let filteredMeds = medications.filter(med => med.is_active);
+      // EXP1 fix: Filter active + ไม่หมดอายุ
+      let filteredMeds = medications.filter(med => med.is_active && !utils.isExpiredMedication(med));
       
       // Create schedule items from medications
       const scheduleItems = createScheduleFromMedications(filteredMeds);

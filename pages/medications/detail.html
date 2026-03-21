@@ -236,6 +236,10 @@
       background: #EF4444;
     }
     
+    .hero-badge.expired {
+      background: #9CA3AF;
+    }
+    
     /* ===== Info Cards ===== */
     .info-card {
       background: white;
@@ -985,10 +989,14 @@
       document.getElementById('medName').textContent = medication.medication_name;
       document.getElementById('medStrength').textContent = medication.strength || '';
       
-      // Status badge
+      // Status badge — EXP5 fix: เพิ่มเคสยาหมดอายุ
       const statusBadge = document.getElementById('statusBadge');
       const statusText = document.getElementById('statusText');
-      if (medication.is_active) {
+      const medStatus = utils.getMedicationStatus(medication);
+      if (medStatus === 'expired') {
+        statusBadge.classList.add('expired');
+        statusText.textContent = 'หมดอายุ';
+      } else if (medStatus === 'active') {
         statusBadge.classList.add('active');
         statusText.textContent = 'กำลังใช้';
       } else {
@@ -1207,6 +1215,24 @@
     // ✅ Bug #2 Fix: แสดง Quick Actions แยกตามมื้อ/scheduled_time
     function renderQuickActions() {
       const quickActions = document.getElementById('quickActions');
+      
+      // EXP3 fix: ถ้ายาหมดอายุ → แสดงข้อความแทนปุ่ม
+      if (utils.isExpiredMedication(medication)) {
+        quickActions.innerHTML = `
+          <div style="flex: 1; text-align: center; padding: 1rem;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; color: #9CA3AF;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span style="font-size: 1rem; font-weight: 600;">ยาหมดอายุแล้ว</span>
+            </div>
+            <p style="color: var(--color-gray-500); font-size: 0.875rem; margin-top: 0.5rem;">
+              สิ้นสุดการใช้เมื่อ ${utils.formatDate(medication.end_date)}
+            </p>
+          </div>
+        `;
+        return;
+      }
       
       // ถ้าไม่มี reminders ให้แสดงปุ่มแบบเดิม
       if (reminders.length === 0) {
