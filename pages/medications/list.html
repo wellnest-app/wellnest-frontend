@@ -965,9 +965,9 @@
         if (medications.length === 0) {
           emptyState.style.display = 'block';
         } else {
-          // EXP1 fix: เช็คยาที่ยังไม่หมดอายุ
-          const activeMeds = medications.filter(m => m.is_active && !utils.isExpiredMedication(m));
-          if (activeMeds.length === 0) {
+          // CAL1: เช็คว่ามียา active อย่างน้อย 1 ตัว (renderTimeline จัดการ date filter เอง)
+          const anyActive = medications.some(m => m.is_active);
+          if (!anyActive) {
             emptyState.style.display = 'block';
           } else {
             timelineContainer.style.display = 'block';
@@ -980,6 +980,34 @@
         loadingSkeleton.style.display = 'none';
         emptyState.style.display = 'block';
       }
+    }
+    
+    // ✅ CAL1 fix: เช็คว่ายา active ในวันที่เลือกหรือไม่
+    // เทียบ selectedDate กับ start_date/end_date ของยา
+    function isMedicationActiveOnDate(med, checkDate) {
+      if (!med.is_active) return false;
+      
+      // สร้าง date string YYYY-MM-DD จาก checkDate เพื่อเทียบกับ start_date/end_date
+      const y = checkDate.getFullYear();
+      const m = String(checkDate.getMonth() + 1).padStart(2, '0');
+      const d = String(checkDate.getDate()).padStart(2, '0');
+      const checkStr = `${y}-${m}-${d}`;
+      
+      // เช็ค start_date: ถ้ามี start_date และวันที่เลือก < start_date → ยังไม่เริ่มใช้
+      const startDate = med.start_date;
+      if (startDate) {
+        const startStr = startDate.substring(0, 10); // "YYYY-MM-DD"
+        if (checkStr < startStr) return false;
+      }
+      
+      // เช็ค end_date: ถ้ามี end_date และวันที่เลือก > end_date → หมดอายุแล้ว
+      const endDate = med.end_date;
+      if (endDate) {
+        const endStr = endDate.substring(0, 10); // "YYYY-MM-DD"
+        if (checkStr > endStr) return false;
+      }
+      
+      return true;
     }
     
     // ✅ Phase 2.5: Check if medication+time is already taken/skipped
@@ -1045,8 +1073,8 @@
     
     // Render Timeline
     function renderTimeline() {
-      // EXP1 fix: Filter active + ไม่หมดอายุ
-      let filteredMeds = medications.filter(med => med.is_active && !utils.isExpiredMedication(med));
+      // CAL1 fix: Filter ยาที่ active ในวันที่เลือก (เช็ค start_date/end_date)
+      let filteredMeds = medications.filter(med => isMedicationActiveOnDate(med, selectedDate));
       
       // Create schedule items from medications
       const scheduleItems = createScheduleFromMedications(filteredMeds);
@@ -1066,14 +1094,27 @@
       const nonEmptyGroups = scheduleItems.filter(group => group.items.length > 0);
       
       if (nonEmptyGroups.length === 0) {
+        // CAL1: แยกข้อความ empty state — ไม่มียาในวันที่เลือก vs filter tab
+        let emptyTitle, emptyDesc;
+        if (filteredMeds.length === 0) {
+          emptyTitle = 'ไม่มียาในวันที่เลือก';
+          emptyDesc = 'วันที่เลือกอยู่นอกช่วงเวลาการใช้ยา';
+        } else if (currentFilter === 'taken') {
+          emptyTitle = 'ยังไม่มียาที่ทานแล้ว';
+          emptyDesc = 'ทานยาตามกำหนดเพื่อดูประวัติ';
+        } else {
+          emptyTitle = 'ไม่มียาที่รอทาน';
+          emptyDesc = 'ทานยาครบแล้ววันนี้!';
+        }
+        
         timelineContainer.innerHTML = `
           <div class="empty-state">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
               <polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
-            <h3>${currentFilter === 'taken' ? 'ยังไม่มียาที่ทานแล้ว' : 'ไม่มียาที่รอทาน'}</h3>
-            <p>${currentFilter === 'taken' ? 'ทานยาตามกำหนดเพื่อดูประวัติ' : 'ทานยาครบแล้ววันนี้!'}</p>
+            <h3>${emptyTitle}</h3>
+            <p>${emptyDesc}</p>
           </div>
         `;
         return;
