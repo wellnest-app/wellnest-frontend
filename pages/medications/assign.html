@@ -929,14 +929,15 @@
         loadingOverlay.style.display = 'flex';
         submitBtn.disabled = true;
         
-        await Api.post('/medications/assign', data);
+        const result = await Api.post('/medications/assign', data);
+        loadingOverlay.style.display = 'none';
         
-        Toast.success(t('medications.messages.addSuccess'));
+        // UX1: Auto-suggest reminders ตาม frequency
+        const userMedId = result.user_med_id;
+        const freq = data.frequency_per_day || 1;
+        const medName = medication ? medication.medication_name : 'ยา';
         
-        // Redirect to medications list
-        setTimeout(() => {
-          window.location.href = '/wellnest-frontend/pages/medications/list.html';
-        }, 1000);
+        showReminderSuggestionModal(userMedId, freq, medName);
         
       } catch (error) {
         console.error('Failed to assign medication:', error);
@@ -945,6 +946,133 @@
         submitBtn.disabled = false;
       }
     });
+    
+    // ============================================================
+    // UX1: Auto-suggest Reminders Modal
+    // ============================================================
+    
+    // เวลาแนะนำตาม frequency
+    const SUGGESTED_TIMES = {
+      1: ['08:00'],
+      2: ['08:00', '20:00'],
+      3: ['08:00', '13:00', '19:00'],
+      4: ['07:00', '12:00', '17:00', '22:00'],
+      6: ['06:00', '10:00', '14:00', '18:00', '22:00', '02:00']
+    };
+    
+    const TIME_LABELS = {
+      '02:00': 'กลางคืน', '06:00': 'เช้ามืด', '07:00': 'เช้า',
+      '08:00': 'หลังอาหารเช้า', '10:00': 'สาย', '12:00': 'เที่ยง',
+      '13:00': 'หลังอาหารเที่ยง', '14:00': 'บ่าย', '17:00': 'เย็น',
+      '18:00': 'หลังอาหารเย็น', '19:00': 'หลังอาหารเย็น',
+      '20:00': 'ค่ำ', '22:00': 'ก่อนนอน'
+    };
+    
+    function showReminderSuggestionModal(userMedId, frequency, medName) {
+      const times = SUGGESTED_TIMES[frequency] || SUGGESTED_TIMES[1];
+      
+      // สร้าง HTML แสดงเวลาที่แนะนำ
+      const timesHtml = times.map((t, i) => `
+        <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--color-primary-50); border-radius: 10px; border: 1px solid var(--color-primary-200);">
+          <div style="width: 40px; height: 40px; border-radius: 10px; background: white; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--color-primary-600); font-size: 0.875rem;">
+            ${i + 1}
+          </div>
+          <div style="flex: 1;">
+            <div style="font-weight: 600; color: var(--color-gray-800);">${t}</div>
+            <div style="font-size: 0.75rem; color: var(--color-gray-500);">${TIME_LABELS[t] || ''}</div>
+          </div>
+          <div style="color: var(--color-primary-500);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </div>
+        </div>
+      `).join('');
+      
+      Modal.show({
+        title: 'ตั้งเวลาเตือนทานยา',
+        content: `
+          <div style="margin-bottom: 1rem;">
+            <p style="color: var(--color-gray-600); margin-bottom: 0.75rem;">
+              เพิ่ม <strong>${medName}</strong> สำเร็จแล้ว
+            </p>
+            <p style="color: var(--color-gray-600); margin-bottom: 1rem;">
+              ต้องการตั้งเตือน <strong>วันละ ${frequency} ครั้ง</strong> ตามเวลาแนะนำหรือไม่?
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              ${timesHtml}
+            </div>
+            <p style="font-size: 0.75rem; color: var(--color-gray-400); margin-top: 0.75rem; text-align: center;">
+              สามารถแก้ไขเวลาได้ภายหลังในหน้า "การเตือน"
+            </p>
+          </div>
+        `,
+        actions: [
+          {
+            label: 'ไว้ทีหลัง',
+            class: 'btn-outline',
+            onclick: `skipReminders(${userMedId})`
+          },
+          {
+            label: 'ตั้งเตือนเลย',
+            class: 'btn-primary',
+            onclick: `createSuggestedReminders(${userMedId}, ${frequency})`
+          }
+        ]
+      });
+    }
+    
+    // กด "ไว้ทีหลัง" → redirect ไป list ปกติ
+    window.skipReminders = function(userMedId) {
+      Modal.close();
+      Toast.success(t('medications.messages.addSuccess'));
+      setTimeout(() => {
+        window.location.href = '/wellnest-frontend/pages/medications/list.html';
+      }, 800);
+    };
+    
+    // กด "ตั้งเตือนเลย" → สร้าง reminders อัตโนมัติ
+    window.createSuggestedReminders = async function(userMedId, frequency) {
+      Modal.close();
+      
+      const times = SUGGESTED_TIMES[frequency] || SUGGESTED_TIMES[1];
+      const loadingEl = document.getElementById('loadingOverlay');
+      loadingEl.style.display = 'flex';
+      
+      let successCount = 0;
+      let failCount = 0;
+      
+      for (const time of times) {
+        try {
+          await Api.post('/reminders/add', {
+            user_med_id: userMedId,
+            reminder_time: time,
+            is_enabled: true,
+            days_of_week: null  // ทุกวัน
+          });
+          successCount++;
+        } catch (err) {
+          console.error(`Failed to create reminder at ${time}:`, err);
+          failCount++;
+        }
+      }
+      
+      loadingEl.style.display = 'none';
+      
+      if (successCount > 0 && failCount === 0) {
+        Toast.success(`ตั้งเตือนสำเร็จ ${successCount} เวลา`);
+      } else if (successCount > 0) {
+        Toast.warning(`ตั้งเตือนได้ ${successCount}/${times.length} เวลา`);
+      } else {
+        Toast.error('ตั้งเตือนไม่สำเร็จ');
+      }
+      
+      // Redirect ไปหน้า reminders list เพื่อให้เห็นผล
+      setTimeout(() => {
+        window.location.href = '/wellnest-frontend/pages/reminders/list.html';
+      }, 1200);
+    };
   });
   </script>
 </body>

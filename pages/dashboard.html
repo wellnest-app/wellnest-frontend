@@ -324,7 +324,6 @@
     .reminder-time .period {
       font-size: 0.6875rem;
       color: var(--color-gray-500);
-      text-transform: uppercase;
     }
     
     .reminder-details {
@@ -1047,20 +1046,9 @@
       card.className = 'reminder-card';
       card.dataset.id = reminder.reminder_id;
       
-      // Parse time - handle different formats
-      const timeStr = reminder.reminder_time || '00:00';
-      let hours = 0, minutes = 0;
-      
-      if (timeStr.includes(':')) {
-        const parts = timeStr.split(':');
-        hours = parseInt(parts[0], 10) || 0;
-        minutes = parseInt(parts[1], 10) || 0;
-      }
-      
-      // Format time for display (12-hour format)
-      const period = hours >= 12 ? 'PM' : 'AM';
-      const displayHours = hours % 12 || 12;
-      const displayMinutes = minutes.toString().padStart(2, '0');
+      // L3 Fix: ใช้ utils.formatTime() แสดงเวลา 24h มาตรฐาน
+      const timeDisplay = utils.formatTime(reminder.reminder_time || '00:00');
+      const periodLabel = utils.getTimePeriodLabel(reminder.reminder_time);
       
       // ชื่อยา + dosage (ได้จาก enriched data)
       const medName = reminder.medication_name || 'ยา';
@@ -1068,8 +1056,8 @@
       
       card.innerHTML = `
         <div class="reminder-time">
-          <div class="time">${displayHours}:${displayMinutes}</div>
-          <div class="period">${period}</div>
+          <div class="time">${timeDisplay}</div>
+          <div class="period">${periodLabel}</div>
         </div>
         <div class="reminder-details">
           <div class="reminder-med">${medName}</div>

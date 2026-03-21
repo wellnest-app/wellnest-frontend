@@ -1106,7 +1106,7 @@
               <circle cx="12" cy="12" r="10"/>
               <polyline points="12 6 12 12 16 14"/>
             </svg>
-            ${formatTime(r.reminder_time)}
+            ${utils.formatTime(r.reminder_time)}
           </div>
           <button onclick="event.stopPropagation(); confirmDeleteReminder(${r.reminder_id}, '${r.reminder_time}')" 
                   class="reminder-delete-btn" 
@@ -1128,7 +1128,7 @@
     
     // ✅ Bug #3 Fix: Confirm delete SINGLE reminder
     window.confirmDeleteReminder = function(reminderId, reminderTime) {
-      const timeLabel = formatTime(reminderTime);
+      const timeLabel = utils.formatTime(reminderTime);
       Modal.show({
         title: 'ลบการเตือน',
         content: `
@@ -1188,16 +1188,7 @@
       return `${date.getDate()} ${thaiMonths[date.getMonth()]} ${date.getFullYear() + 543}`;
     }
     
-    function formatTime(timeStr) {
-      if (!timeStr) return '-';
-      
-      const [hours, minutes] = timeStr.split(':');
-      const h = parseInt(hours);
-      const period = h >= 12 ? 'PM' : 'AM';
-      const displayHours = h % 12 || 12;
-      
-      return `${displayHours}:${minutes} ${period}`;
-    }
+    // L3: formatTime() ถูกย้ายไป utils.formatTime() — ใช้ 24h format มาตรฐาน
     
     // ✅ Phase 2.5: Helper function to find next pending reminder
     function getNextPendingReminder() {
@@ -1223,7 +1214,7 @@
         if (hasAnyAction) {
           const lastAction = todayHistory[0];
           const status = lastAction.status || 'taken';
-          const time = new Date(lastAction.taken_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+          const time = utils.formatTime(new Date(lastAction.taken_at));
           
           quickActions.innerHTML = `
             <div style="flex: 1; text-align: center; padding: 1rem;">
@@ -1268,12 +1259,12 @@
       let html = '<div style="width: 100%; display: flex; flex-direction: column; gap: 0.75rem;">';
       
       mealSlots.forEach((slot, index) => {
-        const timeLabel = formatTime(slot.time);
+        const timeLabel = utils.formatTime(slot.time);
         const mealName = getMealName(slot.time);
         
         if (slot.status === 'taken') {
           // ✅ ทานแล้ว - แสดง checkmark สีเขียว
-          const takenTime = new Date(slot.taken_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+          const takenTime = utils.formatTime(new Date(slot.taken_at));
           html += `
             <div style="display: flex; align-items: center; padding: 0.75rem; background: #F0FDF4; border-radius: 12px; border: 1px solid #BBF7D0;">
               <div style="flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; background: #DCFCE7; display: flex; align-items: center; justify-content: center;">
@@ -1287,7 +1278,7 @@
           `;
         } else if (slot.status === 'skipped') {
           // ❌ ข้ามแล้ว - แสดง X สีแดง
-          const skippedTime = new Date(slot.taken_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+          const skippedTime = utils.formatTime(new Date(slot.taken_at));
           html += `
             <div style="display: flex; align-items: center; padding: 0.75rem; background: #FEF2F2; border-radius: 12px; border: 1px solid #FECACA;">
               <div style="flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; background: #FEE2E2; display: flex; align-items: center; justify-content: center;">

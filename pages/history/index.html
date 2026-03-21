@@ -662,7 +662,7 @@
         const status = item.status || 'taken';
         const statusIcon = getStatusIcon(status);
         const takenDate = new Date(item.taken_at);
-        const time = formatTime(takenDate);
+        const time = utils.formatTime(takenDate);
         
         // ✅ Phase 2.5: Use scheduled_time if available, otherwise calculate from taken_at
         const scheduledTime = item.scheduled_time;
@@ -778,14 +778,7 @@
     return `วัน${dayName}ที่ ${day} ${month} ${year}`;
   }
   
-  // Format time
-  function formatTime(date) {
-    const hours = date.getHours();
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const period = hours >= 12 ? 'PM' : 'AM';
-    const displayHours = hours % 12 || 12;
-    return `${displayHours}:${minutes} ${period}`;
-  }
+  // L3: formatTime() ถูกย้ายไป utils.formatTime() — ใช้ 24h format มาตรฐาน
   
   // Get meal period from time
   function getMealPeriod(date) {

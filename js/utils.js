@@ -24,16 +24,46 @@ const utils = {
   },
   
   /**
-   * Format time
-   * @param {string} time - Time string (HH:mm or HH:mm:ss)
-   * @returns {string}
+   * Format time เป็น 24h HH:mm — มาตรฐานทั้ง app (L3 fix)
+   * รองรับทั้ง string ("08:00", "08:00:00") และ Date object
+   * @param {string|Date} time - Time string หรือ Date object
+   * @returns {string} เช่น "08:00", "13:30", "19:00"
    */
   formatTime(time) {
     if (!time) return '';
     
-    // Handle HH:mm:ss format
-    const parts = time.split(':');
-    return `${parts[0]}:${parts[1]}`;
+    // กรณี Date object
+    if (time instanceof Date) {
+      const h = time.getHours().toString().padStart(2, '0');
+      const m = time.getMinutes().toString().padStart(2, '0');
+      return `${h}:${m}`;
+    }
+    
+    // กรณี string — HH:mm:ss หรือ HH:mm
+    const str = String(time);
+    const parts = str.split(':');
+    if (parts.length >= 2) {
+      const h = parts[0].padStart(2, '0');
+      const m = parts[1].padStart(2, '0');
+      return `${h}:${m}`;
+    }
+    
+    return str;
+  },
+  
+  /**
+   * Get Thai time period label จากเวลา (L3 helper)
+   * @param {string} timeStr - Time string "HH:mm"
+   * @returns {string} เช่น "เช้า", "บ่าย", "เย็น", "ค่ำ"
+   */
+  getTimePeriodLabel(timeStr) {
+    if (!timeStr) return '';
+    const hour = parseInt(String(timeStr).split(':')[0], 10);
+    if (isNaN(hour)) return '';
+    if (hour >= 6 && hour < 12) return 'เช้า';
+    if (hour >= 12 && hour < 17) return 'บ่าย';
+    if (hour >= 17 && hour < 21) return 'เย็น';
+    return 'ค่ำ';
   },
   
   /**
@@ -43,7 +73,7 @@ const utils = {
    */
   formatDateTime(datetime) {
     const d = new Date(datetime);
-    return `${this.formatDate(d)} ${this.formatTime(d.toTimeString())}`;
+    return `${this.formatDate(d)} ${this.formatTime(d)}`;
   },
   
   /**

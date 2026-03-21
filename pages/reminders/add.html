@@ -743,7 +743,7 @@
           </svg>
         </div>
         <div class="preview-text">
-          <div class="preview-time" id="previewTime">8:00 AM</div>
+          <div class="preview-time" id="previewTime">08:00 เช้า</div>
           <div class="preview-med" id="previewMed">ยังไม่ได้เลือกยา</div>
           <div class="preview-days" id="previewDays">ทุกวัน</div>
         </div>
@@ -922,13 +922,10 @@
     });
     
     function updatePreview() {
-      // Time
+      // L3 Fix: ใช้ utils.formatTime() แสดงเวลา 24h
       const time = reminderTime.value;
-      const [hours, minutes] = time.split(':');
-      const h = parseInt(hours);
-      const period = h >= 12 ? 'PM' : 'AM';
-      const displayHours = h % 12 || 12;
-      previewTime.textContent = `${displayHours}:${minutes} ${period}`;
+      const periodLabel = utils.getTimePeriodLabel(time);
+      previewTime.textContent = `${utils.formatTime(time)}${periodLabel ? ' ' + periodLabel : ''}`;
       
       // Medication
       previewMed.textContent = selectedMedication ? selectedMedication.medication_name : 'ยังไม่ได้เลือกยา';

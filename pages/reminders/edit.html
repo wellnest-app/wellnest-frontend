@@ -936,7 +936,7 @@
         if (snoozeTime > new Date()) {
           snoozeCard.style.display = 'block';
           document.getElementById('snoozeUntil').textContent = 
-            `ถึง ${snoozeTime.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}`;
+            `ถึง ${utils.formatTime(snoozeTime)}`;
           
           const snoozeCount = reminder.snooze_count || 0;
           const maxSnooze = reminder.max_snooze_per_day || 3;
@@ -1043,7 +1043,7 @@
     
     // Confirm delete
     window.confirmDelete = function() {
-      const timeLabel = formatTime(reminder.reminder_time);
+      const timeLabel = utils.formatTime(reminder.reminder_time);
       Modal.show({
         title: 'ลบการเตือน',
         content: `
@@ -1096,14 +1096,7 @@
       }
     };
     
-    function formatTime(timeStr) {
-      if (!timeStr) return '-';
-      const [hours, minutes] = timeStr.split(':');
-      const h = parseInt(hours);
-      const period = h >= 12 ? 'PM' : 'AM';
-      const displayHours = h % 12 || 12;
-      return `${displayHours}:${minutes} ${period}`;
-    }
+    // L3: formatTime() ถูกย้ายไป utils.formatTime() — ใช้ 24h format มาตรฐาน
   });
   </script>
 </body>
