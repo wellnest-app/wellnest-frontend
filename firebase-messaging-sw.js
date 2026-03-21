@@ -32,10 +32,12 @@ messaging.onBackgroundMessage((payload) => {
     
     const options = {
         body: body,
-        icon: '/wellnest-frontend/assets/icons/icon-192x192.png',
+        icon: '/wellnest-frontend/assets/icons/icon-192.png',
+        badge: '/wellnest-frontend/assets/icons/icon-72.png',
         tag: 'wellnest-' + (payload.data?.reminder_id || Date.now()),
         renotify: true,
         requireInteraction: true,
+        vibrate: [200, 100, 200],
         data: payload.data
     };
     

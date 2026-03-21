@@ -860,7 +860,25 @@
     /**
      * เริ่มต้น Push Notification — ทำงาน async ไม่ block dashboard
      * Flow: ตรวจ support → register SW → ขอ permission → getToken → register API
+     * 
+     * Chat 9 PWA Fix:
+     * - iOS 16.4+ ต้องขอ notification permission จาก user gesture (ห้าม auto-request)
+     * - ถ้า iOS + permission=default → แสดงปุ่มให้ user กดเปิดเอง
+     * - Android/Desktop → auto-request เหมือนเดิม
      */
+    
+    // Helper: ตรวจว่าเป็น iOS หรือไม่
+    function isIOS() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
+    
+    // Helper: ตรวจว่ารันใน PWA standalone mode หรือไม่
+    function isStandalone() {
+      return window.matchMedia('(display-mode: standalone)').matches ||
+             window.navigator.standalone === true;
+    }
+    
     async function initPushNotifications() {
       const statusBar = document.getElementById('push-status-bar');
       const statusIcon = document.getElementById('push-status-icon');
@@ -883,7 +901,12 @@
         }
         if (!('Notification' in window)) {
           console.log('[Push] Notification API ไม่รองรับ');
-          showPushStatus('⚠️', 'เบราว์เซอร์ไม่รองรับการแจ้งเตือน', true);
+          // iOS Safari (ไม่ได้ Add to Home Screen) ไม่มี Notification API
+          if (isIOS() && !isStandalone()) {
+            showPushStatus('📲', 'เพิ่มลงหน้าจอหลักเพื่อรับการแจ้งเตือน', true);
+          } else {
+            showPushStatus('⚠️', 'เบราว์เซอร์ไม่รองรับการแจ้งเตือน', true);
+          }
           return;
         }
         
@@ -919,9 +942,20 @@
           return;
         }
         
-        // --- 6. ขอ Permission (ถ้ายังไม่เคยขอ) ---
+        // --- 6. ขอ Permission ---
         let permission = Notification.permission;
         if (permission === 'default') {
+          // iOS PWA Fix: ต้องขอ permission จาก user gesture
+          // ถ้า iOS → แสดงปุ่มให้ user กดเอง (ห้าม auto-request)
+          if (isIOS()) {
+            console.log('[Push] iOS detected — แสดงปุ่มเปิดการแจ้งเตือน');
+            showPushStatus('🔔', 'แตะเพื่อเปิดการแจ้งเตือน', true);
+            // เก็บ swRegistration + messaging ไว้ใช้ตอน user กด
+            window._pushSetup = { swRegistration, messaging };
+            return; // รอ user กด — ดำเนินต่อใน handlePushStatusClick()
+          }
+          
+          // Android/Desktop → auto-request ได้
           console.log('[Push] กำลังขอ notification permission...');
           permission = await Notification.requestPermission();
           console.log('[Push] Permission result:', permission);
@@ -933,7 +967,26 @@
           return;
         }
         
-        // --- 7. Get FCM Token ---
+        // --- 7. ดำเนินการ get token + register ---
+        await completePushRegistration(messaging, swRegistration, showPushStatus);
+        
+        // --- 8. Foreground Message Handler ---
+        setupForegroundHandler(messaging);
+        
+        console.log('[Push] FCM Integration พร้อมใช้งาน');
+        
+      } catch (error) {
+        console.error('[Push] initPushNotifications error:', error);
+      }
+    }
+    
+    /**
+     * ดำเนินการ get FCM token + register กับ backend
+     * แยกเป็น function เพื่อเรียกจากทั้ง auto-flow (Android) และ user-gesture flow (iOS)
+     */
+    async function completePushRegistration(messaging, swRegistration, showPushStatus) {
+      try {
+        // Get FCM Token
         console.log('[Push] กำลังขอ FCM token...');
         let fcmToken;
         try {
@@ -955,26 +1008,23 @@
         
         console.log('[Push] ได้ FCM token แล้ว:', fcmToken.substring(0, 20) + '...');
         
-        // --- 8. ตรวจว่า token เปลี่ยนหรือยัง (เทียบกับ localStorage) ---
+        // ตรวจว่า token เปลี่ยนหรือยัง
         const savedToken = localStorage.getItem(PUSH_TOKEN_KEY);
         const isAlreadyRegistered = localStorage.getItem(PUSH_REGISTERED_KEY) === 'true';
         
         if (isAlreadyRegistered && savedToken === fcmToken) {
-          // Token เดิม ไม่ต้อง register ซ้ำ
           console.log('[Push] Token เดิม — ข้ามการ register');
           showPushStatus('🔔', 'การแจ้งเตือนเปิดอยู่', true);
         } else {
-          // Token ใหม่หรือยังไม่เคย register → ส่งไป Backend
           console.log('[Push] กำลัง register token กับ Backend...');
           try {
             const result = await Api.post('/push/register', {
               fcm_token: fcmToken,
-              device_type: 'web',
+              device_type: isIOS() ? 'ios' : 'web',
               device_name: navigator.userAgent.substring(0, 50)
             });
             console.log('[Push] Register สำเร็จ:', result);
             
-            // บันทึก flag + token ลง localStorage
             localStorage.setItem(PUSH_REGISTERED_KEY, 'true');
             localStorage.setItem(PUSH_TOKEN_KEY, fcmToken);
             
@@ -984,51 +1034,85 @@
             showPushStatus('⚠️', 'ลงทะเบียนแจ้งเตือนไม่สำเร็จ', true);
           }
         }
-        
-        // --- 9. Foreground Message Handler ---
-        // หมายเหตุ: ไม่สร้าง new Notification() ที่นี่ เพราะ Service Worker
-        // จัดการแสดง desktop notification อยู่แล้ว → ป้องกัน notification ซ้ำ 2 อัน
-        messaging.onMessage((payload) => {
-          console.log('[Push] Foreground message:', payload);
-          
-          // ถ้าเป็น notification แบบ reminder → refresh dashboard data
-          const dataType = payload.data?.type || '';
-          if (dataType === 'medication_reminder' || dataType === 'reminder') {
-            console.log('[Push] Reminder notification → refresh dashboard');
-            loadUpcomingReminders();
-            loadComplianceStats();
-          }
-          
-          // แสดง in-app toast แทน desktop notification
-          if (typeof Toast !== 'undefined') {
-            const toastMsg = payload.data?.title || payload.notification?.title || 'มีการแจ้งเตือนใหม่';
-            Toast.info(toastMsg);
-          }
-        });
-        
-        console.log('[Push] FCM Integration พร้อมใช้งาน');
-        
       } catch (error) {
-        // catch-all: ไม่ให้ push ทำ dashboard พัง
-        console.error('[Push] initPushNotifications error:', error);
+        console.error('[Push] completePushRegistration error:', error);
       }
     }
     
     /**
-     * Handler เมื่อ user กดที่ push status bar
-     * - ถ้า denied → แนะนำวิธีเปิดใน browser settings
-     * - ถ้า granted → แสดงข้อมูลสถานะ
+     * Setup foreground message handler
      */
-    window.handlePushStatusClick = function() {
+    function setupForegroundHandler(messaging) {
+      messaging.onMessage((payload) => {
+        console.log('[Push] Foreground message:', payload);
+        
+        const dataType = payload.data?.type || '';
+        if (dataType === 'medication_reminder' || dataType === 'reminder') {
+          console.log('[Push] Reminder notification → refresh dashboard');
+          loadUpcomingReminders();
+          loadComplianceStats();
+        }
+        
+        if (typeof Toast !== 'undefined') {
+          const toastMsg = payload.data?.title || payload.notification?.title || 'มีการแจ้งเตือนใหม่';
+          Toast.info(toastMsg);
+        }
+      });
+    }
+    
+    /**
+     * Handler เมื่อ user กดที่ push status bar
+     * - iOS + permission=default → ขอ permission (user gesture) → complete registration
+     * - denied → แนะนำวิธีเปิดใน browser settings
+     * - granted → แสดงข้อมูลสถานะ
+     */
+    window.handlePushStatusClick = async function() {
       const perm = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
       
       if (perm === 'denied') {
         if (typeof Toast !== 'undefined') {
           Toast.info('เปิดการแจ้งเตือนได้ที่: ตั้งค่าเบราว์เซอร์ → ไซต์นี้ → การแจ้งเตือน → อนุญาต');
         }
+      } else if (perm === 'default' && window._pushSetup) {
+        // iOS flow: user กดแล้ว → ขอ permission (เป็น user gesture แล้ว)
+        console.log('[Push] iOS user tapped → requesting permission...');
+        try {
+          const result = await Notification.requestPermission();
+          console.log('[Push] iOS permission result:', result);
+          
+          if (result === 'granted') {
+            const { swRegistration, messaging } = window._pushSetup;
+            const statusBar = document.getElementById('push-status-bar');
+            const statusIcon = document.getElementById('push-status-icon');
+            const statusText = document.getElementById('push-status-text');
+            
+            function showPushStatus(icon, text, show) {
+              if (!statusBar) return;
+              statusIcon.textContent = icon;
+              statusText.textContent = text;
+              statusBar.style.display = show ? 'inline-flex' : 'none';
+            }
+            
+            await completePushRegistration(messaging, swRegistration, showPushStatus);
+            setupForegroundHandler(messaging);
+            console.log('[Push] iOS FCM registration complete');
+          } else {
+            if (typeof Toast !== 'undefined') {
+              Toast.info('การแจ้งเตือนถูกปิด');
+            }
+          }
+          window._pushSetup = null;
+        } catch (error) {
+          console.error('[Push] iOS permission error:', error);
+        }
       } else if (perm === 'granted') {
         if (typeof Toast !== 'undefined') {
           Toast.success('การแจ้งเตือนเปิดอยู่แล้ว');
+        }
+      } else if (perm === 'unsupported' && isIOS() && !isStandalone()) {
+        // iOS Safari ปกติ (ไม่ได้ Add to Home Screen)
+        if (typeof Toast !== 'undefined') {
+          Toast.info('กดปุ่ม แชร์ (🔗) → "เพิ่มลงหน้าจอหลัก" เพื่อรับการแจ้งเตือน');
         }
       } else {
         // re-trigger registration

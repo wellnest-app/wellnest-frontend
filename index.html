@@ -22,6 +22,9 @@
   <!-- PWA -->
   <link rel="manifest" href="/wellnest-frontend/manifest.json">
   <link rel="apple-touch-icon" href="/wellnest-frontend/assets/icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/wellnest-frontend/assets/icons/icon-152.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/wellnest-frontend/assets/icons/icon-192.png">
+  <meta name="apple-mobile-web-app-title" content="WellNest">
   
   <!-- Favicon -->
   <link rel="icon" type="image/png" sizes="32x32" href="/wellnest-frontend/assets/icons/favicon-32.png">
@@ -180,6 +183,19 @@
   <script src="/wellnest-frontend/js/config.js"></script>
   <script>
     (function() {
+      // P5 Fix: Register Service Worker ตั้งแต่ entry point
+      // ให้ SW ถูก install ทันทีเมื่อเปิดแอป — ไม่ต้องรอเข้า dashboard
+      // สำคัญสำหรับ PWA Add to Home Screen: SW ต้องพร้อมก่อนจึงจะรับ push ได้
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/wellnest-frontend/firebase-messaging-sw.js', {
+          scope: '/wellnest-frontend/'
+        }).then(function(reg) {
+          console.log('[PWA] Service Worker registered from index.html, scope:', reg.scope);
+        }).catch(function(err) {
+          console.warn('[PWA] Service Worker registration failed:', err);
+        });
+      }
+      
       // Token and auth key names from config
       const TOKEN_KEY = 'wellnest_token';
       const USER_KEY = 'wellnest_user';
