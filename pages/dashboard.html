@@ -650,11 +650,12 @@
       modal: true
     });
     
-    // L2 Fix: ผูก click handler ให้ปุ่มกระดิ่งใน header → ไปหน้าการเตือน
+    // L2 Fix: ผูก click handler ให้ปุ่มกระดิ่งใน header → ไปหน้าการแจ้งเตือน
+    // Chat 9: เปลี่ยนจาก reminders/list → notifications/list (เหมาะกว่าตาม semantic กระดิ่ง = ดูประวัติแจ้งเตือน)
     const notifBtn = document.getElementById('headerNotificationBtn');
     if (notifBtn) {
       notifBtn.addEventListener('click', function() {
-        window.location.href = '/wellnest-frontend/pages/reminders/list.html';
+        window.location.href = '/wellnest-frontend/pages/notifications/list.html';
       });
     }
     
@@ -775,6 +776,8 @@
     
     // L8 Fix: คำนวณอัตราการทานยาจาก medication_history + reminders
     // แทน /notifications/stats ที่มีปัญหา notification_type mismatch
+    // R3 Fix: นับเฉพาะ taken ที่ match กับ enabled reminder (deduplicate by reminder_id)
+    //         ป้องกันกรณีกด take ยาที่ไม่มี reminder → ตัวตั้งเกินตัวหาร
     async function loadComplianceStats() {
       try {
         // คำนวณ start of today (local time → ISO)
@@ -793,11 +796,25 @@
         const enabledReminders = Array.isArray(remindersRes) 
           ? remindersRes.filter(r => r.is_enabled && !medMap[r.user_med_id]?.is_expired) 
           : [];
-        const todayTaken = Array.isArray(historyRes) ? historyRes.length : 0;
         const totalExpected = enabledReminders.length;
         
+        // R3 Fix: สร้าง Set ของ reminder_id ที่ enabled (ไม่นับยาหมดอายุ)
+        const enabledReminderIds = new Set(enabledReminders.map(r => r.reminder_id));
+        
+        // R3 Fix: นับ taken เฉพาะที่ reminder_id match + deduplicate by reminder_id
+        //         ป้องกันกรณี: (1) take ยาไม่มี reminder → ไม่นับ
+        //                      (2) take ซ้ำ reminder เดียวกัน → นับแค่ 1
+        const takenHistory = Array.isArray(historyRes) ? historyRes : [];
+        const takenReminderIds = new Set();
+        takenHistory.forEach(h => {
+          if (h.reminder_id && enabledReminderIds.has(h.reminder_id)) {
+            takenReminderIds.add(h.reminder_id);
+          }
+        });
+        const todayTaken = takenReminderIds.size;
+        
         if (totalExpected > 0) {
-          const rate = Math.min(Math.round((todayTaken / totalExpected) * 100), 100);
+          const rate = Math.round((todayTaken / totalExpected) * 100);
           statCompliance.textContent = `${rate}%`;
         } else {
           statCompliance.textContent = '-';
