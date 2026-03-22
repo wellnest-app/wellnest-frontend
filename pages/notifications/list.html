@@ -7,6 +7,11 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   
+  <!-- PWA -->
+  <link rel="manifest" href="/wellnest-frontend/manifest.json">
+  <link rel="apple-touch-icon" href="/wellnest-frontend/assets/icons/icon-192.png">
+  <meta name="apple-mobile-web-app-title" content="WellNest">
+  
   <title>การแจ้งเตือน - WellNest</title>
   
   <!-- Preconnect -->
@@ -925,14 +930,63 @@
     
     // ===== Actions =====
     
-    // Acknowledge notification (taken / skipped)
+    // 10A-1c: Acknowledge notification (taken / skipped)
+    // "ทานแล้ว" → GET detail → POST /medication/take → POST /acknowledge
+    // "ข้าม" → POST /acknowledge ตรงๆ
     window.acknowledgeNotif = async function(notifId, responseType) {
+      // ป้องกันกดซ้ำ — disable ปุ่มทันที
+      const card = document.querySelector(`.notif-card .notif-action-btn[onclick*="${notifId}"]`);
+      const allBtns = card ? card.closest('.notif-actions')?.querySelectorAll('.notif-action-btn') : [];
+      allBtns.forEach(btn => { btn.disabled = true; btn.style.opacity = '0.5'; });
+      
       try {
-        await Api.post(`/notifications/${notifId}/acknowledge`, {
-          response_type: responseType
-        });
+        if (responseType === 'taken') {
+          // === Flow "ทานแล้ว" — ต้องสร้าง MedicationHistory ด้วย ===
+          
+          // Step 1: ดึง notification detail เพื่อได้ user_med_id, reminder_id, reminder_time
+          let detail = null;
+          try {
+            detail = await Api.get(`/notifications/${notifId}`);
+          } catch (detailErr) {
+            console.error('[Notifications] Failed to get detail:', detailErr);
+          }
+          
+          // Step 2: เรียก /medication/take ถ้ามีข้อมูลครบ
+          if (detail && detail.user_med_id && detail.reminder_id) {
+            try {
+              await Api.post('/medication/take', {
+                user_med_id: detail.user_med_id,
+                reminder_id: detail.reminder_id,
+                scheduled_time: detail.reminder_time || null,
+                action: 'taken'
+              });
+            } catch (takeErr) {
+              // ถ้า duplicate (กดจากหน้าอื่นไปแล้ว) → ไม่ต้อง error
+              console.warn('[Notifications] Take result:', takeErr.message || takeErr);
+            }
+          } else {
+            console.warn('[Notifications] Missing user_med_id or reminder_id — skip /medication/take');
+          }
+          
+          // Step 3: mark notification as acknowledged
+          // อาจ 400 เพราะ B1b ใน /medication/take mark ไปแล้ว → ignore
+          try {
+            await Api.post(`/notifications/${notifId}/acknowledge`, {
+              response_type: 'taken'
+            });
+          } catch (ackErr) {
+            // B1b อาจ mark ไปแล้ว → 400 "already acknowledged" → ไม่เป็นไร
+            console.log('[Notifications] Acknowledge after take:', ackErr.message || 'already marked');
+          }
+          
+        } else {
+          // === Flow "ข้าม" — mark notification เท่านั้น ===
+          await Api.post(`/notifications/${notifId}/acknowledge`, {
+            response_type: responseType
+          });
+        }
         
-        // Update local state
+        // อัปเดต local state
         const notif = notifications.find(n => n.notification_id === notifId);
         if (notif) {
           notif.response_type = responseType;
@@ -949,6 +1003,8 @@
         console.error('Failed to acknowledge:', error);
         const msg = error.detail || error.message || 'เกิดข้อผิดพลาด';
         Toast.error(msg);
+        // คืนสถานะปุ่ม
+        allBtns.forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; });
       }
     };
     
