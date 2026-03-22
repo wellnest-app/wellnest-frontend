@@ -158,6 +158,26 @@
       border: 2px solid white;
     }
     
+    /* 10A-4: Notification badge with count */
+    .notif-badge {
+      position: absolute;
+      top: 4px;
+      right: 2px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 4px;
+      background: #EF4444;
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 18px;
+      text-align: center;
+      border-radius: 9px;
+      border: 2px solid white;
+      pointer-events: none;
+      display: none;
+    }
+    
     /* ===== Page Container ===== */
     .page-container {
       min-height: 100vh;
@@ -662,6 +682,13 @@
       notifBtn.addEventListener('click', function() {
         window.location.href = '/wellnest-frontend/pages/notifications/list.html';
       });
+      
+      // 10A-4: Inject notification badge element เข้าไปในปุ่มกระดิ่ง
+      const badge = document.createElement('span');
+      badge.className = 'notif-badge';
+      badge.id = 'notifBadge';
+      notifBtn.style.position = 'relative';
+      notifBtn.appendChild(badge);
     }
     
     // Get DOM elements
@@ -696,7 +723,8 @@
           loadTodayMedications(),
           loadUpcomingReminders(),
           loadComplianceStats(),
-          loadDeviceCount()
+          loadDeviceCount(),
+          loadNotifBadge()
         ]);
         
         // Step C: เริ่ม FCM Push Notification registration (ไม่ block dashboard)
@@ -839,6 +867,25 @@
       } catch (error) {
         console.log('No devices yet:', error.message);
         statDevices.textContent = '0';
+      }
+    }
+    
+    // 10A-4: Load notification pending count → แสดง badge บนกระดิ่ง
+    async function loadNotifBadge() {
+      try {
+        const data = await Api.get('/notifications/pending/count');
+        const count = data?.pending_count || 0;
+        const badge = document.getElementById('notifBadge');
+        if (!badge) return;
+        
+        if (count > 0) {
+          badge.textContent = count > 9 ? '9+' : count;
+          badge.style.display = 'block';
+        } else {
+          badge.style.display = 'none';
+        }
+      } catch (error) {
+        console.log('Notif badge error:', error.message);
       }
     }
     
@@ -1056,6 +1103,7 @@
           console.log('[Push] Reminder notification → refresh dashboard');
           loadUpcomingReminders();
           loadComplianceStats();
+          loadNotifBadge(); // 10A-4: อัปเดต badge เมื่อมี push เข้า
         }
         
         if (typeof Toast !== 'undefined') {
@@ -1196,9 +1244,10 @@
           action: 'taken'
         });
         Toast.success(t('reminders.taken') || 'บันทึกการทานยาแล้ว');
-        // Refresh reminders + compliance
+        // Refresh reminders + compliance + badge
         loadUpcomingReminders();
         loadComplianceStats();
+        loadNotifBadge(); // 10A-4: อัปเดต badge หลังกดทาน
       } catch (error) {
         console.error('Failed to take reminder:', error);
         Toast.error(t('errors.generic') || 'เกิดข้อผิดพลาด');
