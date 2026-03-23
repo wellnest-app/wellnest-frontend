@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#F5B31A">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <!-- PWA -->
+  <link rel="manifest" href="/wellnest-frontend/manifest.json">
+  <link rel="apple-touch-icon" href="/wellnest-frontend/assets/icons/icon-192.png">
+  <meta name="apple-mobile-web-app-title" content="WellNest">
+
+  <title>รายละเอียดอุปกรณ์ - WellNest</title>
+
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#FFFBEB', 100: '#FEF3C7', 200: '#FDE68A', 300: '#FCD34D',
+              400: '#FBBF24', 500: '#F5B31A', 600: '#D97706', 700: '#B45309',
+              800: '#92400E', 900: '#78350F'
+            },
+            secondary: {
+              50: '#EFF6FF', 100: '#DBEAFE', 200: '#BFDBFE', 300: '#93C5FD',
+              400: '#60A5FA', 500: '#3B82F6', 600: '#2563EB', 700: '#1D4ED8',
+              800: '#1E40AF', 900: '#1E3A8A'
+            }
+          },
+          fontFamily: {
+            sans: ['Noto Sans Thai', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Apache ECharts -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/wellnest-frontend/css/tokens.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/components.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/utilities.css">
+
+  <style>
+    :root {
+      --header-height: 56px;
+      --bottom-nav-height: 64px;
+      --device-50: #ECFDF5; --device-100: #D1FAE5; --device-200: #A7F3D0;
+      --device-300: #6EE7B7; --device-400: #34D399; --device-500: #10B981;
+      --device-600: #059669; --device-700: #047857; --device-800: #065F46;
+    }
+
+    /* ===== Page Container ===== */
+    .page-container {
+      min-height: 100vh; min-height: 100dvh;
+      padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+      padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 80px);
+      background: var(--color-background, #FFFBEB);
+    }
+
+    /* ===== Header ===== */
+    .header {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: var(--header-height); background: white;
+      border-bottom: 1px solid #f0f0f0; z-index: 100;
+      display: flex; align-items: center; padding: 0 1rem;
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+    .header-left { width: 48px; display: flex; align-items: center; }
+    .header-btn {
+      width: 40px; height: 40px; border-radius: 50%; border: none;
+      background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--color-gray-600);
+    }
+    .header-btn:hover { background: var(--color-gray-100); }
+    .header-btn svg { width: 22px; height: 22px; }
+    .header-center { flex: 1; text-align: center; }
+    .header-title {
+      font-size: 1.125rem; font-weight: 600;
+      color: var(--color-gray-800); margin: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .header-right { width: 48px; display: flex; align-items: center; justify-content: flex-end; }
+
+    /* ===== Hero Card ===== */
+    .hero-card {
+      background: linear-gradient(135deg, var(--device-500) 0%, var(--device-700) 100%);
+      margin: 1rem; border-radius: 20px; padding: 1.5rem;
+      color: white; position: relative; overflow: hidden;
+    }
+    .hero-card::before {
+      content: ''; position: absolute; top: -50%; right: -30%;
+      width: 200px; height: 200px;
+      background: rgba(255,255,255,0.1); border-radius: 50%;
+    }
+    .hero-card::after {
+      content: ''; position: absolute; bottom: -30%; left: -20%;
+      width: 150px; height: 150px;
+      background: rgba(255,255,255,0.08); border-radius: 50%;
+    }
+    .hero-content { position: relative; z-index: 1; }
+    .hero-icon {
+      width: 56px; height: 56px; border-radius: 16px;
+      background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 0.75rem;
+    }
+    .hero-icon svg { width: 28px; height: 28px; }
+    .hero-name { font-size: 1.375rem; font-weight: 700; margin-bottom: 0.125rem; }
+    .hero-serial {
+      font-size: 0.8125rem; opacity: 0.85;
+      font-family: monospace; margin-bottom: 0.75rem;
+    }
+    .hero-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      font-size: 0.75rem; font-weight: 500;
+      padding: 0.25rem 0.625rem; border-radius: 1rem;
+      background: rgba(255,255,255,0.2);
+    }
+    .hero-badge svg { width: 14px; height: 14px; }
+    .hero-badge.active { background: #22C55E; }
+    .hero-badge.offline { background: #EF4444; }
+    .hero-badge.pending { background: #F59E0B; }
+
+    /* ===== Telemetry Grid ===== */
+    .tele-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 0.75rem; margin: 0 1rem 1rem;
+    }
+    .tele-card {
+      background: white; border-radius: 16px; padding: 1rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      position: relative; overflow: hidden;
+    }
+    .tele-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; border-radius: 16px 16px 0 0;
+    }
+    .tele-card.temp::before { background: linear-gradient(90deg, #3B82F6, #60A5FA); }
+    .tele-card.hum::before { background: linear-gradient(90deg, #6366F1, #818CF8); }
+    .tele-card.power::before { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
+    .tele-card.door::before { background: linear-gradient(90deg, var(--device-500), var(--device-400)); }
+
+    .tele-label {
+      font-size: 0.75rem; font-weight: 500; color: var(--color-gray-500);
+      display: flex; align-items: center; gap: 0.375rem; margin-bottom: 0.375rem;
+    }
+    .tele-label svg { width: 14px; height: 14px; }
+    .tele-value {
+      font-size: 1.5rem; font-weight: 700; color: var(--color-gray-800);
+    }
+    .tele-value .unit {
+      font-size: 0.875rem; font-weight: 500; color: var(--color-gray-500);
+    }
+    .tele-value.door-open { color: #DC2626; }
+    .tele-value.door-closed { color: #059669; }
+    .tele-sub {
+      font-size: 0.6875rem; color: var(--color-gray-400); margin-top: 0.25rem;
+    }
+
+    /* Wide card (ครอบ 2 column) */
+    .tele-card.wide { grid-column: 1 / -1; }
+
+    /* ===== Stats Card ===== */
+    .stats-card {
+      background: white; margin: 0 1rem 1rem;
+      border-radius: 16px; padding: 1rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .stats-title {
+      font-size: 0.875rem; font-weight: 600; color: var(--color-gray-800);
+      margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .stats-title svg { width: 18px; height: 18px; color: var(--device-500); }
+
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
+    }
+    .stat-item { text-align: center; }
+    .stat-label {
+      font-size: 0.6875rem; color: var(--color-gray-400);
+      margin-bottom: 0.25rem; text-transform: uppercase;
+    }
+    .stat-val {
+      font-size: 1rem; font-weight: 700; color: var(--color-gray-800);
+    }
+    .stat-val .stat-unit {
+      font-size: 0.6875rem; font-weight: 500; color: var(--color-gray-500);
+    }
+
+    .stats-row-title {
+      font-size: 0.75rem; font-weight: 600; color: var(--color-gray-600);
+      margin: 0.75rem 0 0.5rem; padding-top: 0.75rem;
+      border-top: 1px solid var(--color-gray-100);
+      display: flex; align-items: center; gap: 0.375rem;
+    }
+    .stats-row-title svg { width: 14px; height: 14px; color: var(--color-gray-400); }
+
+    /* ===== Chart Card ===== */
+    .chart-card {
+      background: white; margin: 0 1rem 1rem;
+      border-radius: 16px; padding: 1rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .chart-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .chart-title {
+      font-size: 0.875rem; font-weight: 600; color: var(--color-gray-800);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .chart-title svg { width: 18px; height: 18px; color: var(--device-500); }
+
+    .chart-period-btns { display: flex; gap: 0.25rem; }
+    .chart-period-btn {
+      padding: 0.25rem 0.625rem; border-radius: 6px; border: none;
+      font-size: 0.6875rem; font-weight: 600; cursor: pointer;
+      background: var(--color-gray-100); color: var(--color-gray-500);
+      transition: all 0.2s;
+    }
+    .chart-period-btn.active {
+      background: var(--device-500); color: white;
+    }
+
+    #telemetryChart {
+      width: 100%; height: 280px;
+    }
+    .chart-no-data {
+      display: none; text-align: center; padding: 3rem 1rem;
+      color: var(--color-gray-400); font-size: 0.875rem;
+    }
+
+    /* ===== Info Card ===== */
+    .info-card {
+      background: white; margin: 0 1rem 1rem;
+      border-radius: 16px; padding: 1rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .info-card-title {
+      font-size: 0.875rem; font-weight: 600; color: var(--color-gray-800);
+      margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .info-card-title svg { width: 18px; height: 18px; color: var(--device-500); }
+    .info-row {
+      display: flex; justify-content: space-between;
+      padding: 0.625rem 0; border-bottom: 1px solid var(--color-gray-100);
+    }
+    .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .info-row:first-child { padding-top: 0; }
+    .info-label { font-size: 0.875rem; color: var(--color-gray-500); }
+    .info-value {
+      font-size: 0.875rem; font-weight: 500; color: var(--color-gray-800);
+      text-align: right; max-width: 55%; word-break: break-all;
+    }
+
+    /* ===== Danger Zone ===== */
+    .danger-card {
+      background: white; margin: 0 1rem 1.5rem;
+      border-radius: 16px; padding: 1rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      border: 1px solid #FEE2E2;
+    }
+    .danger-title {
+      font-size: 0.875rem; font-weight: 600; color: #DC2626;
+      margin-bottom: 0.5rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .danger-title svg { width: 18px; height: 18px; }
+    .danger-desc {
+      font-size: 0.8125rem; color: var(--color-gray-500);
+      margin-bottom: 0.75rem; line-height: 1.5;
+    }
+    .btn-danger {
+      width: 100%; padding: 0.75rem;
+      border-radius: 12px; border: 1.5px solid #FCA5A5;
+      background: #FEF2F2; color: #DC2626;
+      font-size: 0.875rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .btn-danger:active { background: #FEE2E2; }
+    .btn-danger svg { width: 18px; height: 18px; }
+
+    /* ===== Skeleton ===== */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s infinite; border-radius: 8px;
+    }
+    @keyframes skeleton-loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .skeleton-hero {
+      margin: 1rem; height: 160px; border-radius: 20px;
+    }
+    .skeleton-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 0.75rem; margin: 0 1rem 1rem;
+    }
+    .skeleton-tele { height: 90px; border-radius: 16px; }
+    .skeleton-chart { margin: 0 1rem 1rem; height: 200px; border-radius: 16px; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="header-btn" onclick="goBack()" aria-label="กลับ">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+    </div>
+    <div class="header-center">
+      <h1 class="header-title" id="headerTitle">รายละเอียดอุปกรณ์</h1>
+    </div>
+    <div class="header-right">
+      <button class="header-btn" onclick="refreshAll()" aria-label="รีเฟรช" id="refreshBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Page Content -->
+  <div class="page-container">
+
+    <!-- Skeleton Loading -->
+    <div id="loadingSkeleton">
+      <div class="skeleton skeleton-hero"></div>
+      <div class="skeleton-grid">
+        <div class="skeleton skeleton-tele"></div>
+        <div class="skeleton skeleton-tele"></div>
+        <div class="skeleton skeleton-tele"></div>
+        <div class="skeleton skeleton-tele"></div>
+      </div>
+      <div class="skeleton skeleton-chart"></div>
+    </div>
+
+    <!-- Main Content (ซ่อนจนกว่าจะโหลดเสร็จ) -->
+    <div id="mainContent" style="display: none;">
+
+      <!-- Hero Card -->
+      <div class="hero-card">
+        <div class="hero-content">
+          <div class="hero-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+              <path d="M8 21h8"/><path d="M12 17v4"/>
+            </svg>
+          </div>
+          <div class="hero-name" id="heroName">-</div>
+          <div class="hero-serial" id="heroSerial">-</div>
+          <div class="hero-badges" id="heroBadges"></div>
+        </div>
+      </div>
+
+      <!-- Telemetry Grid -->
+      <div class="tele-grid" id="teleGrid">
+        <!-- อุณหภูมิ -->
+        <div class="tele-card temp">
+          <div class="tele-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+            อุณหภูมิ
+          </div>
+          <div class="tele-value" id="valTemp">-- <span class="unit">°C</span></div>
+          <div class="tele-sub" id="subTemp"></div>
+        </div>
+        <!-- ความชื้น -->
+        <div class="tele-card hum">
+          <div class="tele-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+            ความชื้น
+          </div>
+          <div class="tele-value" id="valHum">-- <span class="unit">%</span></div>
+          <div class="tele-sub" id="subHum"></div>
+        </div>
+        <!-- กำลังไฟ -->
+        <div class="tele-card power">
+          <div class="tele-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            กำลังไฟ
+          </div>
+          <div class="tele-value" id="valPower">-- <span class="unit">W</span></div>
+          <div class="tele-sub" id="subPower"></div>
+        </div>
+        <!-- ประตู -->
+        <div class="tele-card door">
+          <div class="tele-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="2" width="14" height="20" rx="2"/><path d="M13 12v.01"/></svg>
+            ประตูตู้เย็น
+          </div>
+          <div class="tele-value" id="valDoor">--</div>
+          <div class="tele-sub" id="subDoor"></div>
+        </div>
+      </div>
+
+      <!-- Stats Card (24 ชม.) -->
+      <div class="stats-card" id="statsCard">
+        <div class="stats-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.22-8.57"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          สถิติ 24 ชั่วโมง
+        </div>
+
+        <!-- อุณหภูมิ -->
+        <div class="stats-row-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+          อุณหภูมิ (°C)
+        </div>
+        <div class="stats-grid">
+          <div class="stat-item"><div class="stat-label">ต่ำสุด</div><div class="stat-val" id="statTempMin">--</div></div>
+          <div class="stat-item"><div class="stat-label">เฉลี่ย</div><div class="stat-val" id="statTempAvg">--</div></div>
+          <div class="stat-item"><div class="stat-label">สูงสุด</div><div class="stat-val" id="statTempMax">--</div></div>
+        </div>
+
+        <!-- ความชื้น -->
+        <div class="stats-row-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+          ความชื้น (%)
+        </div>
+        <div class="stats-grid">
+          <div class="stat-item"><div class="stat-label">ต่ำสุด</div><div class="stat-val" id="statHumMin">--</div></div>
+          <div class="stat-item"><div class="stat-label">เฉลี่ย</div><div class="stat-val" id="statHumAvg">--</div></div>
+          <div class="stat-item"><div class="stat-label">สูงสุด</div><div class="stat-val" id="statHumMax">--</div></div>
+        </div>
+
+        <!-- ไฟฟ้า -->
+        <div class="stats-row-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          พลังงาน
+        </div>
+        <div class="stats-grid">
+          <div class="stat-item"><div class="stat-label">กำลังไฟ เฉลี่ย</div><div class="stat-val" id="statPowerAvg">-- <span class="stat-unit">W</span></div></div>
+          <div class="stat-item"><div class="stat-label">พลังงานรวม</div><div class="stat-val" id="statEnergy">-- <span class="stat-unit">kWh</span></div></div>
+          <div class="stat-item"><div class="stat-label">เปิดประตู</div><div class="stat-val" id="statDoorOpen">-- <span class="stat-unit">ครั้ง</span></div></div>
+        </div>
+      </div>
+
+      <!-- Chart Card -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            กราฟข้อมูล
+          </div>
+          <div class="chart-period-btns">
+            <button class="chart-period-btn active" data-hours="24" onclick="changeChartPeriod(24, this)">24 ชม.</button>
+            <button class="chart-period-btn" data-hours="72" onclick="changeChartPeriod(72, this)">3 วัน</button>
+            <button class="chart-period-btn" data-hours="168" onclick="changeChartPeriod(168, this)">7 วัน</button>
+          </div>
+        </div>
+        <div id="telemetryChart"></div>
+        <div class="chart-no-data" id="chartNoData">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 0.5rem; display: block; color: var(--color-gray-300);">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          ยังไม่มีข้อมูลสำหรับช่วงเวลานี้
+        </div>
+      </div>
+
+      <!-- Device Info Card -->
+      <div class="info-card">
+        <div class="info-card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          ข้อมูลอุปกรณ์
+        </div>
+        <div class="info-row"><span class="info-label">Serial Number</span><span class="info-value" id="infoSerial">-</span></div>
+        <div class="info-row"><span class="info-label">ประเภท</span><span class="info-value" id="infoType">-</span></div>
+        <div class="info-row"><span class="info-label">Firmware</span><span class="info-value" id="infoFirmware">-</span></div>
+        <div class="info-row"><span class="info-label">Rate Limit</span><span class="info-value" id="infoInterval">-</span></div>
+        <div class="info-row"><span class="info-label">เชื่อมต่อเมื่อ</span><span class="info-value" id="infoClaimed">-</span></div>
+        <div class="info-row"><span class="info-label">อัปเดตล่าสุด</span><span class="info-value" id="infoLastSeen">-</span></div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="danger-card">
+        <div class="danger-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          ถอดอุปกรณ์ออก
+        </div>
+        <div class="danger-desc">ถอดอุปกรณ์ออกจากบัญชีของคุณ ข้อมูล telemetry จะยังคงอยู่ในระบบ</div>
+        <button class="btn-danger" onclick="confirmUnclaim()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18"/><path d="M6 6l12 12"/>
+          </svg>
+          ถอดอุปกรณ์ออก
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Component Placeholders -->
+  <div id="bottom-nav-placeholder"></div>
+  <div id="toast-placeholder"></div>
+  <div id="modal-placeholder"></div>
+
+  <!-- Core Scripts -->
+  <script src="/wellnest-frontend/js/config.js"></script>
+  <script src="/wellnest-frontend/js/i18n/th.js"></script>
+  <script src="/wellnest-frontend/js/i18n/en.js"></script>
+  <script src="/wellnest-frontend/js/i18n.js"></script>
+  <script src="/wellnest-frontend/js/utils.js"></script>
+  <script src="/wellnest-frontend/js/api.js"></script>
+  <script src="/wellnest-frontend/js/auth.js"></script>
+  <script src="/wellnest-frontend/js/storage.js"></script>
+  <script src="/wellnest-frontend/js/components.js"></script>
+  <script src="/wellnest-frontend/js/modal.js"></script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', async function() {
+    // === Auth ===
+    if (typeof Auth !== 'undefined') { Auth.requireAuth(); }
+
+    // === Load components ===
+    await Components.init({
+      bottomNav: { active: 'devices' },
+      toast: true,
+      modal: true
+    });
+
+    // === Get device ID from URL ===
+    const params = new URLSearchParams(window.location.search);
+    const deviceId = parseInt(params.get('id'), 10);
+    if (!deviceId) {
+      if (typeof Toast !== 'undefined') { Toast.error('ไม่พบรหัสอุปกรณ์'); }
+      setTimeout(() => { window.location.href = '/wellnest-frontend/pages/devices/list.html'; }, 1000);
+      return;
+    }
+
+    // === State ===
+    let device = null;
+    let latestTele = null;
+    let stats = null;
+    let chartInstance = null;
+    let currentChartHours = 24;
+
+    // === Helpers ===
+    function sanitize(str) {
+      if (str === null || str === undefined) return '';
+      const div = document.createElement('div');
+      div.textContent = String(str);
+      return div.innerHTML;
+    }
+
+    function timeAgo(dateStr) {
+      if (!dateStr) return '-';
+      const now = new Date();
+      const past = new Date(dateStr);
+      const diffSec = Math.floor((now - past) / 1000);
+      const diffMin = Math.floor(diffSec / 60);
+      const diffHour = Math.floor(diffMin / 60);
+      const diffDay = Math.floor(diffHour / 24);
+      if (diffSec < 60) return 'เมื่อสักครู่';
+      if (diffMin < 60) return diffMin + ' นาทีที่แล้ว';
+      if (diffHour < 24) return diffHour + ' ชั่วโมงที่แล้ว';
+      if (diffDay < 7) return diffDay + ' วันที่แล้ว';
+      return past.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('th-TH', {
+        day: 'numeric', month: 'short', year: 'numeric'
+      }) + ' ' + d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+
+    function statusText(s) {
+      return { 'active': 'ออนไลน์', 'offline': 'ออฟไลน์', 'pending': 'รอเชื่อมต่อ' }[s] || s;
+    }
+
+    function deviceTypeText(t) {
+      return { 'fridge': 'ตู้เย็นเก็บยา', 'box': 'กล่องเก็บยา' }[t] || t;
+    }
+
+    function v(val, decimals) {
+      if (val === null || val === undefined) return '--';
+      return Number(val).toFixed(decimals !== undefined ? decimals : 1);
+    }
+
+    // === Load all data ===
+    async function loadAll() {
+      try {
+        document.getElementById('loadingSkeleton').style.display = 'block';
+        document.getElementById('mainContent').style.display = 'none';
+
+        // โหลดพร้อมกัน 3 API
+        const [deviceRes, latestRes, statsRes] = await Promise.allSettled([
+          api.get('/devices/' + deviceId),
+          api.get('/devices/' + deviceId + '/telemetry/latest'),
+          api.getWithParams('/devices/' + deviceId + '/telemetry/stats', { hours: 24 })
+        ]);
+
+        // Device (required)
+        if (deviceRes.status === 'rejected') {
+          throw deviceRes.reason;
+        }
+        device = deviceRes.value;
+
+        // Latest telemetry (optional)
+        latestTele = (latestRes.status === 'fulfilled') ? latestRes.value : null;
+
+        // Stats (optional)
+        stats = (statsRes.status === 'fulfilled') ? statsRes.value : null;
+
+        renderAll();
+
+        // โหลดกราฟแยก (ไม่ block render)
+        loadChart(currentChartHours);
+
+      } catch (error) {
+        console.error('[DeviceDetail] Load failed:', error);
+        document.getElementById('loadingSkeleton').style.display = 'none';
+        if (error.status === 404) {
+          if (typeof Toast !== 'undefined') { Toast.error('ไม่พบอุปกรณ์นี้'); }
+          setTimeout(() => { window.location.href = '/wellnest-frontend/pages/devices/list.html'; }, 1500);
+        } else {
+          if (typeof Toast !== 'undefined') { Toast.error('ไม่สามารถโหลดข้อมูลได้'); }
+        }
+      }
+    }
+
+    // === Render ===
+    function renderAll() {
+      document.getElementById('loadingSkeleton').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+
+      // Header
+      document.getElementById('headerTitle').textContent = device.device_name || 'รายละเอียดอุปกรณ์';
+
+      // Hero
+      document.getElementById('heroName').textContent = device.device_name || device.serial_number;
+      document.getElementById('heroSerial').textContent = device.serial_number;
+
+      const status = device.status || 'pending';
+      let badgesHtml = '<span class="hero-badge ' + sanitize(status) + '">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/></svg>'
+        + statusText(status) + '</span>';
+      if (device.firmware_version) {
+        badgesHtml += '<span class="hero-badge">FW ' + sanitize(device.firmware_version) + '</span>';
+      }
+      if (device.device_type) {
+        badgesHtml += '<span class="hero-badge">' + sanitize(deviceTypeText(device.device_type)) + '</span>';
+      }
+      document.getElementById('heroBadges').innerHTML = badgesHtml;
+
+      // Telemetry values
+      var lt = latestTele || {};
+      document.getElementById('valTemp').innerHTML = v(lt.temperature) + ' <span class="unit">°C</span>';
+      document.getElementById('valHum').innerHTML = v(lt.humidity) + ' <span class="unit">%</span>';
+      document.getElementById('valPower').innerHTML = v(lt.power) + ' <span class="unit">W</span>';
+
+      // ประตู
+      var doorEl = document.getElementById('valDoor');
+      if (lt.door_open === true) {
+        doorEl.innerHTML = 'เปิดอยู่';
+        doorEl.className = 'tele-value door-open';
+      } else if (lt.door_open === false) {
+        doorEl.innerHTML = 'ปิดอยู่';
+        doorEl.className = 'tele-value door-closed';
+      } else {
+        doorEl.innerHTML = '--';
+        doorEl.className = 'tele-value';
+      }
+
+      // Sub text (last update)
+      var subTime = (lt.recorded_at) ? timeAgo(lt.recorded_at) : '';
+      if (subTime) {
+        document.getElementById('subTemp').textContent = subTime;
+        document.getElementById('subHum').textContent = subTime;
+        document.getElementById('subPower').textContent = (lt.voltage !== null && lt.voltage !== undefined)
+          ? v(lt.voltage) + 'V / ' + v(lt.current) + 'A' : subTime;
+        document.getElementById('subDoor').textContent = (lt.light_lux !== null && lt.light_lux !== undefined)
+          ? 'แสง: ' + v(lt.light_lux, 0) + ' lux' : subTime;
+      }
+
+      // Stats
+      if (stats) {
+        document.getElementById('statTempMin').innerHTML = v(stats.temp_min);
+        document.getElementById('statTempAvg').innerHTML = v(stats.temp_avg);
+        document.getElementById('statTempMax').innerHTML = v(stats.temp_max);
+        document.getElementById('statHumMin').innerHTML = v(stats.hum_min);
+        document.getElementById('statHumAvg').innerHTML = v(stats.hum_avg);
+        document.getElementById('statHumMax').innerHTML = v(stats.hum_max);
+        document.getElementById('statPowerAvg').innerHTML = v(stats.power_avg) + ' <span class="stat-unit">W</span>';
+        document.getElementById('statEnergy').innerHTML = v(stats.energy_total, 3) + ' <span class="stat-unit">kWh</span>';
+        document.getElementById('statDoorOpen').innerHTML = (stats.door_open_count !== null ? stats.door_open_count : '--') + ' <span class="stat-unit">ครั้ง</span>';
+      }
+
+      // Info card
+      document.getElementById('infoSerial').textContent = device.serial_number;
+      document.getElementById('infoType').textContent = deviceTypeText(device.device_type);
+      document.getElementById('infoFirmware').textContent = device.firmware_version || '-';
+      document.getElementById('infoInterval').textContent = (device.min_interval_seconds || 60) + ' วินาที';
+      document.getElementById('infoClaimed').textContent = formatDate(device.claimed_at);
+      document.getElementById('infoLastSeen').textContent = device.last_seen_at ? timeAgo(device.last_seen_at) : 'ยังไม่เคยเชื่อมต่อ';
+    }
+
+    // === Chart ===
+    async function loadChart(hours) {
+      currentChartHours = hours;
+      var chartEl = document.getElementById('telemetryChart');
+      var noData = document.getElementById('chartNoData');
+
+      try {
+        var telemetry = await api.getWithParams('/devices/' + deviceId + '/telemetry', {
+          hours: hours,
+          limit: 1000
+        });
+
+        if (!telemetry || telemetry.length === 0) {
+          chartEl.style.display = 'none';
+          noData.style.display = 'block';
+          return;
+        }
+
+        chartEl.style.display = 'block';
+        noData.style.display = 'none';
+
+        // เรียงจากเก่า→ใหม่
+        telemetry.sort(function(a, b) {
+          return new Date(a.recorded_at) - new Date(b.recorded_at);
+        });
+
+        var times = [];
+        var temps = [];
+        var hums = [];
+        for (var i = 0; i < telemetry.length; i++) {
+          var t = telemetry[i];
+          var d = new Date(t.recorded_at);
+          times.push(d);
+          temps.push(t.temperature);
+          hums.push(t.humidity);
+        }
+
+        // Initialize หรือ update chart
+        if (!chartInstance) {
+          chartInstance = echarts.init(chartEl);
+          window.addEventListener('resize', function() {
+            if (chartInstance) { chartInstance.resize(); }
+          });
+        }
+
+        var option = {
+          tooltip: {
+            trigger: 'axis',
+            backgroundColor: 'rgba(255,255,255,0.95)',
+            borderColor: '#e5e7eb',
+            borderWidth: 1,
+            textStyle: { color: '#374151', fontFamily: 'Noto Sans Thai', fontSize: 12 },
+            formatter: function(params) {
+              var d = new Date(params[0].axisValue);
+              var dateStr = d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })
+                + ' ' + d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false });
+              var html = '<div style="font-weight:600;margin-bottom:4px;">' + dateStr + '</div>';
+              for (var i = 0; i < params.length; i++) {
+                var p = params[i];
+                if (p.value !== null && p.value !== undefined) {
+                  html += '<div style="display:flex;align-items:center;gap:6px;">'
+                    + p.marker
+                    + '<span>' + p.seriesName + ': <strong>' + Number(p.value).toFixed(1) + '</strong></span>'
+                    + '</div>';
+                }
+              }
+              return html;
+            }
+          },
+          legend: {
+            data: ['อุณหภูมิ (°C)', 'ความชื้น (%)'],
+            bottom: 0,
+            textStyle: { fontFamily: 'Noto Sans Thai', fontSize: 11, color: '#6b7280' },
+            itemWidth: 14, itemHeight: 8, itemGap: 20
+          },
+          grid: {
+            top: 10, right: 10, bottom: 60, left: 5,
+            containLabel: true
+          },
+          xAxis: {
+            type: 'time',
+            axisLabel: {
+              fontSize: 10, color: '#9ca3af',
+              formatter: function(val) {
+                var d = new Date(val);
+                return d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false });
+              }
+            },
+            axisLine: { lineStyle: { color: '#e5e7eb' } },
+            splitLine: { show: false }
+          },
+          yAxis: [
+            {
+              type: 'value', name: '°C', nameTextStyle: { fontSize: 10, color: '#9ca3af' },
+              axisLabel: { fontSize: 10, color: '#9ca3af' },
+              splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } }
+            },
+            {
+              type: 'value', name: '%', nameTextStyle: { fontSize: 10, color: '#9ca3af' },
+              axisLabel: { fontSize: 10, color: '#9ca3af' },
+              splitLine: { show: false }
+            }
+          ],
+          dataZoom: [
+            {
+              type: 'inside', xAxisIndex: 0, start: 0, end: 100,
+              minValueSpan: 3600 * 1000
+            },
+            {
+              type: 'slider', xAxisIndex: 0, start: 0, end: 100,
+              height: 20, bottom: 28,
+              borderColor: '#e5e7eb', fillerColor: 'rgba(16, 185, 129, 0.1)',
+              handleStyle: { color: '#10B981', borderColor: '#059669' },
+              textStyle: { fontSize: 9, color: '#9ca3af' },
+              labelFormatter: function(val) {
+                var d = new Date(val);
+                return d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false });
+              }
+            }
+          ],
+          series: [
+            {
+              name: 'อุณหภูมิ (°C)',
+              type: 'line', yAxisIndex: 0, smooth: true, symbol: 'none',
+              lineStyle: { width: 2, color: '#3B82F6' },
+              areaStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: 'rgba(59, 130, 246, 0.2)' },
+                  { offset: 1, color: 'rgba(59, 130, 246, 0.02)' }
+                ])
+              },
+              data: times.map(function(t, i) { return [t, temps[i]]; })
+            },
+            {
+              name: 'ความชื้น (%)',
+              type: 'line', yAxisIndex: 1, smooth: true, symbol: 'none',
+              lineStyle: { width: 2, color: '#8B5CF6' },
+              areaStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: 'rgba(139, 92, 246, 0.15)' },
+                  { offset: 1, color: 'rgba(139, 92, 246, 0.02)' }
+                ])
+              },
+              data: times.map(function(t, i) { return [t, hums[i]]; })
+            }
+          ]
+        };
+
+        chartInstance.setOption(option, true);
+
+      } catch (error) {
+        console.error('[DeviceDetail] Chart load failed:', error);
+        chartEl.style.display = 'none';
+        noData.style.display = 'block';
+      }
+    }
+
+    // === Chart period switch ===
+    window.changeChartPeriod = function(hours, btn) {
+      document.querySelectorAll('.chart-period-btn').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+      loadChart(hours);
+    };
+
+    // === Unclaim ===
+    window.confirmUnclaim = function() {
+      if (typeof Modal === 'undefined') return;
+      Modal.closeAll();
+
+      var deviceName = sanitize(device.device_name || device.serial_number);
+      Modal.show({
+        title: 'ถอดอุปกรณ์ออก',
+        content: '<p style="color: var(--color-gray-600); margin-bottom: 1rem;">'
+          + 'ต้องการถอดอุปกรณ์ <strong>' + deviceName + '</strong> ออกจากบัญชีของคุณหรือไม่?</p>'
+          + '<p style="font-size: 0.875rem; color: var(--color-gray-500);">การดำเนินการนี้จะ:</p>'
+          + '<ul style="font-size: 0.875rem; color: var(--color-gray-500); margin: 0.5rem 0 0 1.5rem; list-style: disc;">'
+          + '<li>ยกเลิกการเชื่อมต่อกับบัญชีของคุณ</li>'
+          + '<li>อุปกรณ์จะกลับเป็นสถานะ "รอเชื่อมต่อ"</li>'
+          + '<li>ข้อมูล telemetry ยังคงอยู่ในระบบ</li>'
+          + '</ul>',
+        actions: [
+          { label: 'ยกเลิก', class: 'btn-outline', onclick: "Modal.close()" },
+          { label: 'ถอดอุปกรณ์ออก', class: 'btn-danger', onclick: "doUnclaim()" }
+        ]
+      });
+    };
+
+    window.doUnclaim = async function() {
+      try {
+        await api.delete('/devices/' + deviceId);
+        if (typeof Modal !== 'undefined') { Modal.close(); }
+        if (typeof Toast !== 'undefined') { Toast.success('ถอดอุปกรณ์ออกเรียบร้อยแล้ว'); }
+        setTimeout(function() {
+          window.location.href = '/wellnest-frontend/pages/devices/list.html';
+        }, 1000);
+      } catch (error) {
+        console.error('[DeviceDetail] Unclaim failed:', error);
+        if (typeof Modal !== 'undefined') { Modal.close(); }
+        if (typeof Toast !== 'undefined') { Toast.error(error.message || 'ไม่สามารถถอดอุปกรณ์ได้'); }
+      }
+    };
+
+    // === Refresh ===
+    window.refreshAll = async function() {
+      var btn = document.getElementById('refreshBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.querySelector('svg').style.animation = 'spin 0.8s linear infinite';
+      }
+      await loadAll();
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.querySelector('svg').style.animation = '';
+      }
+      if (typeof Toast !== 'undefined') { Toast.success('รีเฟรชแล้ว'); }
+    };
+
+    // === Navigation ===
+    window.goBack = function() {
+      window.location.href = '/wellnest-frontend/pages/devices/list.html';
+    };
+
+    // === Init ===
+    loadAll();
+  });
+  </script>
+
+  <style>
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
+</body>
+</html>

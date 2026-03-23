@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#F5B31A">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <!-- PWA -->
+  <link rel="manifest" href="/wellnest-frontend/manifest.json">
+  <link rel="apple-touch-icon" href="/wellnest-frontend/assets/icons/icon-192.png">
+  <meta name="apple-mobile-web-app-title" content="WellNest">
+
+  <title>เชื่อมต่ออุปกรณ์ - WellNest</title>
+
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#FFFBEB', 100: '#FEF3C7', 200: '#FDE68A', 300: '#FCD34D',
+              400: '#FBBF24', 500: '#F5B31A', 600: '#D97706', 700: '#B45309',
+              800: '#92400E', 900: '#78350F'
+            },
+            secondary: {
+              50: '#EFF6FF', 100: '#DBEAFE', 200: '#BFDBFE', 300: '#93C5FD',
+              400: '#60A5FA', 500: '#3B82F6', 600: '#2563EB', 700: '#1D4ED8',
+              800: '#1E40AF', 900: '#1E3A8A'
+            }
+          },
+          fontFamily: {
+            sans: ['Noto Sans Thai', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/wellnest-frontend/css/tokens.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/components.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/utilities.css">
+
+  <style>
+    :root {
+      --header-height: 56px;
+      --bottom-nav-height: 64px;
+      /* Devices theme — Teal/Emerald */
+      --device-50: #ECFDF5;
+      --device-100: #D1FAE5;
+      --device-200: #A7F3D0;
+      --device-300: #6EE7B7;
+      --device-400: #34D399;
+      --device-500: #10B981;
+      --device-600: #059669;
+      --device-700: #047857;
+      --device-800: #065F46;
+      --device-900: #064E3B;
+    }
+
+    /* ===== Page Container ===== */
+    .page-container {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+      padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 40px);
+      background: var(--color-background, #FFFBEB);
+    }
+
+    /* ===== Header ===== */
+    .header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-height);
+      background: white;
+      border-bottom: 1px solid #f0f0f0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+    .header-left { width: 48px; display: flex; align-items: center; }
+    .header-btn {
+      width: 40px; height: 40px; border-radius: 50%; border: none;
+      background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--color-gray-600);
+    }
+    .header-btn:hover { background: var(--color-gray-100); }
+    .header-btn svg { width: 22px; height: 22px; }
+    .header-center { flex: 1; text-align: center; }
+    .header-title { font-size: 1.125rem; font-weight: 600; color: var(--color-gray-800); margin: 0; }
+    .header-right { width: 48px; }
+
+    /* ===== Illustration / Hero ===== */
+    .claim-hero {
+      text-align: center;
+      padding: 2rem 1.5rem 1rem;
+    }
+    .claim-hero-icon {
+      width: 88px; height: 88px; margin: 0 auto 1rem;
+      background: linear-gradient(135deg, var(--device-100) 0%, var(--device-50) 100%);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
+    }
+    .claim-hero-icon svg { width: 44px; height: 44px; color: var(--device-600); }
+    .claim-hero h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--color-gray-800); margin-bottom: 0.375rem;
+    }
+    .claim-hero p {
+      font-size: 0.875rem; color: var(--color-gray-500);
+      line-height: 1.6; max-width: 320px; margin: 0 auto;
+    }
+
+    /* ===== Form Card ===== */
+    .form-card {
+      background: white;
+      margin: 0 1rem 1rem;
+      border-radius: 16px;
+      padding: 1.25rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem; font-weight: 600;
+      color: var(--color-gray-700);
+      margin-bottom: 0.5rem;
+    }
+    .form-label .required {
+      color: #EF4444; margin-left: 0.125rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid var(--color-gray-200);
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: 'Noto Sans Thai', monospace;
+      color: var(--color-gray-800);
+      background: white;
+      transition: all 0.2s;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .form-input::placeholder {
+      color: var(--color-gray-400);
+      font-family: 'Noto Sans Thai', sans-serif;
+    }
+    .form-input:focus {
+      border-color: var(--device-500);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+    .form-input.error {
+      border-color: #EF4444;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .form-hint {
+      font-size: 0.75rem; color: var(--color-gray-400);
+      margin-top: 0.375rem; line-height: 1.5;
+    }
+    .form-error {
+      font-size: 0.75rem; color: #EF4444;
+      margin-top: 0.375rem; display: none;
+    }
+    .form-error.show {
+      display: block;
+    }
+
+    /* ===== Submit Button ===== */
+    .btn-submit {
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      border-radius: 12px;
+      border: none;
+      font-size: 1rem; font-weight: 600;
+      color: white;
+      background: linear-gradient(135deg, var(--device-500) 0%, var(--device-600) 100%);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      margin-top: 1.5rem;
+    }
+    .btn-submit:active:not(:disabled) { transform: scale(0.98); }
+    .btn-submit:disabled {
+      opacity: 0.6; cursor: not-allowed;
+      box-shadow: none;
+    }
+    .btn-submit svg { width: 20px; height: 20px; }
+
+    /* ===== Spinner ===== */
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .btn-submit.loading .spinner { display: block; }
+    .btn-submit.loading .btn-text { display: none; }
+    .btn-submit.loading .btn-icon { display: none; }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ===== Info Card ===== */
+    .info-card {
+      background: white;
+      margin: 0 1rem 1rem;
+      border-radius: 16px;
+      padding: 1rem 1.25rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .info-card-title {
+      font-size: 0.875rem; font-weight: 600;
+      color: var(--color-gray-700);
+      margin-bottom: 0.625rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .info-card-title svg { width: 18px; height: 18px; color: var(--device-500); }
+
+    .info-step {
+      display: flex; gap: 0.75rem;
+      padding: 0.5rem 0;
+    }
+    .info-step:not(:last-child) {
+      border-bottom: 1px solid var(--color-gray-100);
+    }
+    .step-num {
+      width: 24px; height: 24px; flex-shrink: 0;
+      border-radius: 50%;
+      background: var(--device-100);
+      color: var(--device-700);
+      font-size: 0.75rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step-text {
+      font-size: 0.8125rem; color: var(--color-gray-600);
+      line-height: 1.5; padding-top: 0.125rem;
+    }
+
+    /* ===== Success Overlay ===== */
+    .success-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      display: none;
+      align-items: center; justify-content: center;
+      padding: 1.5rem;
+    }
+    .success-overlay.show {
+      display: flex;
+    }
+    .success-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      max-width: 340px;
+      width: 100%;
+      animation: scaleIn 0.3s ease;
+    }
+    @keyframes scaleIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .success-icon {
+      width: 72px; height: 72px; margin: 0 auto 1rem;
+      background: var(--device-100);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .success-icon svg { width: 36px; height: 36px; color: var(--device-600); }
+    .success-card h3 {
+      font-size: 1.125rem; font-weight: 700;
+      color: var(--color-gray-800); margin-bottom: 0.375rem;
+    }
+    .success-card p {
+      font-size: 0.875rem; color: var(--color-gray-500);
+      margin-bottom: 1.5rem; line-height: 1.5;
+    }
+    .success-card .device-name-display {
+      font-weight: 600; color: var(--device-700);
+    }
+    .btn-success-action {
+      width: 100%; padding: 0.75rem;
+      border-radius: 12px; border: none;
+      font-size: 0.9375rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-success-action.primary {
+      background: linear-gradient(135deg, var(--device-500) 0%, var(--device-600) 100%);
+      color: white; margin-bottom: 0.5rem;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .btn-success-action.secondary {
+      background: var(--color-gray-100); color: var(--color-gray-700);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="header-btn" onclick="goBack()" aria-label="กลับ">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+    </div>
+    <div class="header-center">
+      <h1 class="header-title">เชื่อมต่ออุปกรณ์</h1>
+    </div>
+    <div class="header-right"></div>
+  </header>
+
+  <!-- Page Content -->
+  <div class="page-container">
+
+    <!-- Hero -->
+    <div class="claim-hero">
+      <div class="claim-hero-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+          <path d="M8 21h8"/>
+          <path d="M12 17v4"/>
+          <path d="M12 7v4" stroke-width="2.5"/>
+          <circle cx="12" cy="13" r="0.5" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+      <h2>เชื่อมต่ออุปกรณ์ใหม่</h2>
+      <p>กรอก Serial Number ที่อยู่บนสติกเกอร์ด้านล่างอุปกรณ์ เพื่อเชื่อมต่อกับบัญชีของคุณ</p>
+    </div>
+
+    <!-- Form -->
+    <div class="form-card">
+      <div class="form-group">
+        <label class="form-label" for="serialInput">
+          Serial Number <span class="required">*</span>
+        </label>
+        <input
+          type="text"
+          id="serialInput"
+          class="form-input"
+          placeholder="เช่น iot-well-test001"
+          autocomplete="off"
+          autocapitalize="none"
+          spellcheck="false"
+          maxlength="100"
+        >
+        <div class="form-hint">ดู Serial Number ได้จากสติกเกอร์ด้านล่างอุปกรณ์</div>
+        <div class="form-error" id="serialError"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="nameInput">
+          ตั้งชื่ออุปกรณ์ <span style="color: var(--color-gray-400); font-weight: 400;">(ไม่บังคับ)</span>
+        </label>
+        <input
+          type="text"
+          id="nameInput"
+          class="form-input"
+          placeholder="เช่น ตู้เย็นเก็บยาห้องนอน"
+          autocomplete="off"
+          maxlength="100"
+        >
+        <div class="form-hint">ตั้งชื่อเพื่อให้จดจำได้ง่าย (แก้ไขภายหลังได้)</div>
+      </div>
+
+      <button class="btn-submit" id="submitBtn" onclick="claimDevice()">
+        <div class="spinner"></div>
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <span class="btn-text">เชื่อมต่ออุปกรณ์</span>
+      </button>
+    </div>
+
+    <!-- ขั้นตอนการเชื่อมต่อ -->
+    <div class="info-card">
+      <div class="info-card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        วิธีเชื่อมต่ออุปกรณ์
+      </div>
+
+      <div class="info-step">
+        <div class="step-num">1</div>
+        <div class="step-text">พลิกดูสติกเกอร์ด้านล่างอุปกรณ์ IoT จะพบ Serial Number เช่น <strong>iot-well-test001</strong></div>
+      </div>
+      <div class="info-step">
+        <div class="step-num">2</div>
+        <div class="step-text">กรอก Serial Number ลงในช่องด้านบน แล้วกดปุ่ม "เชื่อมต่ออุปกรณ์"</div>
+      </div>
+      <div class="info-step">
+        <div class="step-num">3</div>
+        <div class="step-text">เมื่อเชื่อมต่อสำเร็จ อุปกรณ์จะแสดงในรายการ พร้อมข้อมูลอุณหภูมิและความชื้น</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Overlay -->
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-card">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h3>เชื่อมต่อสำเร็จ!</h3>
+      <p>อุปกรณ์ <span class="device-name-display" id="successDeviceName"></span> ถูกเชื่อมต่อกับบัญชีของคุณแล้ว</p>
+      <button class="btn-success-action primary" id="btnGoDetail" onclick="goToDetail()">ดูรายละเอียดอุปกรณ์</button>
+      <button class="btn-success-action secondary" onclick="goToList()">กลับรายการอุปกรณ์</button>
+    </div>
+  </div>
+
+  <!-- Component Placeholders -->
+  <div id="bottom-nav-placeholder"></div>
+  <div id="toast-placeholder"></div>
+  <div id="modal-placeholder"></div>
+
+  <!-- Core Scripts -->
+  <script src="/wellnest-frontend/js/config.js"></script>
+  <script src="/wellnest-frontend/js/i18n/th.js"></script>
+  <script src="/wellnest-frontend/js/i18n/en.js"></script>
+  <script src="/wellnest-frontend/js/i18n.js"></script>
+  <script src="/wellnest-frontend/js/utils.js"></script>
+  <script src="/wellnest-frontend/js/api.js"></script>
+  <script src="/wellnest-frontend/js/auth.js"></script>
+  <script src="/wellnest-frontend/js/storage.js"></script>
+  <script src="/wellnest-frontend/js/components.js"></script>
+  <script src="/wellnest-frontend/js/modal.js"></script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', async function() {
+    // === Auth check ===
+    if (typeof Auth !== 'undefined') {
+      Auth.requireAuth();
+    }
+
+    // === Load shared components ===
+    await Components.init({
+      bottomNav: { active: 'devices' },
+      toast: true,
+      modal: true
+    });
+
+    // === State ===
+    let claimedDevice = null; // เก็บ device ที่ claim สำเร็จ
+
+    // === Elements ===
+    const serialInput = document.getElementById('serialInput');
+    const nameInput = document.getElementById('nameInput');
+    const serialError = document.getElementById('serialError');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // === Focus serial input ===
+    setTimeout(() => serialInput.focus(), 300);
+
+    // === Enter key submit ===
+    serialInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        claimDevice();
+      }
+    });
+    nameInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        claimDevice();
+      }
+    });
+
+    // === Clear error เมื่อพิมพ์ ===
+    serialInput.addEventListener('input', function() {
+      serialInput.classList.remove('error');
+      serialError.classList.remove('show');
+    });
+
+    // === Helper: sanitize ===
+    function sanitize(str) {
+      if (str === null || str === undefined) return '';
+      const div = document.createElement('div');
+      div.textContent = String(str);
+      return div.innerHTML;
+    }
+
+    // === Helper: แสดง error ===
+    function showError(msg) {
+      serialError.textContent = msg;
+      serialError.classList.add('show');
+      serialInput.classList.add('error');
+      serialInput.focus();
+    }
+
+    // === Helper: set loading state ===
+    function setLoading(loading) {
+      if (loading) {
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+      } else {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+      }
+    }
+
+    // === Claim Device ===
+    window.claimDevice = async function() {
+      // Clear errors
+      serialInput.classList.remove('error');
+      serialError.classList.remove('show');
+
+      // Trim input
+      const serial = serialInput.value.trim();
+      const deviceName = nameInput.value.trim() || null;
+
+      // Frontend validation เบาๆ — ตรวจแค่ว่าไม่ว่าง
+      if (!serial) {
+        showError('กรุณากรอก Serial Number');
+        return;
+      }
+      if (serial.length < 3) {
+        showError('Serial Number สั้นเกินไป');
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        // เรียก API claim
+        const payload = {
+          serial_number: serial
+        };
+        if (deviceName) {
+          payload.device_name = deviceName;
+        }
+
+        const result = await api.post('/devices/claim', payload);
+
+        // สำเร็จ!
+        claimedDevice = result;
+        console.log('[Claim] Success:', result);
+
+        // แสดง success overlay
+        const displayName = sanitize(result.device_name || result.serial_number);
+        document.getElementById('successDeviceName').innerHTML = displayName;
+        document.getElementById('successOverlay').classList.add('show');
+
+        // Haptic feedback
+        if (typeof Utils !== 'undefined' && Utils.haptic) {
+          Utils.haptic('success');
+        }
+
+      } catch (error) {
+        console.error('[Claim] Failed:', error);
+        setLoading(false);
+
+        // แปลง error จาก backend เป็นภาษาไทย
+        const status = error.status || 0;
+        const msg = error.message || '';
+
+        if (status === 422) {
+          // Pydantic validation error (format ไม่ตรง regex)
+          showError('รูปแบบ Serial Number ไม่ถูกต้อง');
+        } else if (status === 404) {
+          showError('ไม่พบอุปกรณ์นี้ในระบบ กรุณาตรวจสอบ Serial Number');
+        } else if (status === 400) {
+          if (msg.toLowerCase().includes('already claimed') || msg.toLowerCase().includes('already has')) {
+            showError('อุปกรณ์นี้ถูกเชื่อมต่อกับผู้ใช้อื่นแล้ว');
+          } else if (msg.toLowerCase().includes('already registered')) {
+            showError('Serial Number นี้มีอยู่ในระบบแล้ว');
+          } else {
+            showError(msg || 'ไม่สามารถเชื่อมต่ออุปกรณ์ได้');
+          }
+        } else if (status === 0) {
+          showError('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่');
+        } else {
+          showError(msg || 'เกิดข้อผิดพลาด กรุณาลองใหม่');
+        }
+      }
+    };
+
+    // === Navigation ===
+    window.goBack = function() {
+      window.location.href = '/wellnest-frontend/pages/devices/list.html';
+    };
+
+    window.goToList = function() {
+      window.location.href = '/wellnest-frontend/pages/devices/list.html';
+    };
+
+    window.goToDetail = function() {
+      if (claimedDevice && claimedDevice.device_id) {
+        window.location.href = '/wellnest-frontend/pages/devices/detail.html?id=' + claimedDevice.device_id;
+      } else {
+        goToList();
+      }
+    };
+  });
+  </script>
+</body>
+</html>

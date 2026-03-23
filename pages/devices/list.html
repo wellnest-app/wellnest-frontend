@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#F5B31A">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <!-- PWA -->
+  <link rel="manifest" href="/wellnest-frontend/manifest.json">
+  <link rel="apple-touch-icon" href="/wellnest-frontend/assets/icons/icon-192.png">
+  <meta name="apple-mobile-web-app-title" content="WellNest">
+
+  <title>อุปกรณ์ IoT - WellNest</title>
+
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#FFFBEB', 100: '#FEF3C7', 200: '#FDE68A', 300: '#FCD34D',
+              400: '#FBBF24', 500: '#F5B31A', 600: '#D97706', 700: '#B45309',
+              800: '#92400E', 900: '#78350F'
+            },
+            secondary: {
+              50: '#EFF6FF', 100: '#DBEAFE', 200: '#BFDBFE', 300: '#93C5FD',
+              400: '#60A5FA', 500: '#3B82F6', 600: '#2563EB', 700: '#1D4ED8',
+              800: '#1E40AF', 900: '#1E3A8A'
+            }
+          },
+          fontFamily: {
+            sans: ['Noto Sans Thai', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/wellnest-frontend/css/tokens.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/components.css">
+  <link rel="stylesheet" href="/wellnest-frontend/css/utilities.css">
+
+  <style>
+    :root {
+      --header-height: 56px;
+      --bottom-nav-height: 64px;
+      /* Devices theme — Teal/Emerald */
+      --device-50: #ECFDF5;
+      --device-100: #D1FAE5;
+      --device-200: #A7F3D0;
+      --device-300: #6EE7B7;
+      --device-400: #34D399;
+      --device-500: #10B981;
+      --device-600: #059669;
+      --device-700: #047857;
+      --device-800: #065F46;
+      --device-900: #064E3B;
+    }
+
+    /* ===== Page Container ===== */
+    .page-container {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+      padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 80px);
+      background: var(--color-background, #FFFBEB);
+    }
+
+    /* ===== Header ===== */
+    .header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-height);
+      background: white;
+      border-bottom: 1px solid #f0f0f0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+    .header-left { width: 48px; display: flex; align-items: center; }
+    .header-btn {
+      width: 40px; height: 40px; border-radius: 50%; border: none;
+      background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--color-gray-600);
+    }
+    .header-btn:hover { background: var(--color-gray-100); }
+    .header-btn svg { width: 22px; height: 22px; }
+    .header-center { flex: 1; text-align: center; }
+    .header-title { font-size: 1.125rem; font-weight: 600; color: var(--color-gray-800); margin: 0; }
+    .header-right { width: 48px; display: flex; align-items: center; justify-content: flex-end; }
+
+    /* ===== Summary Card ===== */
+    .summary-card {
+      background: linear-gradient(135deg, var(--device-500) 0%, var(--device-700) 100%);
+      margin: 1rem;
+      border-radius: 20px;
+      padding: 1.25rem;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .summary-card::before {
+      content: '';
+      position: absolute; top: -40%; right: -20%;
+      width: 180px; height: 180px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+    }
+    .summary-card::after {
+      content: '';
+      position: absolute; bottom: -30%; left: -15%;
+      width: 120px; height: 120px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 50%;
+    }
+    .summary-content { position: relative; z-index: 1; }
+    .summary-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 0.75rem;
+    }
+    .summary-icon svg { width: 26px; height: 26px; }
+    .summary-title { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .summary-stats {
+      display: flex; gap: 1.5rem; margin-top: 0.5rem;
+      font-size: 0.8125rem; opacity: 0.9;
+    }
+    .summary-stat { display: flex; align-items: center; gap: 0.375rem; }
+    .summary-stat svg { width: 16px; height: 16px; }
+
+    /* ===== Device Card ===== */
+    .device-list { padding: 0 1rem 1rem; }
+    .device-list-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.5rem 0.25rem 0.75rem; margin-top: 0.5rem;
+    }
+    .device-list-title {
+      font-size: 0.9375rem; font-weight: 600; color: var(--color-gray-800);
+    }
+
+    .device-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: all 0.2s;
+      cursor: pointer;
+      position: relative;
+    }
+    .device-card:active { transform: scale(0.98); }
+
+    /* Device icon */
+    .device-icon-wrap {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--device-100) 0%, var(--device-50) 100%);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; position: relative;
+    }
+    .device-icon-wrap svg { width: 26px; height: 26px; color: var(--device-600); }
+
+    /* Status dot บนไอคอน */
+    .status-dot {
+      position: absolute; bottom: -2px; right: -2px;
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2.5px solid white;
+    }
+    .status-dot.active { background: #22C55E; }
+    .status-dot.offline { background: #EF4444; }
+    .status-dot.pending { background: #F59E0B; }
+
+    /* Device info */
+    .device-info { flex: 1; min-width: 0; }
+    .device-name {
+      font-size: 0.9375rem; font-weight: 600; color: var(--color-gray-900);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .device-serial {
+      font-size: 0.75rem; color: var(--color-gray-400);
+      margin-top: 0.125rem; font-family: monospace;
+    }
+    .device-meta {
+      display: flex; align-items: center; gap: 0.75rem;
+      margin-top: 0.375rem; flex-wrap: wrap;
+    }
+
+    /* Mini telemetry badges */
+    .mini-badge {
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      padding: 0.125rem 0.5rem; border-radius: 6px;
+      font-size: 0.6875rem; font-weight: 500;
+    }
+    .mini-badge svg { width: 12px; height: 12px; }
+    .mini-badge.temp { background: #DBEAFE; color: #2563EB; }
+    .mini-badge.hum { background: #E0E7FF; color: #4338CA; }
+    .mini-badge.door-closed { background: #D1FAE5; color: #059669; }
+    .mini-badge.door-open { background: #FEE2E2; color: #DC2626; }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      padding: 0.125rem 0.5rem; border-radius: 6px;
+      font-size: 0.6875rem; font-weight: 500;
+    }
+    .status-badge.active { background: #D1FAE5; color: #059669; }
+    .status-badge.offline { background: #FEE2E2; color: #DC2626; }
+    .status-badge.pending { background: #FEF3C7; color: #D97706; }
+
+    /* Chevron */
+    .device-chevron {
+      flex-shrink: 0; color: var(--color-gray-300);
+    }
+    .device-chevron svg { width: 20px; height: 20px; }
+
+    /* ===== Last Seen ===== */
+    .last-seen {
+      font-size: 0.6875rem; color: var(--color-gray-400);
+      display: flex; align-items: center; gap: 0.25rem;
+    }
+    .last-seen svg { width: 11px; height: 11px; }
+
+    /* ===== Empty State ===== */
+    .empty-state {
+      text-align: center; padding: 3rem 2rem;
+    }
+    .empty-state .empty-icon {
+      width: 80px; height: 80px; margin: 0 auto 1.25rem;
+      background: var(--device-100);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .empty-state .empty-icon svg {
+      width: 40px; height: 40px; color: var(--device-500);
+    }
+    .empty-state h3 {
+      font-size: 1.125rem; font-weight: 600;
+      color: var(--color-gray-700); margin-bottom: 0.5rem;
+    }
+    .empty-state p {
+      font-size: 0.875rem; color: var(--color-gray-500);
+      margin-bottom: 1.5rem; line-height: 1.6;
+    }
+    .empty-state .btn-claim {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.75rem 1.5rem; border-radius: 12px; border: none;
+      background: linear-gradient(135deg, var(--device-500) 0%, var(--device-600) 100%);
+      color: white; font-size: 0.9375rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .empty-state .btn-claim:active { transform: scale(0.97); }
+    .empty-state .btn-claim svg { width: 20px; height: 20px; }
+
+    /* ===== FAB ===== */
+    .fab {
+      position: fixed;
+      bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 16px);
+      right: 16px;
+      width: 56px; height: 56px; border-radius: 16px;
+      background: linear-gradient(135deg, var(--device-500) 0%, var(--device-600) 100%);
+      color: white; border: none;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+      cursor: pointer; z-index: 90; transition: all 0.2s;
+    }
+    .fab:active { transform: scale(0.95); }
+    .fab svg { width: 24px; height: 24px; }
+
+    /* ===== Skeleton Loading ===== */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s infinite;
+      border-radius: 8px;
+    }
+    @keyframes skeleton-loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .skeleton-card {
+      background: white; border-radius: 16px;
+      padding: 1rem; margin-bottom: 0.75rem;
+      display: flex; gap: 0.875rem;
+    }
+    .skeleton-icon { width: 52px; height: 52px; flex-shrink: 0; border-radius: 14px; }
+    .skeleton-content { flex: 1; }
+    .skeleton-title { height: 18px; width: 55%; margin-bottom: 0.5rem; }
+    .skeleton-text { height: 14px; width: 70%; margin-bottom: 0.5rem; }
+    .skeleton-badge { height: 20px; width: 40%; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="header-btn" onclick="history.back()" aria-label="กลับ">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+    </div>
+    <div class="header-center">
+      <h1 class="header-title">อุปกรณ์ IoT</h1>
+    </div>
+    <div class="header-right">
+      <!-- ปุ่ม refresh -->
+      <button class="header-btn" onclick="refreshDevices()" aria-label="รีเฟรช" id="refreshBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Page Content -->
+  <div class="page-container">
+
+    <!-- Summary Card -->
+    <div class="summary-card" id="summaryCard" style="display: none;">
+      <div class="summary-content">
+        <div class="summary-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <path d="M8 21h8"/>
+            <path d="M12 17v4"/>
+          </svg>
+        </div>
+        <div class="summary-title" id="summaryTitle">อุปกรณ์ของฉัน</div>
+        <div class="summary-stats">
+          <div class="summary-stat" id="statTotal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <path d="M8 21h8"/><path d="M12 17v4"/>
+            </svg>
+            <span>0 อุปกรณ์</span>
+          </div>
+          <div class="summary-stat" id="statOnline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <span>0 ออนไลน์</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Device List -->
+    <div class="device-list">
+      <div class="device-list-header" id="listHeader" style="display: none;">
+        <span class="device-list-title">รายการอุปกรณ์</span>
+      </div>
+
+      <!-- Skeleton Loading -->
+      <div id="loadingSkeleton">
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-icon"></div>
+          <div class="skeleton-content">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-badge"></div>
+          </div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-icon"></div>
+          <div class="skeleton-content">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-badge"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Device Cards -->
+      <div id="deviceListContainer" style="display: none;"></div>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <path d="M8 21h8"/>
+            <path d="M12 17v4"/>
+          </svg>
+        </div>
+        <h3>ยังไม่มีอุปกรณ์</h3>
+        <p>เชื่อมต่ออุปกรณ์ IoT เพื่อติดตามสภาพตู้เย็นเก็บยาของคุณ<br>เช่น อุณหภูมิ ความชื้น และสถานะประตู</p>
+        <button class="btn-claim" onclick="goToClaim()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          เชื่อมต่ออุปกรณ์
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAB — เชื่อมต่ออุปกรณ์ใหม่ -->
+  <button class="fab" id="fabBtn" onclick="goToClaim()" aria-label="เชื่อมต่ออุปกรณ์" style="display: none;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <line x1="12" y1="5" x2="12" y2="19"/>
+      <line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+
+  <!-- Component Placeholders -->
+  <div id="bottom-nav-placeholder"></div>
+  <div id="toast-placeholder"></div>
+  <div id="modal-placeholder"></div>
+
+  <!-- Core Scripts -->
+  <script src="/wellnest-frontend/js/config.js"></script>
+  <script src="/wellnest-frontend/js/i18n/th.js"></script>
+  <script src="/wellnest-frontend/js/i18n/en.js"></script>
+  <script src="/wellnest-frontend/js/i18n.js"></script>
+  <script src="/wellnest-frontend/js/utils.js"></script>
+  <script src="/wellnest-frontend/js/api.js"></script>
+  <script src="/wellnest-frontend/js/auth.js"></script>
+  <script src="/wellnest-frontend/js/storage.js"></script>
+  <script src="/wellnest-frontend/js/components.js"></script>
+  <script src="/wellnest-frontend/js/modal.js"></script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', async function() {
+    // === Auth check ===
+    if (typeof Auth !== 'undefined') {
+      Auth.requireAuth();
+    }
+
+    // === Load shared components ===
+    await Components.init({
+      bottomNav: { active: 'devices' },
+      toast: true,
+      modal: true
+    });
+
+    // === State ===
+    let devices = [];
+
+    // === Elements ===
+    const summaryCard = document.getElementById('summaryCard');
+    const listHeader = document.getElementById('listHeader');
+    const loadingSkeleton = document.getElementById('loadingSkeleton');
+    const deviceListContainer = document.getElementById('deviceListContainer');
+    const emptyState = document.getElementById('emptyState');
+    const fabBtn = document.getElementById('fabBtn');
+
+    // === Helper: sanitize HTML ===
+    function sanitize(str) {
+      if (str === null || str === undefined) return '';
+      const div = document.createElement('div');
+      div.textContent = String(str);
+      return div.innerHTML;
+    }
+
+    // === Helper: เวลาที่แล้ว (relative time) ===
+    function timeAgo(dateStr) {
+      if (!dateStr) return 'ไม่ทราบ';
+      const now = new Date();
+      const past = new Date(dateStr);
+      const diffMs = now - past;
+      const diffSec = Math.floor(diffMs / 1000);
+      const diffMin = Math.floor(diffSec / 60);
+      const diffHour = Math.floor(diffMin / 60);
+      const diffDay = Math.floor(diffHour / 24);
+
+      if (diffSec < 60) return 'เมื่อสักครู่';
+      if (diffMin < 60) return diffMin + ' นาทีที่แล้ว';
+      if (diffHour < 24) return diffHour + ' ชั่วโมงที่แล้ว';
+      if (diffDay < 7) return diffDay + ' วันที่แล้ว';
+      // แสดงวันที่จริง
+      return past.toLocaleDateString('th-TH', {
+        day: 'numeric', month: 'short', year: '2-digit'
+      });
+    }
+
+    // === Helper: สถานะภาษาไทย ===
+    function statusText(status) {
+      const map = {
+        'active': 'ออนไลน์',
+        'offline': 'ออฟไลน์',
+        'pending': 'รอเชื่อมต่อ'
+      };
+      return map[status] || status;
+    }
+
+    // === Load devices ===
+    async function loadDevices() {
+      try {
+        loadingSkeleton.style.display = 'block';
+        deviceListContainer.style.display = 'none';
+        emptyState.style.display = 'none';
+        summaryCard.style.display = 'none';
+        listHeader.style.display = 'none';
+        fabBtn.style.display = 'none';
+
+        devices = await api.get('/devices/');
+
+        // โหลด telemetry ล่าสุดของแต่ละ device (parallel)
+        const telemetryPromises = devices.map(async (device) => {
+          try {
+            const latest = await api.get('/devices/' + device.device_id + '/telemetry/latest');
+            device._latest = latest;
+          } catch (e) {
+            // ยังไม่มี telemetry — ไม่เป็นไร
+            device._latest = null;
+          }
+        });
+        await Promise.all(telemetryPromises);
+
+        renderDevices();
+
+      } catch (error) {
+        console.error('[Devices] Failed to load:', error);
+        loadingSkeleton.style.display = 'none';
+        if (typeof Toast !== 'undefined') {
+          Toast.error('ไม่สามารถโหลดรายการอุปกรณ์ได้');
+        }
+      }
+    }
+
+    // === Render ===
+    function renderDevices() {
+      loadingSkeleton.style.display = 'none';
+
+      if (devices.length === 0) {
+        emptyState.style.display = 'block';
+        summaryCard.style.display = 'none';
+        listHeader.style.display = 'none';
+        fabBtn.style.display = 'none';
+        deviceListContainer.style.display = 'none';
+        return;
+      }
+
+      // แสดง summary + list + FAB
+      summaryCard.style.display = 'block';
+      listHeader.style.display = 'flex';
+      fabBtn.style.display = 'flex';
+      deviceListContainer.style.display = 'block';
+      emptyState.style.display = 'none';
+
+      // Summary stats
+      const totalCount = devices.length;
+      const onlineCount = devices.filter(d => d.status === 'active').length;
+      document.getElementById('statTotal').querySelector('span').textContent = totalCount + ' อุปกรณ์';
+      document.getElementById('statOnline').querySelector('span').textContent = onlineCount + ' ออนไลน์';
+
+      // Render cards
+      deviceListContainer.innerHTML = devices.map(device => createDeviceCard(device)).join('');
+    }
+
+    // === สร้าง Device Card ===
+    function createDeviceCard(device) {
+      const name = sanitize(device.device_name || device.serial_number);
+      const serial = sanitize(device.serial_number);
+      const status = device.status || 'pending';
+      const latest = device._latest;
+
+      // Mini telemetry badges
+      let badges = '';
+      if (latest && latest.temperature !== null && latest.temperature !== undefined) {
+        badges += '<span class="mini-badge temp">'
+          + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>'
+          + sanitize(latest.temperature.toFixed(1)) + '°C</span>';
+      }
+      if (latest && latest.humidity !== null && latest.humidity !== undefined) {
+        badges += '<span class="mini-badge hum">'
+          + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>'
+          + sanitize(latest.humidity.toFixed(1)) + '%</span>';
+      }
+      if (latest && latest.door_open !== null && latest.door_open !== undefined) {
+        if (latest.door_open) {
+          badges += '<span class="mini-badge door-open">'
+            + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 2h11a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H5"/><path d="M5 22V2"/><path d="M13 12v.01"/></svg>'
+            + 'เปิด</span>';
+        } else {
+          badges += '<span class="mini-badge door-closed">'
+            + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="2" width="14" height="20" rx="2"/><path d="M13 12v.01"/></svg>'
+            + 'ปิด</span>';
+        }
+      }
+
+      // Status badge (ถ้าไม่มี telemetry ให้แสดง status แทน)
+      if (!badges) {
+        badges = '<span class="status-badge ' + sanitize(status) + '">' + statusText(status) + '</span>';
+      }
+
+      // Last seen
+      const lastSeenHtml = (latest && latest.recorded_at)
+        ? '<span class="last-seen">'
+          + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+          + sanitize(timeAgo(latest.recorded_at))
+          + '</span>'
+        : (device.last_seen_at
+            ? '<span class="last-seen">'
+              + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+              + sanitize(timeAgo(device.last_seen_at))
+              + '</span>'
+            : '<span class="last-seen">ยังไม่มีข้อมูล</span>'
+          );
+
+      return ''
+        + '<div class="device-card" onclick="viewDevice(' + device.device_id + ')">'
+        +   '<div class="device-icon-wrap">'
+        +     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'
+        +       '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>'
+        +       '<path d="M8 21h8"/><path d="M12 17v4"/>'
+        +     '</svg>'
+        +     '<span class="status-dot ' + sanitize(status) + '"></span>'
+        +   '</div>'
+        +   '<div class="device-info">'
+        +     '<div class="device-name">' + name + '</div>'
+        +     '<div class="device-serial">' + serial + '</div>'
+        +     '<div class="device-meta">'
+        +       badges
+        +       lastSeenHtml
+        +     '</div>'
+        +   '</div>'
+        +   '<div class="device-chevron">'
+        +     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>'
+        +   '</div>'
+        + '</div>';
+    }
+
+    // === Navigation ===
+    window.viewDevice = function(deviceId) {
+      window.location.href = '/wellnest-frontend/pages/devices/detail.html?id=' + deviceId;
+    };
+
+    window.goToClaim = function() {
+      window.location.href = '/wellnest-frontend/pages/devices/claim.html';
+    };
+
+    // === Refresh ===
+    window.refreshDevices = async function() {
+      const btn = document.getElementById('refreshBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        // หมุน icon
+        btn.querySelector('svg').style.animation = 'spin 0.8s linear infinite';
+      }
+      await loadDevices();
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.querySelector('svg').style.animation = '';
+      }
+      if (typeof Toast !== 'undefined') {
+        Toast.success('รีเฟรชแล้ว');
+      }
+    };
+
+    // === Reload เมื่อกลับมาหน้านี้ (กลับจาก claim/detail) ===
+    document.addEventListener('visibilitychange', async () => {
+      if (document.visibilityState === 'visible' && devices.length >= 0) {
+        console.log('[Devices] Page visible — reloading...');
+        await loadDevices();
+      }
+    });
+    window.addEventListener('pageshow', async (event) => {
+      if (event.persisted) {
+        console.log('[Devices] Page restored from cache — reloading...');
+        await loadDevices();
+      }
+    });
+
+    // === Init ===
+    loadDevices();
+  });
+  </script>
+
+  <!-- Spin animation สำหรับปุ่ม refresh -->
+  <style>
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</body>
+</html>
