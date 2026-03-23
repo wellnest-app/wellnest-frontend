@@ -782,10 +782,12 @@
               var html = '<div style="font-weight:600;margin-bottom:4px;">' + dateStr + '</div>';
               for (var i = 0; i < params.length; i++) {
                 var p = params[i];
-                if (p.value !== null && p.value !== undefined) {
+                // data format = [time, value] → ใช้ p.data[1] ไม่ใช่ p.value
+                var val = (p.data && p.data.length > 1) ? p.data[1] : null;
+                if (val !== null && val !== undefined) {
                   html += '<div style="display:flex;align-items:center;gap:6px;">'
                     + p.marker
-                    + '<span>' + p.seriesName + ': <strong>' + Number(p.value).toFixed(1) + '</strong></span>'
+                    + '<span>' + p.seriesName + ': <strong>' + Number(val).toFixed(1) + '</strong></span>'
                     + '</div>';
                 }
               }
@@ -799,7 +801,7 @@
             itemWidth: 14, itemHeight: 8, itemGap: 20
           },
           grid: {
-            top: 10, right: 10, bottom: 60, left: 5,
+            top: 25, right: 45, bottom: 60, left: 5,
             containLabel: true
           },
           xAxis: {
@@ -816,12 +818,16 @@
           },
           yAxis: [
             {
-              type: 'value', name: '°C', nameTextStyle: { fontSize: 10, color: '#9ca3af' },
+              type: 'value', name: 'อุณหภูมิ (°C)',
+              nameTextStyle: { fontSize: 10, color: '#3B82F6', padding: [0, 0, 0, 0] },
+              nameLocation: 'end',
               axisLabel: { fontSize: 10, color: '#9ca3af' },
               splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } }
             },
             {
-              type: 'value', name: '%', nameTextStyle: { fontSize: 10, color: '#9ca3af' },
+              type: 'value', name: 'ความชื้น (%)',
+              nameTextStyle: { fontSize: 10, color: '#8B5CF6', padding: [0, 0, 0, 0] },
+              nameLocation: 'end',
               axisLabel: { fontSize: 10, color: '#9ca3af' },
               splitLine: { show: false }
             }
@@ -847,10 +853,12 @@
             {
               name: 'อุณหภูมิ (°C)',
               type: 'line', yAxisIndex: 0, smooth: true, symbol: 'none',
+              color: '#3B82F6',
+              itemStyle: { color: '#3B82F6' },
               lineStyle: { width: 2, color: '#3B82F6' },
               areaStyle: {
                 color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                  { offset: 0, color: 'rgba(59, 130, 246, 0.2)' },
+                  { offset: 0, color: 'rgba(59, 130, 246, 0.25)' },
                   { offset: 1, color: 'rgba(59, 130, 246, 0.02)' }
                 ])
               },
@@ -859,11 +867,13 @@
             {
               name: 'ความชื้น (%)',
               type: 'line', yAxisIndex: 1, smooth: true, symbol: 'none',
+              color: '#8B5CF6',
+              itemStyle: { color: '#8B5CF6' },
               lineStyle: { width: 2, color: '#8B5CF6' },
               areaStyle: {
                 color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                  { offset: 0, color: 'rgba(139, 92, 246, 0.15)' },
-                  { offset: 1, color: 'rgba(139, 92, 246, 0.02)' }
+                  { offset: 0, color: 'rgba(139, 92, 246, 0.25)' },
+                  { offset: 1, color: 'rgba(139, 92, 246, 0.03)' }
                 ])
               },
               data: times.map(function(t, i) { return [t, hums[i]]; })
