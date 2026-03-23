@@ -516,7 +516,7 @@
         listHeader.style.display = 'none';
         fabBtn.style.display = 'none';
 
-        devices = await api.get('/devices/');
+        devices = await api.get('/devices');
 
         // โหลด telemetry ล่าสุดของแต่ละ device (parallel)
         const telemetryPromises = devices.map(async (device) => {
