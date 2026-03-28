@@ -950,9 +950,15 @@
           todayHistory = [];
         }
         
-        // M1 Fix: โหลดประวัติทั้งหมดสำหรับคำนวณ compliance progress
+        // M1 Fix: โหลดประวัติสำหรับคำนวณ compliance progress
+        // 13A Fix: กรองเฉพาะ >= start_date ของ assignment ปัจจุบัน
+        // ป้องกัน history จากรอบ assign เก่าถูกนับรวม (เมื่อ re-assign ยาตัวเดียวกัน)
         try {
-          const histData = await Api.get(`/history?user_med_id=${id}`);
+          let histUrl = `/history?user_med_id=${id}`;
+          if (medication.start_date) {
+            histUrl += `&start=${new Date(medication.start_date).toISOString()}`;
+          }
+          const histData = await Api.get(histUrl);
           fullHistory = histData || [];
         } catch (e) {
           fullHistory = [];
