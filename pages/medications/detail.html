@@ -1240,6 +1240,24 @@
         return;
       }
       
+      // 13C Fix: ถ้ายาถูก deactivate (นำออก/หยุดใช้) → แสดงข้อความแทนปุ่ม
+      if (!medication.is_active) {
+        quickActions.innerHTML = `
+          <div style="flex: 1; text-align: center; padding: 1rem;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; color: #9CA3AF;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><line x1="4" y1="12" x2="20" y2="12"/>
+              </svg>
+              <span style="font-size: 1rem; font-weight: 600;">ยาถูกหยุดใช้แล้ว</span>
+            </div>
+            <p style="color: var(--color-gray-500); font-size: 0.875rem; margin-top: 0.5rem;">
+              ไปที่หน้า "เพิ่มยา" เพื่อเริ่มใช้ยานี้อีกครั้ง
+            </p>
+          </div>
+        `;
+        return;
+      }
+      
       // ถ้าไม่มี reminders ให้แสดงปุ่มแบบเดิม
       if (reminders.length === 0) {
         const hasAnyAction = todayHistory.length > 0;
