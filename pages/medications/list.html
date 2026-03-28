@@ -398,6 +398,124 @@
       color: #DC2626;
     }
     
+    /* ===== KB1 Fix: Expired Toggle ===== */
+    .expired-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 1rem 0.25rem;
+      gap: 0.5rem;
+    }
+    
+    .expired-toggle-label {
+      font-size: 0.75rem;
+      color: var(--color-gray-500);
+    }
+    
+    .toggle-switch {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--color-gray-300);
+      border-radius: 22px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    
+    .toggle-switch input:checked + .toggle-slider {
+      background: var(--color-primary-500);
+    }
+    
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(18px);
+    }
+    
+    /* ===== KB1 Fix: Expired Section ===== */
+    .expired-section {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--color-gray-200);
+    }
+    
+    .expired-section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      padding-left: 0.25rem;
+    }
+    
+    .expired-section-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #F3F4F6;
+      color: #9CA3AF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .expired-section-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .expired-section-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-gray-400);
+    }
+    
+    .expired-section-count {
+      font-size: 0.75rem;
+      color: var(--color-gray-400);
+      margin-left: auto;
+    }
+    
+    .med-card.expired {
+      opacity: 0.6;
+      background: #F9FAFB;
+      border: 1px solid #E5E7EB;
+    }
+    
+    .med-card.expired .med-icon {
+      background: #F3F4F6;
+    }
+    
+    .med-card.expired .med-icon svg {
+      color: #9CA3AF;
+    }
+    
+    .status-badge.expired {
+      background: #F3F4F6;
+      color: #6B7280;
+    }
+    
     /* ===== Actions ===== */
     .med-actions {
       display: flex;
@@ -695,6 +813,15 @@
       <button class="filter-tab" data-filter="taken">ทานแล้ว</button>
     </div>
     
+    <!-- KB1 Fix: Toggle แสดงยาหมดอายุ -->
+    <div class="expired-toggle-row">
+      <span class="expired-toggle-label">แสดงยาหมดอายุ</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="expiredToggle">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    
     <!-- Timeline Section -->
     <div class="timeline-section" id="timelineContainer">
       <!-- Skeleton Loading -->
@@ -793,6 +920,8 @@
     let medications = [];
     let reminders = [];
     let currentFilter = 'all';
+    let showExpired = false;  // KB1 Fix: toggle แสดงยาหมดอายุ
+    let expiredMedications = [];  // KB1 Fix: เก็บยาหมดอายุแยก
     
     // ✅ Phase 2.5: Track taken/skipped from API (persistent)
     let todayHistory = [];  // History records from API
@@ -808,6 +937,7 @@
     // Initialize
     initDatePicker();
     initFilterTabs();
+    initExpiredToggle();  // KB1 Fix
     loadMedications();
     
     // ✅ Bug #1 Fix: Sync with detail.html when returning to this page
@@ -922,6 +1052,16 @@
       });
     }
     
+    // KB1 Fix: Toggle แสดงยาหมดอายุ
+    function initExpiredToggle() {
+      const toggle = document.getElementById('expiredToggle');
+      if (!toggle) return;
+      toggle.addEventListener('change', () => {
+        showExpired = toggle.checked;
+        loadMedications();
+      });
+    }
+    
     // ✅ Phase 2.5: Load today's history from API
     async function loadTodayHistory() {
       try {
@@ -948,31 +1088,37 @@
         timelineContainer.style.display = 'none';
         emptyState.style.display = 'none';
         
+        // KB1 Fix: เมื่อ toggle ON → ดึงยาทั้งหมดรวมหมดอายุ
+        const medsUrl = showExpired 
+          ? '/medications/mine?include_inactive=true' 
+          : '/medications/mine';
+        
         // Fetch medications, reminders, and today's history in parallel
         const [medsResponse, remindersResponse] = await Promise.all([
-          Api.get('/medications/mine'),
+          Api.get(medsUrl),
           Api.get('/reminders').catch(() => [])
         ]);
         
-        medications = Array.isArray(medsResponse) ? medsResponse : [];
+        const allMeds = Array.isArray(medsResponse) ? medsResponse : [];
         reminders = Array.isArray(remindersResponse) ? remindersResponse : [];
+        
+        // KB1 Fix: แยกยา active กับ expired
+        medications = allMeds.filter(m => m.is_active);
+        expiredMedications = showExpired ? allMeds.filter(m => !m.is_active) : [];
         
         // ✅ Phase 2.5: Load today's history
         await loadTodayHistory();
         
         loadingSkeleton.style.display = 'none';
         
-        if (medications.length === 0) {
+        const hasActive = medications.some(m => m.is_active);
+        const hasExpired = expiredMedications.length > 0;
+        
+        if (!hasActive && !hasExpired) {
           emptyState.style.display = 'block';
         } else {
-          // CAL1: เช็คว่ามียา active อย่างน้อย 1 ตัว (renderTimeline จัดการ date filter เอง)
-          const anyActive = medications.some(m => m.is_active);
-          if (!anyActive) {
-            emptyState.style.display = 'block';
-          } else {
-            timelineContainer.style.display = 'block';
-            renderTimeline();
-          }
+          timelineContainer.style.display = 'block';
+          renderTimeline();
         }
         
       } catch (error) {
@@ -1093,7 +1239,10 @@
       // Remove empty groups
       const nonEmptyGroups = scheduleItems.filter(group => group.items.length > 0);
       
-      if (nonEmptyGroups.length === 0) {
+      // KB1 Fix: สร้าง expired section HTML
+      const expiredHtml = renderExpiredSection();
+      
+      if (nonEmptyGroups.length === 0 && !expiredHtml) {
         // CAL1: แยกข้อความ empty state — ไม่มียาในวันที่เลือก vs filter tab
         let emptyTitle, emptyDesc;
         if (filteredMeds.length === 0) {
@@ -1120,7 +1269,8 @@
         return;
       }
       
-      timelineContainer.innerHTML = nonEmptyGroups.map(group => `
+      // Render active meds + expired section
+      const activeHtml = nonEmptyGroups.map(group => `
         <div class="time-group">
           <div class="time-group-header">
             <div class="time-group-icon ${group.period}">
@@ -1132,6 +1282,91 @@
           ${group.items.map(item => createMedCard(item)).join('')}
         </div>
       `).join('');
+      
+      timelineContainer.innerHTML = activeHtml + (expiredHtml || '');
+    }
+    
+    // KB1 Fix: Render section ยาหมดอายุ
+    function renderExpiredSection() {
+      if (!showExpired || expiredMedications.length === 0) return '';
+      
+      const formLabels = {
+        tablet: 'เม็ด', capsule: 'แคปซูล', syrup: 'น้ำเชื่อม',
+        injection: 'ฉีด', cream: 'ครีม', inhaler: 'พ่น', drop: 'หยด'
+      };
+      
+      const cards = expiredMedications.map(med => {
+        const dosage = med.prescribed_dosage || '-';
+        const formLabel = formLabels[med.dosage_form] || med.dosage_form || '';
+        const endDateStr = med.end_date ? formatExpiredDate(med.end_date) : '-';
+        
+        return `
+          <div class="med-card expired" onclick="viewMedicationDetail(${med.user_med_id})">
+            <div class="med-icon">
+              ${getDosageFormIcon(med.dosage_form || 'tablet')}
+            </div>
+            <div class="med-content">
+              <div class="med-name">${sanitizeText(med.medication_name)}</div>
+              <div class="med-dosage">${sanitizeText(dosage)}${formLabel ? ' · ' + formLabel : ''}</div>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="med-time">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  สิ้นสุด ${endDateStr}
+                </span>
+                <span class="status-badge expired">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  หมดอายุ
+                </span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      return `
+        <div class="expired-section">
+          <div class="expired-section-header">
+            <div class="expired-section-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
+            <span class="expired-section-label">ยาหมดอายุ</span>
+            <span class="expired-section-count">${expiredMedications.length} รายการ</span>
+          </div>
+          ${cards}
+        </div>
+      `;
+    }
+    
+    // KB1 Fix: Format date สำหรับยาหมดอายุ
+    function formatExpiredDate(dateStr) {
+      if (!dateStr) return '-';
+      const d = new Date(dateStr);
+      const day = d.getDate();
+      const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.',
+                       'ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+      const buddhistYear = d.getFullYear() + 543;
+      return `${day} ${months[d.getMonth()]} ${buddhistYear}`;
+    }
+    
+    // KB1 Fix: Sanitize text ป้องกัน XSS
+    function sanitizeText(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
     }
     
     // Create schedule from medications (with reminder data)
