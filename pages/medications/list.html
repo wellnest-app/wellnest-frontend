@@ -1485,29 +1485,64 @@
       }
       
       // ✅ Phase 2.5: Only show actions if not taken/skipped
-      const actions = item.taken || item.skipped ? '' : `
-        <div class="med-actions">
-          <button class="action-btn take" onclick="takeMedication(event, ${item.id}, '${item.time}', ${item.reminderId || 'null'})" title="ทานแล้ว">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-          </button>
-          <button class="action-btn skip" onclick="skipMedication(event, ${item.id}, '${item.time}', ${item.reminderId || 'null'})" title="ข้าม">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-          ${item.reminderId ? `
-          <button class="action-btn snooze" onclick="showSnoozeDialog(event, ${item.id}, ${item.reminderId})" title="เลื่อน">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 12 16 14"/>
-            </svg>
-          </button>
-          ` : ''}
-        </div>
-      `;
+      // 13D Fix: Disable ปุ่มเมื่อเลือกวันที่ไม่ใช่วันนี้ (ป้องกันบันทึกย้อนหลัง/ล่วงหน้า)
+      const isToday = isSameDay(selectedDate, new Date());
+      let actions = '';
+      
+      if (item.taken || item.skipped) {
+        // ทานแล้ว/ข้ามแล้ว → ไม่แสดงปุ่ม (เหมือนเดิม)
+        actions = '';
+      } else if (!isToday) {
+        // 13D: ไม่ใช่วันนี้ → แสดงปุ่มแบบ disabled (จาง กดไม่ได้)
+        actions = `
+          <div class="med-actions">
+            <button class="action-btn take" disabled title="กดทานได้เฉพาะวันนี้">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </button>
+            <button class="action-btn skip" disabled title="กดข้ามได้เฉพาะวันนี้">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+            ${item.reminderId ? `
+            <button class="action-btn snooze" disabled title="เลื่อนเตือนได้เฉพาะวันนี้">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </button>
+            ` : ''}
+          </div>
+        `;
+      } else {
+        // วันนี้ + ยังไม่ได้กด → แสดงปุ่มปกติ
+        actions = `
+          <div class="med-actions">
+            <button class="action-btn take" onclick="takeMedication(event, ${item.id}, '${item.time}', ${item.reminderId || 'null'})" title="ทานแล้ว">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </button>
+            <button class="action-btn skip" onclick="skipMedication(event, ${item.id}, '${item.time}', ${item.reminderId || 'null'})" title="ข้าม">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+            ${item.reminderId ? `
+            <button class="action-btn snooze" onclick="showSnoozeDialog(event, ${item.id}, ${item.reminderId})" title="เลื่อน">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </button>
+            ` : ''}
+          </div>
+        `;
+      }
       
       return `
         <div class="med-card ${statusClass}" onclick="viewMedicationDetail(${item.id})">
