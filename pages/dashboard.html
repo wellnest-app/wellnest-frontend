@@ -654,6 +654,7 @@
   <script src="/wellnest-frontend/js/auth.js"></script>
   <script src="/wellnest-frontend/js/storage.js"></script>
   <script src="/wellnest-frontend/js/components.js"></script>
+  <script src="/wellnest-frontend/js/push-native.js"></script>
   
   <script>
   document.addEventListener('DOMContentLoaded', async function() {
@@ -945,6 +946,27 @@
       }
       
       try {
+        // --- Capacitor Native Push ---
+        // ถ้ารันใน Capacitor → ใช้ native push plugin แทน Web FCM
+        if (window.isCapacitor && window.isCapacitor() && window.NativePush && NativePush.isAvailable()) {
+          console.log('[Push] Capacitor detected → ใช้ Native Push');
+          await NativePush.init({
+            onStatusChange: showPushStatus,
+            onNotification: function(notification) {
+              // Refresh dashboard data เมื่อได้รับ push ขณะเปิดแอป
+              loadUpcomingReminders();
+              loadComplianceStats();
+              loadNotifBadge();
+              if (typeof Toast !== 'undefined') {
+                var msg = (notification.data && notification.data.title) || notification.title || 'มีการแจ้งเตือนใหม่';
+                Toast.info(msg);
+              }
+            }
+          });
+          return; // ไม่ต้องทำ Web FCM
+        }
+        
+        // --- Web FCM (PWA) ---
         // --- 1. ตรวจสอบ browser support ---
         if (!('serviceWorker' in navigator)) {
           console.log('[Push] Service Worker ไม่รองรับ');
@@ -1120,6 +1142,17 @@
      * - granted → แสดงข้อมูลสถานะ
      */
     window.handlePushStatusClick = async function() {
+      // Capacitor: กด status bar → re-init native push
+      if (window.isCapacitor && window.isCapacitor() && window.NativePush && NativePush.isAvailable()) {
+        if (NativePush.isRegistered()) {
+          if (typeof Toast !== 'undefined') Toast.success('การแจ้งเตือนเปิดอยู่แล้ว');
+        } else {
+          initPushNotifications(); // จะเข้า Capacitor branch อัตโนมัติ
+        }
+        return;
+      }
+      
+      // Web FCM flow
       const perm = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
       
       if (perm === 'denied') {

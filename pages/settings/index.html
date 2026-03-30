@@ -674,6 +674,7 @@
   <script src="/wellnest-frontend/js/api.js"></script>
   <script src="/wellnest-frontend/js/auth.js"></script>
   <script src="/wellnest-frontend/js/storage.js"></script>
+  <script src="/wellnest-frontend/js/push-native.js"></script>
   
   <script>
   document.addEventListener('DOMContentLoaded', async function() {
@@ -771,7 +772,19 @@
     const statusText = document.getElementById('notif-status-text');
     if (!toggle) return;
     
-    // ตรวจ browser support
+    // Capacitor Native: ใช้ localStorage flag เดียวกับ Web FCM
+    if (window.isCapacitor && window.isCapacitor() && window.NativePush && NativePush.isAvailable()) {
+      if (NativePush.isRegistered()) {
+        toggle.classList.add('active');
+        if (statusText) statusText.textContent = t('settings.notifStatus.enabled');
+      } else {
+        toggle.classList.remove('active');
+        if (statusText) statusText.textContent = t('settings.notifStatus.disabled');
+      }
+      return;
+    }
+    
+    // Web FCM: ตรวจ browser support
     if (!('Notification' in window) || !('serviceWorker' in navigator)) {
       toggle.style.opacity = '0.5';
       toggle.style.pointerEvents = 'none';
@@ -804,7 +817,33 @@
     const willEnable = !element.classList.contains('active');
     
     if (willEnable) {
-      // === เปิด: ขอ permission + register FCM ===
+      // === Capacitor Native Push ===
+      if (window.isCapacitor && window.isCapacitor() && window.NativePush && NativePush.isAvailable()) {
+        try {
+          if (statusText) statusText.textContent = t('settings.notifStatus.enabling');
+          const success = await NativePush.init({
+            onStatusChange: function(icon, text, show) {
+              // NativePush จะเรียก callback นี้เมื่อ register สำเร็จ/ล้มเหลว
+              if (statusText) statusText.textContent = text;
+            }
+          });
+          if (success || NativePush.isRegistered()) {
+            element.classList.add('active');
+            if (statusText) statusText.textContent = t('settings.notifStatus.enabled');
+            if (typeof Toast !== 'undefined') Toast.success(t('settings.notificationsEnabled'));
+          } else {
+            syncNotificationToggle();
+          }
+        } catch (error) {
+          console.error('[Settings] Native push enable failed:', error);
+          if (statusText) statusText.textContent = t('settings.notifStatus.enableFailed');
+          if (typeof Toast !== 'undefined') Toast.error(t('settings.notifStatus.enableError'));
+          syncNotificationToggle();
+        }
+        return;
+      }
+      
+      // === เปิด: ขอ permission + register FCM (Web) ===
       try {
         // ตรวจ browser support
         if (!('Notification' in window) || !('serviceWorker' in navigator)) {
@@ -883,7 +922,23 @@
       }
       
     } else {
-      // === ปิด: Unregister FCM token ===
+      // === Capacitor Native Push — ปิด ===
+      if (window.isCapacitor && window.isCapacitor() && window.NativePush && NativePush.isAvailable()) {
+        try {
+          if (statusText) statusText.textContent = t('settings.notifStatus.disabling');
+          await NativePush.unregister();
+          element.classList.remove('active');
+          if (statusText) statusText.textContent = t('settings.notifStatus.disabled');
+          if (typeof Toast !== 'undefined') Toast.success(t('settings.notificationsDisabled'));
+        } catch (error) {
+          console.error('[Settings] Native push disable failed:', error);
+          if (typeof Toast !== 'undefined') Toast.error(t('settings.notifStatus.disableError'));
+          syncNotificationToggle();
+        }
+        return;
+      }
+      
+      // === ปิด: Unregister FCM token (Web) ===
       try {
         if (statusText) statusText.textContent = t('settings.notifStatus.disabling');
         

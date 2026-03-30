@@ -227,6 +227,15 @@ config.getMqttTopic = (topicKey, params = {}) => {
   return topic;
 };
 
+// Capacitor detection — ตรวจว่ารันใน native app (Capacitor) หรือไม่
+// คืนค่า true เฉพาะเมื่อรันใน Capacitor WebView (Android/iOS)
+// บน browser ปกติจะคืนค่า false เสมอ
+window.isCapacitor = function() {
+  return !!(window.Capacitor && 
+            window.Capacitor.isNativePlatform && 
+            window.Capacitor.isNativePlatform());
+};
+
 // Freeze config to prevent modifications
 Object.freeze(config);
 Object.freeze(config.api);
