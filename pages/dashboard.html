@@ -1094,7 +1094,7 @@
           try {
             const result = await Api.post('/push/register', {
               fcm_token: fcmToken,
-              device_type: isIOS() ? 'ios' : 'web',
+              device_type: 'web',
               device_name: navigator.userAgent.substring(0, 50)
             });
             console.log('[Push] Register สำเร็จ:', result);
