@@ -58,6 +58,10 @@
         .contact { background: #f0fdfa; padding: 15px; border-radius: 8px; margin-top: 20px; }
         .footer { text-align: center; padding: 20px 0; color: #9ca3af; font-size: 0.8rem; margin-top: 30px; border-top: 1px solid #e5e7eb; }
         .hidden { display: none; }
+        a { color: #0d9488; text-decoration: underline; }
+        a:hover { color: #0f766e; }
+        .service-provider-note { background: #f9fafb; padding: 12px; border-left: 3px solid #0d9488; border-radius: 4px; margin-top: 10px; font-size: 0.95rem; }
+        .last-updated { color: #6b7280; font-size: 0.9rem; font-style: italic; }
     </style>
 </head>
 <body>
@@ -76,6 +80,7 @@
 <div id="content-th">
     <h2>นโยบายความเป็นส่วนตัว</h2>
     <p>มีผลตั้งแต่วันที่: 28 มีนาคม 2569 (2026)</p>
+    <p class="last-updated">อัปเดตล่าสุด: 12 พฤษภาคม 2569 (2026)</p>
     <p>WellNest ("แอปพลิเคชัน", "เรา") ให้ความสำคัญกับความเป็นส่วนตัวของผู้ใช้งาน นโยบายนี้อธิบายว่าเราเก็บรวบรวม ใช้ และปกป้องข้อมูลส่วนบุคคลของคุณอย่างไร</p>
 
     <div class="section">
@@ -113,12 +118,12 @@
 
     <div class="section">
         <h3>4. การแบ่งปันข้อมูล</h3>
-        <p>เราไม่ขาย ไม่แลกเปลี่ยน และไม่เปิดเผยข้อมูลส่วนบุคคลของคุณให้กับบุคคลที่สาม ยกเว้น:</p>
+        <p>เราไม่ขาย ไม่แลกเปลี่ยน และไม่เปิดเผยข้อมูลส่วนบุคคลของคุณให้กับบุคคลที่สามเพื่อวัตถุประสงค์เชิงพาณิชย์ ยกเว้น:</p>
         <ul>
             <li>เมื่อได้รับความยินยอมจากคุณ</li>
             <li>เมื่อจำเป็นตามกฎหมาย</li>
-            <li>การใช้บริการ Firebase Cloud Messaging (Google) สำหรับส่ง Push Notification</li>
         </ul>
+        <p class="service-provider-note"><strong>หมายเหตุเกี่ยวกับ Service Provider:</strong> เราใช้บริการ Firebase Cloud Messaging (Google) ในฐานะ "ผู้ให้บริการ" (Service Provider) เพื่อส่งการแจ้งเตือนเท่านั้น ภายใต้ข้อตกลงการประมวลผลข้อมูล (Data Processing Agreement) ของ Google ซึ่งไม่ถือเป็นการแบ่งปันข้อมูลกับบุคคลที่สามตามนิยามของ Google Play Data Safety</p>
     </div>
 
     <div class="section">
@@ -127,7 +132,7 @@
             <li>คุณสามารถเข้าถึง แก้ไข หรือลบข้อมูลของคุณได้ตลอดเวลาผ่านแอปพลิเคชัน</li>
             <li>คุณสามารถยกเลิกการแจ้งเตือนได้ทุกเมื่อ</li>
             <li>คุณสามารถถอดอุปกรณ์ IoT ออกจากบัญชีได้ทุกเมื่อ</li>
-            <li>คุณสามารถขอให้ลบบัญชีและข้อมูลทั้งหมดได้โดยติดต่อเรา</li>
+            <li>คุณสามารถขอให้ลบบัญชีและข้อมูลทั้งหมดได้ผ่าน <a href="/wellnest-frontend/account-deletion.html">แบบฟอร์มคำขอลบบัญชี</a> หรือติดต่อเราที่อีเมลด้านล่าง</li>
         </ul>
     </div>
 
@@ -145,8 +150,14 @@
         <p>เราอาจปรับปรุงนโยบายนี้เป็นครั้งคราว การเปลี่ยนแปลงจะแจ้งให้ทราบผ่านแอปพลิเคชัน</p>
     </div>
 
+    <div class="section">
+        <h3>8. ความเป็นส่วนตัวของเด็ก</h3>
+        <p>แอปพลิเคชัน WellNest ออกแบบสำหรับผู้ใช้อายุ 18 ปีขึ้นไป เราไม่ได้เก็บข้อมูลส่วนบุคคลของผู้เยาว์โดยเจตนา หากเราทราบว่าได้รับข้อมูลของผู้ใช้ที่อายุต่ำกว่า 18 ปีโดยไม่ได้รับความยินยอมจากผู้ปกครอง เราจะลบข้อมูลดังกล่าวออกจากระบบทันที</p>
+        <p>หากคุณเป็นผู้ปกครองและพบว่าบุตรหลานของคุณได้ให้ข้อมูลกับเรา กรุณาติดต่อเราที่อีเมลด้านล่าง เพื่อให้เราดำเนินการลบข้อมูล</p>
+    </div>
+
     <div class="contact">
-        <h3>8. ติดต่อเรา</h3>
+        <h3>9. ติดต่อเรา</h3>
         <p>หากมีคำถามเกี่ยวกับนโยบายความเป็นส่วนตัว กรุณาติดต่อ:</p>
         <p>อีเมล: applicationwellnest@gmail.com</p>
     </div>
@@ -156,6 +167,7 @@
 <div id="content-en" class="hidden">
     <h2>Privacy Policy</h2>
     <p>Effective Date: March 28, 2026</p>
+    <p class="last-updated">Last Updated: May 12, 2026</p>
     <p>WellNest ("the App", "we") values your privacy. This policy explains how we collect, use, and protect your personal information.</p>
 
     <div class="section">
@@ -193,12 +205,12 @@
 
     <div class="section">
         <h3>4. Information Sharing</h3>
-        <p>We do not sell, trade, or disclose your personal information to third parties, except:</p>
+        <p>We do not sell, trade, or disclose your personal information to third parties for commercial purposes, except:</p>
         <ul>
             <li>With your consent</li>
             <li>When required by law</li>
-            <li>Firebase Cloud Messaging (Google) for sending push notifications</li>
         </ul>
+        <p class="service-provider-note"><strong>Note on Service Providers:</strong> We use Firebase Cloud Messaging (Google) as a "Service Provider" to deliver notifications only, under Google's Data Processing Agreement. This is not considered third-party data sharing as defined by Google Play Data Safety.</p>
     </div>
 
     <div class="section">
@@ -207,7 +219,7 @@
             <li>You can access, modify, or delete your data at any time through the app</li>
             <li>You can disable notifications at any time</li>
             <li>You can disconnect IoT devices from your account at any time</li>
-            <li>You can request account and data deletion by contacting us</li>
+            <li>You can request account and data deletion via our <a href="/wellnest-frontend/account-deletion.html">Account Deletion Form</a> or by contacting us at the email below</li>
         </ul>
     </div>
 
@@ -225,8 +237,14 @@
         <p>We may update this policy from time to time. Changes will be communicated through the app.</p>
     </div>
 
+    <div class="section">
+        <h3>8. Children's Privacy</h3>
+        <p>WellNest is designed for users aged 18 and above. We do not knowingly collect personal information from minors. If we become aware that we have received information from a user under the age of 18 without parental consent, we will delete such information from our systems immediately.</p>
+        <p>If you are a parent or guardian and believe your child has provided us with information, please contact us at the email below so we can take action to delete the data.</p>
+    </div>
+
     <div class="contact">
-        <h3>8. Contact Us</h3>
+        <h3>9. Contact Us</h3>
         <p>If you have questions about this privacy policy, please contact:</p>
         <p>Email: applicationwellnest@gmail.com</p>
     </div>
