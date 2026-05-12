@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="th" data-lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FFFBEB">
+<meta name="description" content="WellNest - คำขอลบบัญชีและข้อมูลผู้ใช้ / Account & data deletion request">
+<meta name="robots" content="index, follow">
+<title>ลบบัญชี - WellNest | Delete Account</title>
+<link rel="icon" href="/wellnest-frontend/favicon.ico">
+<style>
+  /* ============================================
+     WellNest — Account Deletion Page
+     Standalone (ไม่ depend on external CSS)
+     ============================================ */
+  
+  :root {
+    /* Surface */
+    --bg: #FFFBEB;
+    --surface: #FFFFFF;
+    --surface-alt: #FAF7E8;
+    
+    /* Text */
+    --text-1: #1F2937;
+    --text-2: #4B5563;
+    --text-3: #6B7280;
+    
+    /* Borders */
+    --border: #E5E7EB;
+    --border-strong: #D1D5DB;
+    
+    /* Brand */
+    --primary: #059669;
+    --primary-hover: #047857;
+    
+    /* States */
+    --danger: #DC2626;
+    --danger-hover: #B91C1C;
+    --danger-bg: #FEF2F2;
+    --danger-border: #FECACA;
+    
+    --info-bg: #EFF6FF;
+    --info-border: #BFDBFE;
+    
+    /* Layout */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05);
+  }
+  
+  *, *::before, *::after { box-sizing: border-box; }
+  
+  html { -webkit-text-size-adjust: 100%; }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text-1);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Sarabun",
+                 "Noto Sans Thai", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* ===== Header ===== */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--text-1);
+  }
+  
+  .header-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--primary);
+    color: #FFFFFF;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.5px;
+  }
+  
+  .header-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  /* ===== Language Switcher ===== */
+  .lang-switcher {
+    display: inline-flex;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 2px;
+    gap: 2px;
+  }
+  
+  .lang-btn {
+    background: transparent;
+    border: 0;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-3);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  
+  .lang-btn:hover { color: var(--text-1); }
+  
+  .lang-btn.active {
+    background: var(--surface);
+    color: var(--text-1);
+    box-shadow: var(--shadow);
+  }
+  
+  /* ===== Container ===== */
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+  }
+  
+  .page-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: var(--text-1);
+    line-height: 1.3;
+  }
+  
+  .page-subtitle {
+    font-size: 15px;
+    color: var(--text-3);
+    margin: 0 0 32px;
+  }
+  
+  /* ===== Cards ===== */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  
+  .card h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 12px;
+    color: var(--text-1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .card p {
+    margin: 0 0 12px;
+    color: var(--text-2);
+  }
+  
+  .card p:last-child { margin-bottom: 0; }
+  
+  .card-warning {
+    background: var(--danger-bg);
+    border-color: var(--danger-border);
+  }
+  
+  .card-warning h2 { color: var(--danger); }
+  
+  .card-warning .icon { color: var(--danger); }
+  
+  .card-info {
+    background: var(--info-bg);
+    border-color: var(--info-border);
+  }
+  
+  .card-info .icon { color: #2563EB; }
+  
+  /* ===== Bullet List ===== */
+  .bullet-list {
+    margin: 8px 0 0;
+    padding: 0 0 0 22px;
+    color: var(--text-2);
+  }
+  
+  .bullet-list li {
+    margin-bottom: 6px;
+  }
+  
+  .bullet-list li:last-child { margin-bottom: 0; }
+  
+  /* ===== Form ===== */
+  .form-body {
+    margin-top: 16px;
+  }
+  
+  .form-group {
+    margin-bottom: 18px;
+  }
+  
+  .form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-1);
+    margin-bottom: 6px;
+  }
+  
+  .required {
+    color: var(--danger);
+    margin-left: 2px;
+  }
+  
+  .form-hint {
+    display: block;
+    font-size: 13px;
+    color: var(--text-3);
+    margin-top: 4px;
+  }
+  
+  .form-input,
+  .form-textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--text-1);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  
+  .form-input:focus,
+  .form-textarea:focus {
+    outline: 0;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+  }
+  
+  .form-input.error,
+  .form-textarea.error {
+    border-color: var(--danger);
+  }
+  
+  .form-input.error:focus,
+  .form-textarea.error:focus {
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+  }
+  
+  .form-textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  .form-error {
+    display: none;
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 6px;
+  }
+  
+  .form-error.show { display: block; }
+  
+  /* ===== Confirm Checkbox ===== */
+  .checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: 18px;
+  }
+  
+  .checkbox-row input[type="checkbox"] {
+    margin: 3px 0 0;
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--danger);
+    cursor: pointer;
+  }
+  
+  .checkbox-row label {
+    color: var(--text-2);
+    font-size: 14px;
+    cursor: pointer;
+    line-height: 1.5;
+  }
+  
+  /* ===== Buttons ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px 20px;
+    border: 0;
+    border-radius: var(--radius-md);
+    font-size: 16px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  
+  .btn-danger {
+    background: var(--danger);
+    color: #FFFFFF;
+  }
+  
+  .btn-danger:hover:not(:disabled) {
+    background: var(--danger-hover);
+  }
+  
+  .btn-danger:disabled {
+    background: #9CA3AF;
+    cursor: not-allowed;
+  }
+  
+  .contact-email {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  
+  .contact-email:hover { text-decoration: underline; }
+  
+  /* ===== Footer ===== */
+  .footer {
+    text-align: center;
+    color: var(--text-3);
+    font-size: 13px;
+    padding: 24px 20px 32px;
+    border-top: 1px solid var(--border);
+    margin-top: 32px;
+  }
+  
+  .footer-links {
+    margin-bottom: 8px;
+  }
+  
+  .footer-links a {
+    color: var(--text-2);
+    text-decoration: none;
+    margin: 0 8px;
+  }
+  
+  .footer-links a:hover { color: var(--primary); text-decoration: underline; }
+  
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(120%);
+    background: var(--text-1);
+    color: #FFFFFF;
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    z-index: 100;
+    transition: transform 0.25s ease-out;
+    font-size: 14px;
+    max-width: 90vw;
+    pointer-events: none;
+  }
+  
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+  
+  /* ===== Mobile ===== */
+  @media (max-width: 540px) {
+    .header { padding: 12px 16px; }
+    .header-title { font-size: 16px; }
+    .header-logo { width: 32px; height: 32px; font-size: 16px; }
+    .container { padding: 24px 16px 48px; }
+    .page-title { font-size: 24px; }
+    .card { padding: 20px; }
+  }
+  
+  /* ===== i18n visibility ===== */
+  [data-i18n-th], [data-i18n-en] { display: none; }
+  html[data-lang="th"] [data-i18n-th] { display: revert; }
+  html[data-lang="en"] [data-i18n-en] { display: revert; }
+  
+  /* Inline spans should be inline */
+  html[data-lang="th"] span[data-i18n-th],
+  html[data-lang="en"] span[data-i18n-en] { display: inline; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a href="/wellnest-frontend/" class="header-brand" aria-label="WellNest Home">
+    <span class="header-logo" aria-hidden="true">W</span>
+    <h1 class="header-title">WellNest</h1>
+  </a>
+  <div class="lang-switcher" role="group" aria-label="Language selector">
+    <button type="button" class="lang-btn active" data-lang="th">ไทย</button>
+    <button type="button" class="lang-btn" data-lang="en">EN</button>
+  </div>
+</header>
+
+<main class="container">
+
+  <h2 class="page-title">
+    <span data-i18n-th>คำขอลบบัญชีและข้อมูล</span>
+    <span data-i18n-en>Request Account &amp; Data Deletion</span>
+  </h2>
+  <p class="page-subtitle">
+    <span data-i18n-th>หน้านี้ใช้สำหรับส่งคำขอลบบัญชีผู้ใช้ WellNest และข้อมูลที่เกี่ยวข้องทั้งหมด</span>
+    <span data-i18n-en>Use this page to request deletion of your WellNest account and all related data.</span>
+  </p>
+
+  <!-- Warning -->
+  <section class="card card-warning" aria-labelledby="warn-title">
+    <h2 id="warn-title">
+      <span class="icon" aria-hidden="true">⚠</span>
+      <span data-i18n-th>การลบบัญชีไม่สามารถย้อนกลับได้</span>
+      <span data-i18n-en>Account deletion is permanent</span>
+    </h2>
+    <p>
+      <span data-i18n-th>เมื่อบัญชีของคุณถูกลบแล้ว ข้อมูลทั้งหมดจะไม่สามารถกู้คืนได้ กรุณาสำรองข้อมูลที่ต้องการเก็บไว้ก่อนส่งคำขอ</span>
+      <span data-i18n-en>Once your account is deleted, your data cannot be recovered. Please back up anything you wish to keep before submitting.</span>
+    </p>
+  </section>
+
+  <!-- What will be deleted -->
+  <section class="card" aria-labelledby="del-title">
+    <h2 id="del-title">
+      <span data-i18n-th>ข้อมูลที่จะถูกลบ</span>
+      <span data-i18n-en>Data that will be deleted</span>
+    </h2>
+    <ul class="bullet-list" data-i18n-th>
+      <li>บัญชีผู้ใช้ (ชื่อผู้ใช้ อีเมล ชื่อ-นามสกุล)</li>
+      <li>รายการยาทั้งหมดและการตั้งค่ายา</li>
+      <li>การตั้งเวลาเตือนทานยา</li>
+      <li>ประวัติการทานยา/ข้ามยา</li>
+      <li>ประวัติการแจ้งเตือนและการตอบสนอง</li>
+      <li>Push notification tokens ทั้งหมด</li>
+      <li>อุปกรณ์ IoT ที่เชื่อมต่อกับบัญชี</li>
+    </ul>
+    <ul class="bullet-list" data-i18n-en>
+      <li>User account (username, email, full name)</li>
+      <li>All medications and medication settings</li>
+      <li>All reminder schedules</li>
+      <li>Medication intake history (taken/skipped)</li>
+      <li>Notification history and responses</li>
+      <li>All push notification tokens</li>
+      <li>IoT devices linked to your account</li>
+    </ul>
+  </section>
+
+  <!-- What may remain -->
+  <section class="card card-info" aria-labelledby="keep-title">
+    <h2 id="keep-title">
+      <span class="icon" aria-hidden="true">ⓘ</span>
+      <span data-i18n-th>ข้อมูลที่อาจคงเหลือชั่วคราว</span>
+      <span data-i18n-en>Data that may remain temporarily</span>
+    </h2>
+    <ul class="bullet-list" data-i18n-th>
+      <li>Log files ของระบบ — เก็บสูงสุด 90 วัน เพื่อ debugging และความปลอดภัย</li>
+      <li>Backup files — เก็บสูงสุด 180 วัน สำหรับ disaster recovery (ไม่สามารถเข้าถึงได้ในการใช้งานปกติ)</li>
+      <li>หลังจากระยะเวลาดังกล่าว ข้อมูลทั้งหมดจะถูกลบโดยอัตโนมัติ</li>
+    </ul>
+    <ul class="bullet-list" data-i18n-en>
+      <li>System log files — retained up to 90 days for debugging and security</li>
+      <li>Backup files — retained up to 180 days for disaster recovery (not accessible during normal operations)</li>
+      <li>After these retention periods, all data is automatically purged</li>
+    </ul>
+  </section>
+
+  <!-- Timeline -->
+  <section class="card" aria-labelledby="time-title">
+    <h2 id="time-title">
+      <span data-i18n-th>ระยะเวลาดำเนินการ</span>
+      <span data-i18n-en>Processing time</span>
+    </h2>
+    <p>
+      <span data-i18n-th>เราจะดำเนินการลบบัญชีและข้อมูลของคุณ <strong>ภายใน 30 วันทำการ</strong> นับจากวันที่ได้รับคำขอ และจะส่งอีเมลยืนยันเมื่อดำเนินการเสร็จสมบูรณ์</span>
+      <span data-i18n-en>We will process your account and data deletion <strong>within 30 business days</strong> of receiving your request, and will send a confirmation email when complete.</span>
+    </p>
+  </section>
+
+  <!-- Form -->
+  <section class="card" aria-labelledby="form-title">
+    <h2 id="form-title">
+      <span data-i18n-th>แบบฟอร์มคำขอลบบัญชี</span>
+      <span data-i18n-en>Account Deletion Request Form</span>
+    </h2>
+    <p>
+      <span data-i18n-th>กรุณากรอกข้อมูลด้านล่าง ระบบจะเปิดแอปอีเมลของคุณพร้อมเนื้อหาที่กรอกไว้ กรุณากด "ส่ง" ในแอปอีเมลเพื่อยืนยันคำขอ</span>
+      <span data-i18n-en>Please fill in the information below. We will open your email app with the request pre-filled — please click "Send" in your email app to confirm.</span>
+    </p>
+
+    <div class="form-body">
+
+      <div class="form-group">
+        <label class="form-label" for="input-name">
+          <span data-i18n-th>ชื่อ-นามสกุล</span>
+          <span data-i18n-en>Full Name</span>
+          <span class="required" aria-hidden="true">*</span>
+        </label>
+        <input type="text" id="input-name" class="form-input" maxlength="100" autocomplete="name" required>
+        <span class="form-error" id="error-name" role="alert">
+          <span data-i18n-th>กรุณากรอกชื่อ-นามสกุล</span>
+          <span data-i18n-en>Please enter your full name</span>
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="input-username">
+          <span data-i18n-th>ชื่อผู้ใช้ (Username)</span>
+          <span data-i18n-en>Username</span>
+          <span class="required" aria-hidden="true">*</span>
+        </label>
+        <input type="text" id="input-username" class="form-input" maxlength="50" autocomplete="username" required>
+        <span class="form-hint">
+          <span data-i18n-th>ชื่อผู้ใช้ที่ใช้ login ในแอป WellNest</span>
+          <span data-i18n-en>The username you use to log in to WellNest</span>
+        </span>
+        <span class="form-error" id="error-username" role="alert">
+          <span data-i18n-th>กรุณากรอกชื่อผู้ใช้</span>
+          <span data-i18n-en>Please enter your username</span>
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="input-email">
+          <span data-i18n-th>อีเมลสำหรับติดต่อกลับ</span>
+          <span data-i18n-en>Contact Email</span>
+          <span class="required" aria-hidden="true">*</span>
+        </label>
+        <input type="email" id="input-email" class="form-input" maxlength="100" autocomplete="email" required>
+        <span class="form-hint">
+          <span data-i18n-th>เราจะส่งอีเมลยืนยันการลบบัญชีไปยังอีเมลนี้</span>
+          <span data-i18n-en>We will send confirmation of deletion to this email address</span>
+        </span>
+        <span class="form-error" id="error-email" role="alert">
+          <span data-i18n-th>กรุณากรอกอีเมลให้ถูกต้อง</span>
+          <span data-i18n-en>Please enter a valid email address</span>
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="input-reason">
+          <span data-i18n-th>เหตุผล (ไม่บังคับ)</span>
+          <span data-i18n-en>Reason (optional)</span>
+        </label>
+        <textarea id="input-reason" class="form-textarea" maxlength="500"></textarea>
+        <span class="form-hint">
+          <span data-i18n-th>เพื่อช่วยปรับปรุงบริการ (ไม่บังคับ)</span>
+          <span data-i18n-en>Helps us improve our service (optional)</span>
+        </span>
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="confirm-check">
+        <label for="confirm-check">
+          <span data-i18n-th>ฉันเข้าใจว่าการลบบัญชีไม่สามารถย้อนกลับได้ และข้อมูลทั้งหมดจะถูกลบอย่างถาวร</span>
+          <span data-i18n-en>I understand that account deletion is permanent and all data will be irreversibly deleted.</span>
+        </label>
+      </div>
+
+      <button type="button" class="btn btn-danger" id="btn-submit" disabled>
+        <span data-i18n-th>ส่งคำขอลบบัญชี</span>
+        <span data-i18n-en>Submit Deletion Request</span>
+      </button>
+
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="card" aria-labelledby="contact-title">
+    <h2 id="contact-title">
+      <span data-i18n-th>ติดต่อโดยตรง</span>
+      <span data-i18n-en>Direct Contact</span>
+    </h2>
+    <p>
+      <span data-i18n-th>หากแบบฟอร์มไม่สามารถเปิดแอปอีเมลได้ คุณสามารถติดต่อทีมงานโดยตรงที่:</span>
+      <span data-i18n-en>If the form cannot open your email app, you can contact us directly at:</span>
+    </p>
+    <p>
+      <strong>Email:</strong>
+      <a href="mailto:applicationwellnest@gmail.com" class="contact-email">applicationwellnest@gmail.com</a>
+    </p>
+    <p>
+      <span data-i18n-th>เมื่อติดต่อโดยตรง กรุณาแจ้ง: ชื่อ-นามสกุล, Username และอีเมลที่ใช้สมัคร เพื่อให้เราตรวจสอบและดำเนินการได้</span>
+      <span data-i18n-en>When contacting directly, please include: your full name, username, and the email used for registration, so we can verify and process your request.</span>
+    </p>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-links">
+    <a href="/wellnest-frontend/">WellNest</a>
+    <span aria-hidden="true">·</span>
+    <a href="/wellnest-frontend/privacy-policy.html">
+      <span data-i18n-th>นโยบายความเป็นส่วนตัว</span>
+      <span data-i18n-en>Privacy Policy</span>
+    </a>
+  </div>
+  <div>© 2026 WellNest. All rights reserved.</div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ============================================
+     WellNest — Account Deletion Page Logic
+     ============================================ */
+
+  var ADMIN_EMAIL = 'applicationwellnest@gmail.com';
+  var STORAGE_LANG_KEY = 'wellnest_lang';
+  var EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Translation strings สำหรับ dynamic content (toast/title)
+  var I18N = {
+    th: {
+      openingEmail: 'กำลังเปิดแอปอีเมล...',
+      fillRequired: 'กรุณากรอกข้อมูลที่จำเป็นให้ครบ',
+      invalidEmail: 'รูปแบบอีเมลไม่ถูกต้อง',
+      confirmRequired: 'กรุณายืนยันความเข้าใจ',
+      emailSubject: 'คำขอลบบัญชี WellNest',
+      docTitle: 'ลบบัญชี - WellNest'
+    },
+    en: {
+      openingEmail: 'Opening email app...',
+      fillRequired: 'Please fill in all required fields',
+      invalidEmail: 'Invalid email format',
+      confirmRequired: 'Please confirm understanding',
+      emailSubject: 'WellNest Account Deletion Request',
+      docTitle: 'Delete Account - WellNest'
+    }
+  };
+
+  /* ===== Language Switching ===== */
+
+  function getCurrentLang() {
+    return document.documentElement.getAttribute('data-lang') || 'th';
+  }
+
+  function setLang(lang) {
+    if (lang !== 'th' && lang !== 'en') lang = 'th';
+    document.documentElement.setAttribute('data-lang', lang);
+    document.documentElement.setAttribute('lang', lang);
+
+    try { localStorage.setItem(STORAGE_LANG_KEY, lang); } catch (e) {}
+
+    // Update lang buttons
+    var btns = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < btns.length; i++) {
+      if (btns[i].getAttribute('data-lang') === lang) {
+        btns[i].classList.add('active');
+      } else {
+        btns[i].classList.remove('active');
+      }
+    }
+
+    document.title = I18N[lang].docTitle;
+  }
+
+  function initLang() {
+    var saved = null;
+    try { saved = localStorage.getItem(STORAGE_LANG_KEY); } catch (e) {}
+
+    if (!saved) {
+      var browserLang = (navigator.language || 'th').toLowerCase();
+      saved = browserLang.indexOf('th') === 0 ? 'th' : 'en';
+    }
+    setLang(saved);
+
+    var btns = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener('click', function() {
+        setLang(this.getAttribute('data-lang'));
+      });
+    }
+  }
+
+  /* ===== Sanitization ===== */
+
+  function sanitizeText(str) {
+    if (!str) return '';
+    // ลบ control characters + normalize whitespace
+    return String(str)
+      .replace(/[\u0000-\u001F\u007F]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function sanitizeMultiline(str) {
+    if (!str) return '';
+    // อนุญาต \n แต่ strip control chars อื่นๆ + จำกัด 500 chars
+    return String(str)
+      .replace(/\r\n/g, '\n')
+      .replace(/[\u0000-\u0008\u000B-\u001F\u007F]/g, '')
+      .trim()
+      .substring(0, 500);
+  }
+
+  /* ===== Form Validation ===== */
+
+  function showError(field) {
+    var input = document.getElementById('input-' + field);
+    var err = document.getElementById('error-' + field);
+    if (input) input.classList.add('error');
+    if (err) err.classList.add('show');
+  }
+
+  function clearErrors() {
+    var inputs = document.querySelectorAll('.form-input.error, .form-textarea.error');
+    for (var i = 0; i < inputs.length; i++) {
+      inputs[i].classList.remove('error');
+    }
+    var errs = document.querySelectorAll('.form-error.show');
+    for (var j = 0; j < errs.length; j++) {
+      errs[j].classList.remove('show');
+    }
+  }
+
+  function validateForm() {
+    var name = sanitizeText(document.getElementById('input-name').value);
+    var username = sanitizeText(document.getElementById('input-username').value);
+    var email = sanitizeText(document.getElementById('input-email').value);
+    var confirmed = document.getElementById('confirm-check').checked;
+
+    clearErrors();
+    var errors = [];
+
+    if (!name) {
+      showError('name');
+      errors.push('name');
+    }
+    if (!username) {
+      showError('username');
+      errors.push('username');
+    }
+    if (!email || !EMAIL_REGEX.test(email)) {
+      showError('email');
+      errors.push('email');
+    }
+
+    if (errors.length > 0) {
+      showToast(I18N[getCurrentLang()].fillRequired);
+      var first = document.getElementById('input-' + errors[0]);
+      if (first) first.focus();
+      return null;
+    }
+
+    if (!confirmed) {
+      showToast(I18N[getCurrentLang()].confirmRequired);
+      document.getElementById('confirm-check').focus();
+      return null;
+    }
+
+    return {
+      name: name,
+      username: username,
+      email: email,
+      reason: sanitizeMultiline(document.getElementById('input-reason').value)
+    };
+  }
+
+  /* ===== Build mailto URL ===== */
+
+  function buildMailto(data) {
+    var lang = getCurrentLang();
+    var subject = I18N[lang].emailSubject;
+
+    // Plain text body — bilingual labels เพื่อให้ admin อ่านง่าย
+    var bodyLines = [
+      '=== WellNest Account Deletion Request ===',
+      '',
+      'Name / ชื่อ-นามสกุล: ' + data.name,
+      'Username / ชื่อผู้ใช้: ' + data.username,
+      'Email / อีเมล: ' + data.email,
+      '',
+      'Reason / เหตุผล:',
+      data.reason || '(not provided / ไม่ระบุ)',
+      '',
+      '-----',
+      'Submitted at: ' + new Date().toISOString(),
+      'Language preference: ' + lang,
+      '',
+      'Please process within 30 business days.',
+      'กรุณาดำเนินการภายใน 30 วันทำการ'
+    ];
+    var body = bodyLines.join('\n');
+
+    return 'mailto:' + ADMIN_EMAIL +
+           '?subject=' + encodeURIComponent(subject) +
+           '&body=' + encodeURIComponent(body);
+  }
+
+  /* ===== Toast ===== */
+
+  var toastTimer = null;
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() {
+      t.classList.remove('show');
+    }, 3000);
+  }
+
+  /* ===== Submit Handler ===== */
+
+  function handleSubmit() {
+    var data = validateForm();
+    if (!data) return;
+
+    showToast(I18N[getCurrentLang()].openingEmail);
+
+    var url = buildMailto(data);
+    // ใช้ window.location เพื่อ compatibility สูงสุดบน mobile
+    setTimeout(function() {
+      window.location.href = url;
+    }, 200);
+  }
+
+  /* ===== Setup ===== */
+
+  function setupSubmit() {
+    var check = document.getElementById('confirm-check');
+    var btn = document.getElementById('btn-submit');
+
+    function updateBtnState() {
+      btn.disabled = !check.checked;
+    }
+
+    check.addEventListener('change', updateBtnState);
+    btn.addEventListener('click', handleSubmit);
+
+    // Enter key on text fields submits (เฉพาะตอน enabled)
+    var inputs = document.querySelectorAll('.form-input');
+    for (var i = 0; i < inputs.length; i++) {
+      inputs[i].addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (!btn.disabled) handleSubmit();
+        }
+      });
+    }
+
+    // Clear error state เมื่อ user เริ่มแก้
+    var allInputs = document.querySelectorAll('.form-input, .form-textarea');
+    for (var k = 0; k < allInputs.length; k++) {
+      allInputs[k].addEventListener('input', function() {
+        if (this.classList.contains('error')) {
+          this.classList.remove('error');
+          var errEl = document.getElementById('error-' + this.id.replace('input-', ''));
+          if (errEl) errEl.classList.remove('show');
+        }
+      });
+    }
+  }
+
+  /* ===== Init ===== */
+
+  function init() {
+    initLang();
+    setupSubmit();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+</script>
+
+</body>
+</html>
